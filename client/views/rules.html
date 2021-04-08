@@ -1,0 +1,350 @@
+  <div>
+    <h1>Manage Rules</h1>
+    <hr>
+  </div>
+  <div class="p-2"> 
+
+  	<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
+
+  		<select ng-init="selectedType = item.name" ng-model="selectedType" ng-change="ShowInputTime(selectedType)">
+        	<option value="">--Type of Rule--</option>
+        	<option ng-repeat="x in typeRules" value="{{x.id}}">{{x.name}}</option>
+      	</select>
+    </div>
+
+     <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisibleTime">
+
+        Title for this rule:<br>
+        <input type="text"  ng-model="Name">
+        <br>
+        Please select an action from the list:
+        <br>
+        <select ng-init="selectedFirst = item.action_desc" ng-model="selectedFirst">
+        	<option value="">--First Action--</option>
+        	<option ng-repeat="x in actions" value="{{x.id}}">{{x.action_desc}}</option>
+      	</select>
+
+      	<div ng-show = "timeR">Time frame (minutes): <input type="text"  ng-model="TimeFrame"></div>
+      	<div ng-show = "causalityR">
+	      	The previous action happens:
+	        <select ng-init="causality = item.action_desc" ng-model="causality">
+	        	<option value="">--Select--</option>
+	        	<option value="1">After</option>
+	        	<!--<option value="2">Before</option>-->
+	      	</select>
+      	</div>
+      	<div ng-show = "frequencyR">Frequency (minutes): <input type="text"  ng-model="Frequency"></div>
+        <div ng-show="ShowSecond">
+          Please select an action from the list:
+          <br>
+          <select ng-init="selectedSecond = item.action_desc" ng-model="selectedSecond" >
+            <option value="">--Second Action--</option>
+            <option ng-repeat="x in actions" value="{{x.id}}">{{x.action_desc}}</option>
+          </select>
+
+        </div>
+      	
+      	<br>
+        Feedback if correct:
+        <br> <textarea type="text"  rows="3" ng-model="inputIfCorrect" cols="40">Type here</textarea>
+        <br>
+        Feedback if wrong: 
+        <br><textarea type="text" rows="3" ng-model="inputIfWrong" cols="40">Type here</textarea>
+         <br>  
+       	<a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="AddNewRule(selectedType, selectedFirst,causality,selectedSecond)"> Save Rule </a>
+       	<br>
+ 		
+    </div>
+	<button type="button" class="btn btn-primary btn-sm" ng-click="ShowInput()"> Add New Rule </button>
+</div>
+  	
+  
+  	<hr>
+    <p class="lead font-weight-bold">Rules for this session:</p>
+
+	<br/>
+	
+    <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
+      <div class="d-flex justify-content-end align-items-center w-100">
+          <div class="flex-grow-1">
+            <span>{{ list.magnitude }} </span> |
+            <span>{{ list.name }} </span> 
+          </div>
+          <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeRule(list.id)"> Detail </a></div>
+          <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="deleteRule(list.id)"> Delete </a></div>
+      </div>
+  </div>
+
+  <hr>
+    <p class="lead font-weight-bold">Detail of the rule:</p>
+
+<!--<h1>{{detailRule}} </h1> -->
+ <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in detailRule">
+      <div class="d-flex justify-content-end align-items-center w-100">
+          <div class="flex-grow-1">
+            <span>{{ list.name }} </span> |  <span>{{ list.magnitude }} </span> |<br>
+            <span>{{ list.first_action }} </span> - <span style="color:blue">{{ list.value_of_mag }} </span> - <span>{{ list.second_action }} </span> <br>
+            <span style="color:green">{{ list.feedback_ok }} </span> <br>
+            <span style="color:orange">{{ list.feedback_wrong }} </span> <br>
+          </div>
+          <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id)" onclick="gloria()"> Vis </a></div>
+          <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeTimeline()" onclick="gloria()"> Complete Vis </a></div>
+      </div>
+  </div>
+
+<!--<p>{{dataForVis}} <p>{{rulesVal}} </p></p>-->
+  <!--<input id="foo" type="text" value="{{rulesVal}}" />-->
+
+  <!--<div id="foo" ng-model = "rulesVal"></div>-->
+
+  <!--<p id="rules" ng-model = "rulesVal">{{rulesVal}}</p>-->
+  <p id="rules" ng-model = "alldata"></p>
+
+  <div id="visualisation" ng-show = "vis">
+
+  </div>
+  <h2 id="title-page" ><strong></strong></h2>
+  <br>
+  <h2 id="rule-name" ><strong></strong></h2>
+  <div id="timelines" ng-show = "timeline">
+    
+  </div>
+
+  <script type="text/javascript"> 
+  function docReady(fn) {
+    // see if DOM is already available
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        // call on next available tick
+        setTimeout(fn, 1);
+    } else {
+        document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
+
+  function reloadPage() {
+   //window.location.reload();
+    document.getElementById("timelines").innerHTML = "";
+    document.getElementById("visualisation").innerHTML = "";
+
+  }
+
+  function gloria() {
+    //location.reload();
+    console.log('in the timeline');
+    var scope1 = angular.element($("#rules")).scope();
+    console.log('scope1', scope1.rulesVal);
+    data = scope1.rulesVal;
+    alldata= scope1.alldata;
+    var child  = angular.element(document.querySelector('.ng-scope')).scope().$$childTail.$parent;
+    console.log('Child', child);
+
+    angular.forEach(child.rulesVal, function(item, key) {
+        console.log('v')
+    });
+    if(data != undefined){
+      //visualisation(data);
+      //docReady(visualisation(data));
+    }
+    if(alldata !=undefined && data != undefined){
+      //visualisation(data);
+      visTimelineActions(alldata, data);
+    }
+
+
+/*     angular.forEach(child, function(item, key) {
+      console.log(item,key);  
+    });
+
+    angular.forEach(scope, function(item, key) {
+      console.log(item,key);  
+      if(key=='$parent'){
+        console.log("si  entro");
+        for (i in item){
+          console.log(i);
+          if(i=='$$childTail'){
+            for (j in i) {
+               console.log('j[0]: ',j[0]);
+            }
+          } 
+        }
+      }
+    });*/
+  }
+
+  docReady(gloria);
+
+  function visualisation(data){
+    points = [];
+    options=[];
+    var container = document.getElementById('visualisation');
+    document.getElementById("rules").innerHTML = data.title;
+    var points=data.points;
+    var options=data.options;
+    // Create a DataSet (allows two way data-binding)
+
+    var items = new vis.DataSet(points);
+    
+    console.log('the items',items);
+    console.log('the options ',options);
+
+/*    var items = new vis.DataSet([
+        {
+          id: "B",
+          content: "Period B",
+          start: "2014-01-25",
+          end: "2014-01-30",
+          type: "background",
+          className: "negative",
+        },
+        { id: 1, content: "Critical incident 1<br>start", start: "2014-01-23" },
+        { id: 2, content: "Critical action 2", start: "2014-01-18" },
+        { id: 3, content: "Critical action 3", start: "2014-01-21" },
+        { id: 4, content: "Critical action 4", start: "2014-01-19", end: "2014-01-24", type:"range"},
+        { id: 5, content: "Critical action 5", start: "2014-01-28", type: "point" },
+        { id: 6, content: "Critical action 6", start: "2014-01-26", type:"box"}
+      ]);
+
+      // Configuration for the Timeline
+    var options = {
+        start: "2014-01-10",
+        end: "2014-01-30",
+        editable: true,
+    };*/
+
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, items, options[0]);
+    //timeline.fit();
+    //location.reload();
+  }	
+
+  function visTimelineActions(data, dataValid){
+    reloadPage();
+    console.log(data);
+    document.getElementById("title-page").innerHTML = dataValid.ruleName;
+    document.getElementById("rule-name").innerHTML = dataValid.title;
+
+    var critical_times = [];
+    var participants = Object.keys(data.participants).sort();
+    var containers = [];
+    var points=dataValid.points;
+    wrapper = document.getElementById('timelines'); 
+
+    //create the background 
+
+    if(points.length < 3){
+      var background_info =[points[1]]
+    }else{
+      var background_info =[points[2]]
+    }
+    console.log("This is how it looks like: ",background_info, points.length);
+
+
+    //create containers for each timeline
+    for(var i=1;i<=data.n;i++){
+      container = document.createElement('div');
+      container.setAttribute("id", "visualization"+i);
+      wrapper.appendChild(container);
+    }
+       // Get DOM elements where the Timeline will be attached
+    for(var i=0;i<data.n;i++){
+      containers[i] = document.getElementById('visualization'+(i+1));
+    }
+    //create groups
+    var groups = [];
+    for(var i=0;i<data.n;i++){
+      groups[i] = new vis.DataSet([
+        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
+      //console.log(groups[i]);
+    }
+
+    var items = [];
+    for(var i=0;i<data.n;i++){
+      items[i] = new vis.DataSet(data.participants[participants[i]]);
+      items[i].add(background_info);
+    }
+
+    //Add an aditional item
+
+    //
+
+    //items[data.n+1] = new vis.DataSet(points);
+
+       // Configuration for the Timeline
+    var opt = {
+      start: data.time_start,
+      end: data.time_end,
+      //timeAxis: {scale: 'seconds', step: 30},
+      //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
+      zoomable: false,
+      showMajorLabels: false,
+      //showMinorLabels: false,
+    };
+
+       //Create timelines
+    for(var i=0;i<data.n;i++){
+      timeline = new vis.Timeline(containers[i]);
+      timeline.setOptions(opt);
+      timeline.setGroups(groups[i]);
+      timeline.setItems(items[i]);
+
+
+      for(var j=0;j<data.criticalTs.length;j++){
+        timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
+      }
+      
+      timeline.fit();
+    }
+    //modify how to present data points and description
+    var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
+    ////console.log(timeAxisElements);
+    for (var i = 0; i < timeAxisElements.length; i++) {
+      //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
+        timeAxisElements[i].style.color = "white";
+      //}
+    }     
+
+    //modify background for time-response
+    for (var i = 1; i <= data.n; i++) {
+
+      for(var j = 0; j < background_info.length; j++){
+        var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
+        console.log("!!!!!!!!!!!!! ",el);
+        //el.remove();
+        var la = document.getElementById('visualization'+i).querySelectorAll(".negative")[j];
+        //el.style.height = "100% !important";
+        console.log("!!!!!!!!!!!!! ",la);
+        var newpos = document.getElementById('visualization'+i).querySelectorAll(".vis-time-axis.vis-background")[0];
+        console.log(newpos);
+        if(el != undefined){
+          newpos.append(el);
+        }else{
+          newpos.append(la);
+        }
+        
+      }
+ 
+   }//end first for to modify background
+
+  }
+	
+  </script>
+
+  <link href="../../../css/vis.css" rel="stylesheet" type="text/css" />
+  <link href="../../../css/styles.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Lato" />
+<!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+<style>
+.custom-control-label::before, 
+.custom-control-label::after {
+top: .8rem;
+width: 1.25rem;
+height: 1.25rem;
+}
+</style>
+
+
+
+
+

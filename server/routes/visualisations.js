@@ -9,7 +9,7 @@ const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'group_analytics'
+  database: 'group_analytics1'
 });
 
 
@@ -38,7 +38,7 @@ router.post('/getDataforVis', (req, res, next) => {
 //added 30-04-2019
 router.post('/generateJson2', (req, res, next) => {
   dataActions = req.body;
-  //console.log(dataActions);
+  console.log("Is comming to this Json2 function");
 
   var dateObj = new Date();
   var month = dateObj.getUTCMonth() + 1; //months from 1-12
@@ -54,18 +54,21 @@ router.post('/generateJson2', (req, res, next) => {
   var id_session = 0;
   
 
+  //name are the roles (RN, PTN etc)
   for (var i = 0; i < dataActions.length; i++) {
           if (dataActions[i].name != null){
             participants[dataActions[i].name] = [];
           }
-        }
+  }
+
   console.log(participants);
+
   for (x in participants) {nparticipants++;}
 
-alldata["n"] = nparticipants;
-alldata["title"] = dataActions[0].session_name;
-//participants["time_start"] = newdate+" 00:00:00";
-alldata["criticalTs"] = [];
+    alldata["n"] = nparticipants;
+    alldata["title"] = dataActions[0].session_name;
+    //participants["time_start"] = newdate+" 00:00:00";
+    alldata["criticalTs"] = [];
 
         for (var i = 0; i < dataActions.length; i++) {
           //id_session to generate json file
@@ -112,7 +115,7 @@ alldata["criticalTs"] = [];
                       critical_item["className"] = "critical";
                      
                       //if(data[i].action_desc.split(" ")[0] == "Ask"){
-                        critical_item["content"] = '<img src="../../../img/warning.png" style="width: 40px; height: 40px;"><div class="special-time">'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'</div><div id="text">'+dataActions[i].action_desc+'</div>';
+                      critical_item["content"] = '<img src="../../../img/warning.png" style="width: 40px; height: 40px;"><div class="special-time">'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'</div><div id="text">'+dataActions[i].action_desc+'</div>';
                       //  }
                       //else if(data[i].action_desc.split(" ")[0] == "Lose"){
                       //  critical_item["content"] = '<div class="special-time">'+time_from_start+'</div><img src="../../../img/lose.png" style="width: 136px; height: 112px;">';
@@ -120,31 +123,31 @@ alldata["criticalTs"] = [];
                       participants["PTN"].push(critical_item);
                     }
 
-             else {
-                  //console.log(data[i].action_desc);
-                  //any other action
+                 else {
+                      //console.log(data[i].action_desc);
+                      //any other action
 
-                  //time_from_start = data[i].duration.split(":").slice(-2).join(":").split(".")[0];
-                  item["id"] = participants[dataActions[i].name].length+1;
-                  item["group"] = dataActions[i].id_object;
-                  item["action"] = dataActions[i].action_desc;
-                  item["start"] = dataActions[i].time_action;
-                  item["title"] = dataActions[i].notes;
-                  item["type"] = "box";
-                  if (dataActions[i].action_desc == "Deliver Shock"){
-                    item["className"] = "action shock "+dataActions[i].object_type.toLowerCase();
+                      //time_from_start = data[i].duration.split(":").slice(-2).join(":").split(".")[0];
+                      item["id"] = participants[dataActions[i].name].length+1;
+                      item["group"] = dataActions[i].id_object;
+                      item["action"] = dataActions[i].action_desc;
+                      item["start"] = dataActions[i].time_action;
+                      item["title"] = dataActions[i].notes;
+                      item["type"] = "box";
+                      if (dataActions[i].action_desc == "Deliver Shock"){
+                        item["className"] = "action shock "+dataActions[i].object_type.toLowerCase();
+                      }
+                      else{
+                        item["className"] = "action "+dataActions[i].object_type.toLowerCase();
+                      }
+                      
+                      item["content"] = moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'<div id="text">'+dataActions[i].action_desc+'</div>';
+                      if (dataActions[i].name != null){
+                        //console.log("aqui "+item)
+                        participants[dataActions[i].name].push(item);
+                        //console.log("aqui "+participants)
+                      }
                   }
-                  else{
-                    item["className"] = "action "+dataActions[i].object_type.toLowerCase();
-                  }
-                  
-                  item["content"] = moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'<div id="text">'+dataActions[i].action_desc+'</div>';
-                  if (dataActions[i].name != null){
-                    //console.log("aqui "+item)
-                    participants[dataActions[i].name].push(item);
-                    //console.log("aqui "+participants)
-                  }
-              }
             }
           }
 
@@ -322,7 +325,23 @@ participants["criticalTs"] = [];
 });
 
 router.get('/getJsonFromFile', (req, res, next) => {
+  //console.log('value of id_session',req.query.id);
+
   const id_session = req.query.id;
+  
+
+  var obj = JSON.parse(fs.readFileSync('client/data/session_'+id_session+'.json', 'utf8'));
+
+  return res.json(obj);
+  
+    //return res.json(JSON.parse(results));
+});
+
+router.get('/getJsonFromFile/:id', (req, res, next) => {
+  //console.log('value of id_session',req.query.id);
+
+  const id_session = req.params.id;
+
   var obj = JSON.parse(fs.readFileSync('client/data/session_'+id_session+'.json', 'utf8'));
 
   return res.json(obj);

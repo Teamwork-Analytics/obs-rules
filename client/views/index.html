@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
+ <main role="main" class="container">
+         <br>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+          <a class="navbar-brand" ng-href="#/"> Home </a>
+        </nav>
         <br>
-        <ng-view>
+        <div ng-view>
 
-        </ng-view>
+        </div>
         <br>
+  </main>
   <!-- Template -->   
 <script type="text/ng-template" id="/allSessions.html">
-  
-  <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item active" aria-current="page">Home</li>
-  </ol>
-</nav>
   <main role="main" class="container">
       <div>
         <h1>Sessions</h1>
@@ -44,6 +44,8 @@
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectSources(todo.id)"> Sources </a></div>
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectObjects(todo.id)"> Objects </a></div>
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectCapture(todo.id)"> Capture </a></div>
+                  <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="redirectRules(todo.id)"> Rules </a></div>
+
 
               </div>
             </div>
@@ -53,12 +55,6 @@
 </script>
 
 <script type="text/ng-template" id="/allActions.html">
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Log Actions</li>
-  </ol>
-</nav>
 <main role="main" class="container">
       <div>
         <h1>Log Actions</h1>
@@ -115,12 +111,6 @@
 </script>
 
 <script type="text/ng-template" id="/addSession.html">
-  <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Add Session</li>
-  </ol>
-</nav>
   <main role="main" class="container">
       <div>
         <h1>Sessions</h1>
@@ -143,7 +133,6 @@
 <script type="text/ng-template" id="/addActionstoSession.html">
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
     <li class="breadcrumb-item"><a>Add Session</a></li>
     <li class="breadcrumb-item active" aria-current="page">Actions</li>
   </ol>
@@ -205,7 +194,6 @@
 <script type="text/ng-template" id="/addMedia.html">
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
     <li class="breadcrumb-item"><a>Add Session</a></li>
     <li class="breadcrumb-item"><a href="#/actions/{{sessionid}}">Actions</a></li>
     <li class="breadcrumb-item active" aria-current="page">Sources</li>
@@ -256,7 +244,6 @@
 <script type="text/ng-template" id="/addObjects.html">
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
     <li class="breadcrumb-item"><a>Add Session</a></li>
     <li class="breadcrumb-item"><a href="#/actions/{{sessionid}}">Actions</a></li>
     <li class="breadcrumb-item"><a href="#/media/{{sessionid}}">Sources</a></li>
@@ -331,7 +318,6 @@
 <script type="text/ng-template" id="/controlSources.html">
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#/">Home</a></li>
     <li class="breadcrumb-item"><a>Add Session</a></li>
     <li class="breadcrumb-item"><a href="#/actions/{{sessionid}}">Actions</a></li>
     <li class="breadcrumb-item"><a href="#/media/{{sessionid}}">Sources</a></li>
@@ -362,12 +348,10 @@
             </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="endSession()">End Session</button>
+      <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="listRules()">Add Rules</button>
 
 </main>
 </script>
-
-    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
@@ -375,6 +359,7 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/app.js"></script>
+    <!--<script src="js/controllers/rules.js"></script>-->
     <script src="js/vis.js"></script>
   </body>
 </html>

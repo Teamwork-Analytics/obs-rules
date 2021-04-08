@@ -64,93 +64,91 @@ height: 1.25rem;
         container = document.createElement('div');
         container.setAttribute("id", "visualization"+i);
         wrapper.appendChild(container);
-        }
+      }
 
-                // Get DOM elements where the Timeline will be attached
-                for(var i=0;i<data.n;i++){
-                  containers[i] = document.getElementById('visualization'+(i+1));
-                }
-                //create groups
-                var groups = [];
-                for(var i=0;i<data.n;i++){
-                  groups[i] = new vis.DataSet([
-                    {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
-                  //console.log(groups[i]);
-                }
+      // Get DOM elements where the Timeline will be attached
+      for(var i=0;i<data.n;i++){
+        containers[i] = document.getElementById('visualization'+(i+1));
+      }
+      //create groups
+      var groups = [];
+      for(var i=0;i<data.n;i++){
+        groups[i] = new vis.DataSet([
+          {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
+        //console.log(groups[i]);
+      }
 
-                var items = [];
-                for(var i=0;i<data.n;i++){
-                  items[i] = new vis.DataSet(data.participants[participants[i]]);
-                  //items[i].add(background_info);
-                }
-                console.log(items);
+      var items = [];
+      for(var i=0;i<data.n;i++){
+        items[i] = new vis.DataSet(data.participants[participants[i]]);
+        //items[i].add(background_info);
+      }
+      console.log(items);
 
-                //console.log(items);
+      //console.log(items);
 
-                // Configuration for the Timeline
-                var opt = {
-                  start: data.time_start,
-                  end: data.time_end,
-                  //timeAxis: {scale: 'seconds', step: 30},
-                  //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
-                  zoomable: false,
-                  showMajorLabels: false,
-                  //showMinorLabels: false,
-                };
+      // Configuration for the Timeline
+      var opt = {
+        start: data.time_start,
+        end: data.time_end,
+        //timeAxis: {scale: 'seconds', step: 30},
+        //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
+        zoomable: false,
+        showMajorLabels: false,
+        //showMinorLabels: false,
+      };
 
-              //Create timelines
-              for(var i=0;i<data.n;i++){
-                timeline = new vis.Timeline(containers[i]);
-                timeline.setOptions(opt);
-                timeline.setGroups(groups[i]);
-                timeline.setItems(items[i]);
+    //Create timelines
+    for(var i=0;i<data.n;i++){
+      timeline = new vis.Timeline(containers[i]);
+      timeline.setOptions(opt);
+      timeline.setGroups(groups[i]);
+      timeline.setItems(items[i]);
 
 
-                for(var j=0;j<data.criticalTs.length;j++){
-                	timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
-                }
-                
-                timeline.fit();
-              }
-        //modify how to present data points and description
-        var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
-			  ////console.log(timeAxisElements);
-			  for (var i = 0; i < timeAxisElements.length; i++) {
-			    //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
-			      timeAxisElements[i].style.color = "white";
-			    //}
-			  }
+      for(var j=0;j<data.criticalTs.length;j++){
+      	timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
+      }
+      
+      timeline.fit();
+    }
+    //modify how to present data points and description
+    var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
+	  ////console.log(timeAxisElements);
+	  for (var i = 0; i < timeAxisElements.length; i++) {
+	    //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
+	      timeAxisElements[i].style.color = "white";
+	    //}
+	  }
 
-			  for(var i = 1; i <= data.n; i++){
-			  	//console.log('visualization'+i);
-			  	var div_cpr = document.getElementById('visualization'+i).querySelectorAll(".cpr");
-			  	if(div_cpr.length > 0){
-			  		var foreground = document.getElementById('visualization'+i).querySelectorAll(".vis-foreground")[0].firstChild;
-			  		////console.log(top);
-			  		//iterate over cpr node childs
-			  		for (var j = 0; j < div_cpr.length; j++) {
-			  		//clone node
-			  		var cln = div_cpr[j].cloneNode(true);
+	  for(var i = 1; i <= data.n; i++){
+	  	//console.log('visualization'+i);
+	  	var div_cpr = document.getElementById('visualization'+i).querySelectorAll(".cpr");
+	  	if(div_cpr.length > 0){
+	  		var foreground = document.getElementById('visualization'+i).querySelectorAll(".vis-foreground")[0].firstChild;
+	  		////console.log(top);
+	  		//iterate over cpr node childs
+	  		for (var j = 0; j < div_cpr.length; j++) {
+	  		//clone node
+	  		var cln = div_cpr[j].cloneNode(true);
 
-			  		//get element where the content is
-			  		var content = cln.querySelector(".vis-item-content");
-			  		content.innerHTML = "";
-			  		//add a class
-			  		cln.classList.remove("cpr");
-			  		cln.classList.add("cpr-axis");
+	  		//get element where the content is
+	  		var content = cln.querySelector(".vis-item-content");
+	  		content.innerHTML = "";
+	  		//add a class
+	  		cln.classList.remove("cpr");
+	  		cln.classList.add("cpr-axis");
 
-			  		//get axis node
-			  		var axis = document.getElementById('visualization'+i).querySelectorAll(".vis-axis")[0].firstChild;
-			  		//console.log(axis);
+	  		//get axis node
+	  		var axis = document.getElementById('visualization'+i).querySelectorAll(".vis-axis")[0].firstChild;
+	  		//console.log(axis);
 
-			  		axis.appendChild(cln);
-			  		}
-			  	}
-			  	//console.log(cln);
-			  }//end for
-
-        
-			  ////console.log(x);
+	  		axis.appendChild(cln);
+	  		}
+	  	}
+	  	//console.log(cln);
+	  }//end for     
+		////console.log(x);
     },
     error: function (err) {
       //console.log('Error', err);

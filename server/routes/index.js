@@ -45,6 +45,7 @@ router.use('/api/v1/objects', require('./objects'));
 //change for Carmen's subject
 //router.use('/api/v1/visualisations', require('./visualisations_Carmen'));
 router.use('/api/v1/visualisations', require('./visualisations'));
+router.use('/api/v2/rules', require('./rules'));
 //router.use('/profiles', require('./profiles'));
 //router.use('/articles', require('./articles'));
 //router.use('/tags', require('./tags'));
