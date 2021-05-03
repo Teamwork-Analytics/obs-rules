@@ -1,4 +1,7 @@
 var app = angular.module('group-analytics', ['ngRoute']);
+//import pdfmake
+//import pdfMake from 'pdfmake/build/pdfmake.js';
+//import pdfFonts from 'pdfmake/build/vfs_fonts.js';
 //var manageRules = require('./controllers/rules');
 
 app.config(['$routeProvider',
@@ -21,6 +24,10 @@ $routeProvider
             controller: 'manageSourcesController'})
 .when('/rules/:id', {templateUrl: '../views/rules.html',
             controller:'manageRules'})
+.when('/reports/:id', {templateUrl: '../views/reports.html',
+            controller:'manageReports'})
+/*.when('/timeLine/:id', {templateUrl: '../views/timeLineRules.html',
+            controller:'manageVis'})*/
 .when('/delete/:id', {})
 .otherwise({
 redirectTo: '/'
@@ -111,14 +118,178 @@ app.controller('mainController', function($window, $scope, $location, $routePara
       });
   };
 
-  $scope.redirectRules = function(sessionID) {
+/*  $scope.redirectTimeline = function(sessionID) {
+    $location.path('/timeLine/'+sessionID);
 
+  };*/
+
+  $scope.redirectRules = function(sessionID) {
     $location.path('/rules/'+sessionID);
+  };
+
+  $scope.redirectReports = function(sessionID) {
+    $location.path('/reports/'+sessionID);
   };
 
 });
 
-app.controller('manageRules', function($window, $scope, $location, $routeParams, $http, socket) {
+app.controller('manageReports', function($window, $scope, $location, $routeParams, $http, socket) {
+ $scope.sessionid = $routeParams.id;
+
+    // GET ALL RULES OF A SESSION
+  $http.get('/api/v2/rules/all/'+$scope.sessionid)
+  .success(function(data){
+    $scope.sessionRules = data;
+  })
+  .error(function(error){
+    console.log('Error: ' + error);
+  });
+
+  $scope.seeTimeline = ()=>{
+    $scope.timeline = true;
+    console.log('In the app.js session id: ', $scope.sessionid);
+    var dataObj = {
+      id : $scope.sessionid
+    };
+    console.log('In the Obj ', dataObj.id);
+   
+    $http.get('/api/v1/visualisations/getJsonFromFile/'+dataObj.id, dataObj)
+      .success(function(alldata){
+        $scope.alldata = alldata;
+      })
+
+      .error(function(error){
+              console.log('Error: ', error);
+      });
+  };
+
+  $scope.generateReport=()=>{
+    console.log('seeVis session id:',$scope.sessionid);
+    $scope.Divreport = $scope.Divreport = true;
+    var infoReport = {};
+    //console.log('seeVis rule id:',rulesID);
+
+    //infoReport["rules"];
+    //infoReport["feedback"];
+
+    var dataObj = {
+      id_session : $scope.sessionid
+      //id_rule : rulesID
+    };
+    //get rules first
+    $http.get('/api/v2/rules/all/'+$scope.sessionid)
+    .success(function(data){
+      $scope.sessionRules = data;
+      $http.post('/api/v1/visualisations/getDataforVis',dataObj)
+      .success(function(dataActions){
+            //console.log(dataActions);
+            // validate each rule
+            
+            infoReport['dataReport'] = [];
+            //infoReport['FeedbackInfo'] =[];
+            
+            for (rule in data){
+              let rulesInfo = {};
+              //var feedbackInfo = {};
+              rulesID = data[rule].id;
+              //console.log('THIS IS WHAT IS BEEN PLOTED:',rulesID);
+              $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
+              .success(function(detailRule){
+                rulesInfo['id']=detailRule[0].id;
+                rulesInfo['name'] = detailRule[0].name;
+                rulesInfo['rule'] = detailRule[0].first_action+ ' - ' + detailRule[0].value_of_mag+' - '+detailRule[0].second_action;
+                //console.log('Rules Info: ', rulesInfo);
+                //console.log('Info Report: ', infoReport);
+                //console.log('Inside selectOneRule: ', detailRule[0].id, detailRule[0].name);
+                //infoReport['InfoRule'].push(rulesInfo);
+                //rulesInfo = {};
+                const toSend = 
+                {
+                  actions: dataActions,
+                  rule: detailRule
+                }
+                $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
+                  .success(function(objs) {
+                    //$scope.forReport = objs;
+                    //console.log('How to access status', objs);
+                    rulesInfo['id'] = detailRule[0].id;
+                    rulesInfo['status'] = objs.status;
+                    rulesInfo['mesage'] = objs.title;
+                    // create a json file    
+                    
+                    infoReport['dataReport'].push(rulesInfo);
+                    //console.log('Inside validateRule: ', detailRule[0].id, objs.title);
+                    //rulesInfo = {};
+                  })
+                  .error(function(error){
+                      console.log('Error: ', error);
+                  });
+             
+                })
+                .error(function(error){
+                  console.log('Error: ', error);
+                });   
+               //$scope.infoReport = infoReport;
+            }  // end for
+            
+            //$scope.infoReport = infoReport;
+            //pdfMake.createPdf(infoReport).download();
+      })
+      .error(function(error){
+        console.log('Error: ', error);
+      });
+      $scope.infoReport = infoReport;
+      console.log('############', infoReport);
+      //createHtml(infoReport);
+    })
+    .error(function(error){
+      console.log('Error: ' + error);
+    });
+  };
+
+  $scope.seeVis = (rulesID) => {
+  //$scope.vis = true;
+  //$location.path('/timeline/'+sessionID);
+  console.log('seeVis session id:',$scope.sessionid);
+  console.log('seeVis rule id:',rulesID);
+
+    var dataObj = {
+      id_session : $scope.sessionid,
+      id_rule : rulesID
+    };
+    $http.post('/api/v1/visualisations/getDataforVis',dataObj)
+      .success(function(dataActions){
+          console.log(dataActions);
+          //$scope.dataForVis = dataActions;
+          $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
+          .success(function(detailRule){
+            //$scope.detailRule = detailRule;
+            const toSend = 
+            {
+              actions: dataActions,
+              rule: detailRule
+            }
+            $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
+            .success(function(objs) {
+              $scope.rulesVal = objs;
+              console.log('I am in the nested call');
+            })
+            .error(function(error){
+                console.log('Error: ', error);
+            });
+          })
+          .error(function(error){
+              console.log('Error: ', error);
+          });
+      })
+      .error(function(error){
+        console.log('Error: ', error);
+      });
+  };
+
+});
+
+app.controller('manageRules', function($window, $scope, $location, $routeParams, $http, socket){
   //This first line is to assure the session id in rules
   $scope.sessionid = $routeParams.id;
   $scope.formData = {};
@@ -137,97 +308,96 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   });
 
   //get all typeofRules=typesRules
-   var dataObj = {
-        id_session : $scope.sessionid,
-        type : 'type'
-    };
-    //LIST ALL THE TYPE OF RULES
-   $http.get('/api/v2/rules/types', dataObj)
-    .success(function(typeR){
-      $scope.typeRules = typeR;
-    })
-    .error(function(error){
-      console.log('Error: ' + error);
-    });
+  var dataObj = {
+      id_session : $scope.sessionid,
+      type : 'type'
+  };
+  //LIST ALL THE TYPE OF RULES
+ $http.get('/api/v2/rules/types', dataObj)
+  .success(function(typeR){
+    $scope.typeRules = typeR;
+  })
+  .error(function(error){
+    console.log('Error: ' + error);
+  });
 
-    //LIST ALL ACTIONS OF A SESSION
-    $http.get('/api/v2/rules/actions/'+$scope.sessionid)
-    .success(function(objs){
-      $scope.actions = objs;
-      console.log($scope.sessionid);
-    })
-    .error(function(error){
-      console.log('Error: ' + error);
-    });
+  //LIST ALL ACTIONS OF A SESSION
+  $http.get('/api/v2/rules/actions/'+$scope.sessionid)
+  .success(function(objs){
+    $scope.actions = objs;
+    console.log($scope.sessionid);
+  })
+  .error(function(error){
+    console.log('Error: ' + error);
+  });
 
   //PREVIEW RULES
   $scope.seeRule = (idRule) => {
     const dataObj = {
-          id_session : $scope.sessionid,
-          id_rule : idRule
-        };
-      $http.get(`/api/v2/rules/selectOneRule/${idRule}`)
-      .success((detailRule) => {
-        $scope.detailRule = detailRule;
-        $scope.sessionid=dataObj.id_session;
-      })
-      .error((data) => {
-        console.log('Error: ' + data);
-      });
+      id_session : $scope.sessionid,
+      id_rule : idRule
+    };
+    $http.get(`/api/v2/rules/selectOneRule/${idRule}`)
+    .success((detailRule) => {
+      $scope.detailRule = detailRule;
+      $scope.sessionid=dataObj.id_session;
+    })
+    .error((data) => {
+      console.log('Error: ' + data);
+    });
   };
 
-    //function to show input
-    $scope.ShowInput = function(){
-        $scope.IsVisible = $scope.IsVisible = true;
-    }
+  //function to show input
+  $scope.ShowInput = function(){
+      $scope.IsVisible = $scope.IsVisible = true;
+  };
 
-    //FUNCTION TO SHOW FORM ACCORDING TO THE TYPE OF RULE
-    $scope.ShowInputTime = function(type){
-        $scope.ShowSecond = $scope.ShowSecond = true;
-        console.log(type);
-        $scope.IsVisibleTime = $scope.IsVisibleTime = true;
-        if (type==2) {
-          $scope.causalityR = $scope.causalityR = false;
-          $scope.frequencyR = $scope.frequencyR = false;
-          $scope.timeR = $scope.timeR = true;
-        }
-        if (type==1) {
-          $scope.timeR = $scope.timeR = false;
-          $scope.causalityR = $scope.causalityR = true;
-          $scope.frequencyR = $scope.frequencyR = false;
-        }
-        if (type==3) {
-          $scope.timeR = $scope.timeR = false;
-          $scope.causalityR = $scope.causalityR = false;
-          $scope.frequencyR = $scope.frequencyR = true;
-          $scope.ShowSecond = $scope.ShowSecond = false;
-        }
-        //if ($scope.selectedType) {}
-    }
+  //FUNCTION TO SHOW FORM ACCORDING TO THE TYPE OF RULE
+  $scope.ShowInputTime = function(type){
+      $scope.ShowSecond = $scope.ShowSecond = true;
+      console.log(type);
+      $scope.IsVisibleTime = $scope.IsVisibleTime = true;
+      if (type==2) {
+        $scope.causalityR = $scope.causalityR = false;
+        $scope.frequencyR = $scope.frequencyR = false;
+        $scope.timeR = $scope.timeR = true;
+      }
+      if (type==1) {
+        $scope.timeR = $scope.timeR = false;
+        $scope.causalityR = $scope.causalityR = true;
+        $scope.frequencyR = $scope.frequencyR = false;
+      }
+      if (type==3) {
+        $scope.timeR = $scope.timeR = false;
+        $scope.causalityR = $scope.causalityR = false;
+        $scope.frequencyR = $scope.frequencyR = true;
+        $scope.ShowSecond = $scope.ShowSecond = false;
+      }
+  };
 
-    //ADD NEW RULE
-    $scope.AddNewRule = function(type, first, causality, second){
-      var magnitude = "";
-      var value = "";
-      if(causality == 1){causality = 'After'}
-      if(causality == 2){causality = 'Before'}
-      if(type == 1){magnitude='Sequence'; value = causality}
-      if(type == 2){magnitude='Time'; value = $scope.TimeFrame}
-      if(type == 3){magnitude='Frequency'; value = $scope.Frequency}
+  //ADD NEW RULE
+  $scope.AddNewRule = function(type, first, causality, second){
+    var magnitude = "";
+    var value = "";
+    if(causality == 1){causality = 'After'}
+    if(causality == 2){causality = 'Before'}
+    if(type == 1){magnitude='Sequence'; value = causality}
+    if(type == 2){magnitude='Time'; value = $scope.TimeFrame}
+    if(type == 3){magnitude='Frequency'; value = $scope.Frequency}
 
-      const dataObjRule = {
-        typeRule : type,
-        sessionid : $scope.sessionid,
-        name : $scope.Name,
-        firstAction : first,
-        secondAction : second,
-        magnitude : magnitude,
-        value : value,
-        feedbackCorrect: $scope.inputIfCorrect,
-        feedbackWrong: $scope.inputIfWrong,
-      };
-    //console.log(dataObjRule);
-    //insert new rule
+    const dataObjRule = {
+      typeRule : type,
+      sessionid : $scope.sessionid,
+      name : $scope.Name,
+      firstAction : first,
+      secondAction : second,
+      magnitude : magnitude,
+      value : value,
+      feedbackCorrect: $scope.inputIfCorrect,
+      feedbackWrong: $scope.inputIfWrong,
+    };
+  //console.log(dataObjRule);
+  //insert new rule
     $http.post('/api/v2/rules/addRule/', dataObjRule)
     .success(function(allrules){
       $scope.IsVisible = false;
@@ -241,12 +411,11 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       $scope.selectedSecond = '';
       $scope.causality = '';
       $scope.sessionRules = allrules;
-
     })
     .error(function(error){
       console.log('Error: ' + error);
     });
-  }
+  };
 
   //EDIT RULES
   //TO DO
@@ -254,23 +423,18 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   //DELETE RULES
   $scope.deleteRule = (idRule) => {
     
-       const dataObj = {
-          id_session : $scope.sessionid,
-          id_rule : idRule
-        };
-      $http.post('/api/v2/rules/delete/', dataObj)
-      .success((allRules) => {
-        $scope.sessionRules = allRules;
-      })
-      .error((data) => {
-        console.log('Error: ' + data);
-      });
+    const dataObj = {
+      id_session : $scope.sessionid,
+      id_rule : idRule
+    };
+    $http.post('/api/v2/rules/delete/', dataObj)
+    .success((allRules) => {
+      $scope.sessionRules = allRules;
+    })
+    .error((data) => {
+      console.log('Error: ' + data);
+    });
   };
-
-  // PREVIEW VIS
-  //$scope.seeVis = (idRule) => {
-  //    $scope.vis = true;
-  //};
 
   // VISUALISE THE TIMELINE
 
@@ -294,14 +458,12 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       .error(function(error){
               console.log('Error: ', error);
       });
-    
-
   };
 
   $scope.seeVis = (rulesID) => {
-  $scope.vis = true;
+    $scope.vis = true;
   //$location.path('/timeline/'+sessionID);
-  console.log('seeVis',$scope.sessionid);
+  //console.log('seeVis',$scope.sessionid);
 
     var dataObj = {
       id_session : $scope.sessionid,
@@ -309,7 +471,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
     };
     $http.post('/api/v1/visualisations/getDataforVis',dataObj)
       .success(function(dataActions){
-          console.log(dataActions);
+          //console.log(dataActions);
           $scope.dataForVis = dataActions;
           $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
           .success(function(detailRule){
@@ -331,40 +493,42 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
           .error(function(error){
               console.log('Error: ', error);
           });
-/*          $http.post('/api/v1/visualisations/generateJson2', dataActions)
-          .success(function(objs){
-              //$scope.nparticipants = objs.n; 
-            //$scope.selectedactions = objs;
-            console.log('http://localhost:3000/timeline/'+dataObj.id_session);
-            $window.location.href='http://localhost:3000/timeline/'+dataObj.id_session;
-          })
-
-          .error(function(error){
-            console.log('Error: ', error);
-          });*/
       })
       .error(function(error){
         console.log('Error: ', error);
       });
   };
-
-
-    //console.log('here we are');
+  //console.log('here we are');
   $scope.endSession = function(){
-      var dataObj = {
-          id_session : $scope.sessionid,
-      };
-
-      $http.post('/api/v1/sessions/stop', dataObj )
-      .success(function(data){
+    var dataObj = {
+        id_session : $scope.sessionid,
+    };
+    $http.post('/api/v1/sessions/stop', dataObj )
+    .success(function(data){
+      $location.path('/');
       console.log(data);
       $scope.sourceSession = data;
-      })
-      .error((error) => {
-        console.log('Error: ' + error);
-      });
-      $location.path('/');
-    };
+    })
+    .error((error) => {
+      console.log('Error: ' + error);
+    });
+  };
+});
+
+app.controller('manageVis', function($scope, $location, $routeParams, $http, socket) {
+  $scope.sessionid = $routeParams.id;
+  $scope.nparticipants = 0;
+  var containers = [];
+  //GET ALL RULES OF A SESSION
+  $http.get('/api/v2/rules/all/'+$scope.sessionid)
+  .success(function(data){
+    $scope.sessionRules = data;
+    //$window.location.href='http://localhost:3000/timeline/'+sessionID;
+  })
+  .error(function(error){
+    console.log('Error: ' + error);
+  });
+
 });
 
 app.controller('visController', function($scope, $location, $routeParams, $http, socket) {

@@ -154,11 +154,30 @@ body {
   border-color: #ffffff;
   font-weight: 500;
 }
-    div.vis-item-content{
+
+div.vis-item-content{
       margin-left: none;
     }}
 }
 
 .vis-label{
   width: 60px !important;
+}
+
+.styled-tableth, td{
+    border-collapse: collapse;
+    border: 1px solid grey;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    /*min-width: 400px;*/
+    /*box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);*/
+}
+
+.styled-table thead tr th {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    border: 1px solid grey;
+    width: 100%;
 }
