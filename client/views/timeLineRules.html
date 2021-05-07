@@ -1,0 +1,29 @@
+<br>
+Please, click on any of the buttons below to validate group outcomes per rule:
+<br>
+
+<div id="Divrules">
+	<table class='styled-table'>
+		<colgroup>
+	       <col span="1" style="width: 8%;">
+	       <col span="1" style="width: 92%;">
+	    </colgroup>
+		<tr>
+			<th style="text-align:left; vertical-align: top">
+				<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
+		         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
+
+				</div>
+			</th>
+			<td style="text-align:justify-all">
+				<h2 id="title-page" ><strong></strong></h2>
+				<br>
+		  		<h2 id="rule-name" ><strong></strong></h2>
+				<div id="timelines" ng-show = "timeline">
+				<p id="rules" ng-model = "alldata"></p>
+				<!--<div id="visualisation" ng-show = "vis">!-->
+			</td>
+		</tr>
+
+	</table>
+</div>

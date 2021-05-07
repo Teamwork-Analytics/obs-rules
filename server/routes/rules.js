@@ -32,22 +32,23 @@ router.get('/all/:id_session', (req, res, next) => {
       if(err) throw err;
       rows.forEach( (row) => {
         results.push(row);
-        console.log(`${row.name} , ${row.magnitude}`);
+        //console.log(`${row.name} , ${row.magnitude}`);
       });
       return res.json(results);
   });
 });
 
-//get all rules
+//get one rules
 router.get('/selectOneRule/:id_rule', (req, res, next) => {
   const results = [];
+  console.log('selectOneRule########: ', req.params.id_rule);
 
   con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id and r.id=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id and r.id=?) AS second_action FROM group_analytics1.rules as r WHERE r.id=?;', 
     [req.params.id_rule, req.params.id_rule, req.params.id_rule], (err, rows)=>{
       if(err) throw err;
       rows.forEach( (row) => {
         results.push(row);
-        console.log(`${row.magnitude} , ${row.feedback_ok}`);
+        //console.log(`${row.magnitude} , ${row.feedback_ok}`);
       });
       return res.json(results);
   });
@@ -92,6 +93,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   rulesValidated["options"]=[];
   rulesValidated["title"] = actions[0].session_name + " - "+ rule[0].name;
   rulesValidated['ruleName'] = rule[0].name;
+
   start=''
 
   find = false;
@@ -152,14 +154,17 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       if( difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
         rulesValidated["title"] = rule[0].feedback_wrong;
         point["className"] = 'negative';  
+        rulesValidated['status'] = 'wrong';
       }else{
         rulesValidated["title"] = rule[0].feedback_ok;
         point["className"] = 'vis-time-response';  
+        rulesValidated['status'] = 'ok';
       }
     }else{
       //point["content"] =  rule[0].feedback_ok;
       rulesValidated["title"] = rule[0].feedback_ok;
       point["className"] = 'vis-time-response';  
+      rulesValidated['status'] = 'ok';
     }
   } else if(find == true && find2==false){
     //point["content"] = rule[0].feedback_wrong;
@@ -169,6 +174,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     point["end"] = actions[actions.length-1].time_action;
     //point["style"] = "color: red; background-color: pink;";
     point["className"] = 'negative';
+    rulesValidated['status'] = 'wrong';
   }else if(find == false && find2==true){
     //point["content"] = rule[0].feedback_wrong;
     rulesValidated["title"] = rule[0].feedback_wrong;
@@ -177,6 +183,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     point["type"] = 'background';
     //point["style"] = "color: red; background-color: pink;";
     point["className"] = 'negative';
+    rulesValidated['status'] = 'wrong';
   }
   rulesValidated["points"].push(point);
   var options = {};

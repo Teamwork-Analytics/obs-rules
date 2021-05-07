@@ -1,0 +1,342 @@
+ <div>
+    <h1>Manage Reports</h1>
+    <p>See the teacher summary report:
+    	<a href="javascript:void(0)" ng-click="generateReport()" ><img src="./img/report.png" alt="Report" style="width:80px;height:80px;"></a>
+    </p>
+   
+    <div id='rep' ng-show="Divreport">
+    	<div class="">
+    		<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="createPDF()"> Print </a>
+    	</div>
+    	
+		<table class="styled-tableth">
+		<colgroup>
+	       <col span="1" style="width: 48%;">
+	       <col span="1" style="width: 48%;">
+	       <col span="1" style="width: 4%;">
+	    </colgroup>
+			<tr align="center">
+				<th>Rule</th>
+				<th>Group Feedback</th>
+				<th>Outcome</th>
+			</tr>
+			
+			<tr ng-repeat="value in infoReport.dataReport" >
+				<td>
+					{{value.name}} <br> <span style="color:blue">{{value.rule}}</span>
+				</td>
+				<td>
+					{{value.mesage}}
+				</td>	
+				<td>
+					<div id= 'imageok' ng-if="value.status == 'ok' ">
+	        			<img src="./img/ok.png" alt="Report" style="width:50px;height:50px;">
+	    			</div>
+	    			<div id='imagewrong' ng-if="value.status == 'wrong' ">
+	        			<img src="./img/wrong.png" alt="Report" style="width:50px;height:50px;">
+	    			</div>
+				</td>	
+			</tr>		
+				
+			
+		</table>
+		
+	</div>
+	
+</div>
+ <!--<p id="rules" ng-model = "rulesVal">{{rulesVal}}</p>-->
+Or
+<br>
+Please, click on any of the buttons below to validate group outcomes per rule:
+<br>
+
+<div id="Divrules">
+	<table class='styled-table'>
+		<colgroup>
+	       <col span="1" style="width: 8%;">
+	       <col span="1" style="width: 92%;">
+	    </colgroup>
+		<tr>
+			<th style="text-align:left; vertical-align: top">
+				<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
+		         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
+
+				</div>
+			</th>
+			<td style="text-align:justify-all">
+				<h2 id="title-page" ><strong></strong></h2>
+				<br>
+		  		<h2 id="rule-name" ><strong></strong></h2>
+				<div id="timelines" ng-show = "timeline">
+				<p id="rules" ng-model = "alldata"></p>
+				<!--<div id="visualisation" ng-show = "vis">!-->
+			</td>
+		</tr>
+
+	</table>
+</div>
+
+<!--<p id="report" ng-model="infoReport"> {{infoReport}} </p>!-->
+
+<script type="text/javascript">
+	
+	function gloria() {
+		var scope1 = angular.element($("#rules")).scope();
+		console.log('in the timeline');
+	    if(scope1!=undefined){
+		    data = scope1.rulesVal;
+		    alldata= scope1.alldata;
+		    console.log('scope1 rulesVal: ', data);
+		    console.log('scope1 alldata: ', alldata);
+
+		    if(data != undefined && alldata!=undefined){
+		      console.log('Goood');
+		      visTimelineActions(data, alldata);
+		    }else{
+		    	//window.location.reload();
+		    	//docReady(gloria);
+		    	//element = document.getElementById('bottom-rule');
+				//element.click();
+		    }
+
+	    }else{
+	    	location.reload();
+	    }
+	}
+
+	function docReady(fn) {
+	    // see if DOM is already available
+	    if (document.readyState === "complete" || document.readyState === "interactive") {
+	        // call on next available tick
+	        setTimeout(fn, 1);
+	    } else {
+	        document.addEventListener("DOMContentLoaded", fn);
+	    }
+	}
+	  
+	docReady(gloria);
+
+	function visTimelineActions(dataValid, data){
+	    reloadPage();
+	    console.log("visTimelineActions data: ",data);
+	    console.log("visTimelineActions data: ",dataValid);
+	    document.getElementById("title-page").innerHTML = dataValid.ruleName;
+	    document.getElementById("rule-name").innerHTML = dataValid.title;
+
+	    var critical_times = [];
+	    var participants = Object.keys(data.participants).sort();
+	    var containers = [];
+	    var points=dataValid.points;
+	    wrapper = document.getElementById('timelines'); 
+
+	    //create the background 
+
+	    if(points.length < 3){
+	      var background_info =[points[1]]
+	    }else{
+	      var background_info =[points[2]]
+	    }
+	    console.log("This is how it looks like: ",background_info, points.length);
+
+
+	    //create containers for each timeline
+	    for(var i=1;i<=data.n;i++){
+	      container = document.createElement('div');
+	      container.setAttribute("id", "visualization"+i);
+	      wrapper.appendChild(container);
+	    }
+	       // Get DOM elements where the Timeline will be attached
+	    for(var i=0;i<data.n;i++){
+	      containers[i] = document.getElementById('visualization'+(i+1));
+	    }
+	    //create groups
+	    var groups = [];
+	    for(var i=0;i<data.n;i++){
+	      groups[i] = new vis.DataSet([
+	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
+	      //console.log(groups[i]);
+	    }
+
+	    var items = [];
+	    for(var i=0;i<data.n;i++){
+	      items[i] = new vis.DataSet(data.participants[participants[i]]);
+	      items[i].add(background_info);
+	    }
+
+	    var opt = {
+	      start: data.time_start,
+	      end: data.time_end,
+	      //timeAxis: {scale: 'seconds', step: 30},
+	      //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
+	      zoomable: false,
+	      showMajorLabels: false,
+	      //showMinorLabels: false,
+	    };
+
+	       //Create timelines
+	    for(var i=0;i<data.n;i++){
+	      timeline = new vis.Timeline(containers[i]);
+	      timeline.setOptions(opt);
+	      timeline.setGroups(groups[i]);
+	      timeline.setItems(items[i]);
+
+
+	      for(var j=0;j<data.criticalTs.length;j++){
+	        timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
+	      }
+	      
+	      timeline.fit();
+	    }
+	    //modify how to present data points and description
+	    var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
+	    ////console.log(timeAxisElements);
+	    for (var i = 0; i < timeAxisElements.length; i++) {
+	      //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
+	        timeAxisElements[i].style.color = "white";
+	      //}
+	    }     
+
+	    //modify background for time-response
+	    for (var i = 1; i <= data.n; i++) {
+
+	      for(var j = 0; j < background_info.length; j++){
+	        var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
+	        console.log("!!!!!!!!!!!!! ",el);
+	        //el.remove();
+	        var la = document.getElementById('visualization'+i).querySelectorAll(".negative")[j];
+	        //el.style.height = "100% !important";
+	        console.log("!!!!!!!!!!!!! ",la);
+	        var newpos = document.getElementById('visualization'+i).querySelectorAll(".vis-time-axis.vis-background")[0];
+	        console.log(newpos);
+	        if(el != undefined){
+	          newpos.append(el);
+	        }else{
+	          newpos.append(la);
+	        }
+	        
+	      }
+   		}
+
+  	}	
+	
+	function reloadPage() {
+	   //window.location.reload();
+	    document.getElementById("timelines").innerHTML = "";
+	    //document.getElementById("visualisation").innerHTML = "";
+
+	}
+
+
+	function createPDF(){
+		//import { jsPDF } from "jspdf";
+		const elementHTML = document.getElementById('rep');
+		//const elementHTML = document.getElementById('rep').innerHTML;
+
+		const doc = new jsPDF({
+   			orientation: 'p',
+ 			unit: 'pt',
+ 			format: 'a4',
+ 			compressPdf: true
+		}); 
+
+		margins = {
+	        top: 200,
+	        bottom: 70,
+	        left: 30,
+	        width: 550
+	    };
+
+		const options = {
+      		background: 'white',
+      		scale: 3
+    	};
+
+		html2canvas(elementHTML, options).then(canvas => {
+		      const contentDataURL = canvas.toDataURL('image/jpeg', 1.0)
+		      console.log(contentDataURL);  
+		      let pdf = new jspdf('l', 'px', 'a4', true); //Generates PDF in landscape mode
+		      // let pdf = new jspdf('p', 'cm', 'a4'); //Generates PDF in portrait mode
+		    const pageWidth = pdf.internal.pageSize.width;
+		    const pageHeight = pdf.internal.pageSize.height;
+
+		    const widthRatio = pageWidth / canvas.width;
+		    const heightRatio = pageHeight / canvas.height;
+		    const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+
+		    const canvasWidth = canvas.width * ratio;
+		    const canvasHeight = canvas.height * ratio;
+
+		    const marginX = (pageWidth - canvasWidth) / 2;
+		    const marginY = (pageHeight - canvasHeight) / 2;
+
+		    //pdf.addImage(contentDataURL, 'PNG',marginX, marginY, canvasWidth, canvasHeight);  
+		    pdf.addImage(contentDataURL, 'PNG', 20, 40, marginX, marginY);  
+		    pdf.save('Filename.pdf');   
+		}); 
+/*	    html2canvas(elementHTML, options).then((canvas) => {
+
+	      const img = canvas.toDataURL('./img/jpeg',  1.0);
+	      console.log(contentDataURL);
+
+	      // Add image Canvas to PDF
+	      const bufferX = 15;
+	      const bufferY = 15;
+	      const imgProps = (doc as any).getImageProperties(img);
+	      const pdfWidth = doc.internal.pageSize.getWidth() - 2 * bufferX;
+	      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+	      doc.addImage(img, 'PNG', bufferX, bufferY, pdfWidth, pdfHeight, undefined, 'FAST');
+	      return doc;
+	    }).then((docResult) => {
+	      docResult.save(`${new Date().toISOString()}_tutorial.pdf`);
+	    });*/
+  
+
+
+	    //var canvas = document.getElementById('report');
+		//var ctx = canvas.getContext('2d');
+		//ctx.drawImage(img, 0, 0);
+		//var png = canvas.toDataURL("./img/png");
+
+	    //doc.addImage(png, 'PNG', leftmargin, 120, 485, 270,'','FAST');
+
+/*
+		doc.setFont("helvetica");
+		doc.setFontSize(9);
+		//var elementHTML = $('#rep').html();
+		//doc.addPage();
+        //doc.text(20, 20, 'Do you like that?');
+
+		doc.fromHTML(elementHTML, 15, 15, {
+		    'width': 180,
+		},
+		function(bla){doc.save('testReport.pdf');});*/
+
+		// Save the PDF
+		//doc.save('sample-document.pdf');
+
+
+	}
+
+</script>
+<link href="../../../css/vis.css" rel="stylesheet" type="text/css" />
+<link href="../../../css/styles.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Lato" />
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<!--<script src="js/jspdf.js"></script> -->
+<!-- jQuery library -->
+<!-- <script src="js/jquery-3.4.1.min.js"></script>-->
+
+<!-- jsPDF library -->
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+<style>
+.custom-control-label::before, 
+.custom-control-label::after {
+top: .8rem;
+width: 1.25rem;
+height: 1.25rem;
+}
+</style>
+

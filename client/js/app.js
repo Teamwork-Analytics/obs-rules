@@ -94,7 +94,7 @@ app.controller('mainController', function($window, $scope, $location, $routePara
   };
 
   $scope.redirectTimeline = function(sessionID) {
-    
+ 
     //$location.path('/timeline/'+sessionID);
     var dataObj = {
         id_session : sessionID
@@ -157,7 +157,6 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
       .success(function(alldata){
         $scope.alldata = alldata;
       })
-
       .error(function(error){
               console.log('Error: ', error);
       });
@@ -174,7 +173,6 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
 
     var dataObj = {
       id_session : $scope.sessionid
-      //id_rule : rulesID
     };
     //get rules first
     $http.get('/api/v2/rules/all/'+$scope.sessionid)
@@ -207,7 +205,7 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
                 {
                   actions: dataActions,
                   rule: detailRule
-                }
+                };
                 $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
                   .success(function(objs) {
                     //$scope.forReport = objs;
@@ -231,9 +229,6 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
                 });   
                //$scope.infoReport = infoReport;
             }  // end for
-            
-            //$scope.infoReport = infoReport;
-            //pdfMake.createPdf(infoReport).download();
       })
       .error(function(error){
         console.log('Error: ', error);
@@ -268,7 +263,7 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
             {
               actions: dataActions,
               rule: detailRule
-            }
+            };
             $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
             .success(function(objs) {
               $scope.rulesVal = objs;
@@ -394,7 +389,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       magnitude : magnitude,
       value : value,
       feedbackCorrect: $scope.inputIfCorrect,
-      feedbackWrong: $scope.inputIfWrong,
+      feedbackWrong: $scope.inputIfWrong
     };
   //console.log(dataObjRule);
   //insert new rule
@@ -454,7 +449,6 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       .success(function(alldata){
         $scope.alldata = alldata;
       })
-
       .error(function(error){
               console.log('Error: ', error);
       });
@@ -480,7 +474,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
             {
               actions: dataActions,
               rule: detailRule
-            }
+            };
             $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
             .success(function(objs) {
               $scope.rulesVal = objs;
@@ -501,9 +495,9 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   //console.log('here we are');
   $scope.endSession = function(){
     var dataObj = {
-        id_session : $scope.sessionid,
+        id_session : $scope.sessionid
     };
-    $http.post('/api/v1/sessions/stop', dataObj )
+    $http.post('/api/v1/sessions/stop', dataObj)
     .success(function(data){
       $location.path('/');
       console.log(data);
