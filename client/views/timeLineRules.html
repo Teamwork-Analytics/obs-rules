@@ -8,22 +8,343 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 	       <col span="1" style="width: 8%;">
 	       <col span="1" style="width: 92%;">
 	    </colgroup>
-		<tr>
-			<th style="text-align:left; vertical-align: top">
-				<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
-		         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
 
-				</div>
-			</th>
-			<td style="text-align:justify-all">
-				<h2 id="title-page" ><strong></strong></h2>
-				<br>
-		  		<h2 id="rule-name" ><strong></strong></h2>
-				<div id="timelines" ng-show = "timeline">
-				<p id="rules" ng-model = "alldata"></p>
-				<!--<div id="visualisation" ng-show = "vis">!-->
-			</td>
+	    <tr>
+			<div id="loading">loading...</div>
+			<h2 id="title-page" ><strong></strong></h2>
+			<br>
+	  		<h2 id="rule-name" ><strong></strong></h2>
+			<div id="timelines" ng-show = "timeline">
+			<p id="rules" ng-model = "alldata"></p>
+			<p id="rules1" ng-model = "data"></p>
+
+			<!--<div id="visualisation" ng-show = "vis">!-->
 		</tr>
+		<tr>
+			 <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" onclick='visVanillaTimeLine()'> Vanila Timeline </a>	
+			<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
+	         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
+
+			</div>
+		</tr>
+
 
 	</table>
 </div>
+
+<script type="text/javascript">
+
+function visVanillaTimeLine(){
+		var timeline = [];
+		var scope1 = angular.element($("#rules")).scope();
+		wrapper = document.getElementById('timelines'); 
+		var containers = [];
+
+
+		if(scope1==undefined){
+			console.log('No scope');
+		}else{
+			//This is the whole list of actions
+		    data= scope1.alldata;
+		    console.log('Here is the data',data);
+		    //This is the rule that has been validated
+			alldata = scope1.rulesVal; 
+			console.log('Here are the rules, alldata: ',alldata);
+				if(alldata==undefined && data != undefined){
+							//visVanillaTimeLine(alldata);
+				document.getElementById("title-page").innerHTML = data.title;
+			    document.getElementById('loading').style.display = 'none';
+			    var critical_times = [];  
+			    //console.log(data);
+			    var participants = Object.keys(data.participants).sort();
+
+			      //var background_info =[points[1]];
+
+
+			     var background_info = [  
+                                {id: 100, content: '', start: data.time_start, end: data.time_end, type: 'background', className: 'vis-time-response'}];
+
+
+			      
+			      //create containers for each timeline
+			      for(var i=1;i<=data.n;i++){
+			        container = document.createElement('div');
+			        container.setAttribute("id", "visualization"+i);
+			        wrapper.appendChild(container);
+			      }
+
+			      // Get DOM elements where the Timeline will be attached
+			      for(var i=0;i<data.n;i++){
+			        containers[i] = document.getElementById('visualization'+(i+1));
+			      }
+			      //create groups
+			      var groups = [];
+			      for(var i=0;i<data.n;i++){
+			        groups[i] = new vis.DataSet([
+			          {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
+			      }
+			      console.log('The groups: ',groups);
+
+
+			      var items = [];
+			      for(var i=0;i<data.n;i++){
+			        items[i] = new vis.DataSet(data.participants[participants[i]]);
+			        //items[i].add(background_info);
+			      }
+			      console.log('These are the items: ',items);
+
+			      //console.log(items);
+
+			      // Configuration for the Timeline
+			      var opt = {
+			        start: data.time_start,
+			        end: data.time_end,
+			        //timeAxis: {scale: 'seconds', step: 30},
+			        //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
+			        zoomable: false,
+			        showMajorLabels: false
+			        //showMinorLabels: false,
+			      };
+
+			    //Create timelines
+			    for(var i=0;i<data.n;i++){
+			      timeline = new vis.Timeline(containers[i]);
+			      timeline.setOptions(opt);
+			      timeline.setGroups(groups[i]);
+			      timeline.setItems(items[i]);
+			      for(var j=0;j<data.criticalTs.length;j++){
+			      	timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
+			      }
+			      
+			      timeline.fit();
+			    }
+			    //modify how to present data points and description
+			    var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
+				  ////console.log(timeAxisElements);
+				  for (var i = 0; i < timeAxisElements.length; i++) {
+				    //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
+				      timeAxisElements[i].style.color = "white";
+				    //}
+				  }
+
+				  for(var i = 1; i <= data.n; i++){
+				  	//console.log('visualization'+i);
+				  	var div_cpr = document.getElementById('visualization'+i).querySelectorAll(".cpr");
+				  	if(div_cpr.length > 0){
+				  		var foreground = document.getElementById('visualization'+i).querySelectorAll(".vis-foreground")[0].firstChild;
+				  		////console.log(top);
+				  		//iterate over cpr node childs
+				  		for (var j = 0; j < div_cpr.length; j++) {
+					  		//clone node
+					  		var cln = div_cpr[j].cloneNode(true);
+
+					  		//get element where the content is
+					  		var content = cln.querySelector(".vis-item-content");
+					  		content.innerHTML = "";
+					  		//add a class
+					  		cln.classList.remove("cpr");
+					  		cln.classList.add("cpr-axis");
+
+					  		//get axis node
+					  		var axis = document.getElementById('visualization'+i).querySelectorAll(".vis-axis")[0].firstChild;
+					  		//console.log(axis);
+
+					  		axis.appendChild(cln);
+				  		}
+				  	}
+				  	//console.log(cln);
+				  }
+
+/*				//modify background for time-response
+                    for (var i = 1; i <= data.n; i++) {
+
+                            for(var j = 0; j < background_info.length; j++){
+                              var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
+                              //console.log(el);
+                              el.remove();
+                              //el.style.height = "100% !important";
+                              var newpos = document.getElementById('visualization'+i).querySelectorAll(".vis-time-axis.vis-background")[0];
+                              console.log(newpos);
+                              newpos.append(el);
+                            }
+                       
+                    }//end first for to modify background*/
+
+			}
+			else{
+				console.log('Rien a pase');
+			}
+		}
+	}//end VanillaTimeline
+	
+
+	function gloria() {
+		var scope1 = angular.element($("#rules")).scope();
+		console.log('in the timeline');
+	    if(scope1!=undefined){
+	    	//This is the whole list of actions
+	    	alldata= scope1.alldata;
+	    	//This is the rule that has been validated
+		    data = scope1.rulesVal;
+		    
+
+		    console.log('scope1 rulesVal: ', data);
+		    console.log('scope1 alldata: ', alldata);
+
+		    if(data != undefined && alldata==undefined){
+		      console.log('Goood');
+		      visTimelineActions(data, alldata);
+		    }else{
+		    	//window.location.reload();
+		    	//docReady(gloria);
+		    	//element = document.getElementById('bottom-rule');
+				//element.click();
+		    }
+
+	    }else{
+	    	location.reload();
+	    }
+	}
+	
+	function visTimelineActions(dataValid, data){
+	    reloadPage();
+	    console.log("visTimelineActions data: ",data);
+	    console.log("visTimelineActions data: ",dataValid);
+	    document.getElementById("title-page").innerHTML = dataValid.ruleName;
+	    document.getElementById("rule-name").innerHTML = dataValid.title;
+
+	    var critical_times = [];
+	    var participants = Object.keys(data.participants).sort();
+	    var containers = [];
+	    var points=dataValid.points;
+	    wrapper = document.getElementById('timelines'); 
+
+	    //create the background 
+
+	    if(points.length < 3){
+	      var background_info =[points[1]]
+	    }else{
+	      var background_info =[points[2]]
+	    }
+	    console.log("This is how it looks like: ",background_info, points.length);
+
+
+	    //create containers for each timeline
+	    for(var i=1;i<=data.n;i++){
+	      container = document.createElement('div');
+	      container.setAttribute("id", "visualization"+i);
+	      wrapper.appendChild(container);
+	    }
+	       // Get DOM elements where the Timeline will be attached
+	    for(var i=0;i<data.n;i++){
+	      containers[i] = document.getElementById('visualization'+(i+1));
+	    }
+	    //create groups
+	    var groups = [];
+	    for(var i=0;i<data.n;i++){
+	      groups[i] = new vis.DataSet([
+	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
+	      //console.log(groups[i]);
+	    }
+
+	    var items = [];
+	    for(var i=0;i<data.n;i++){
+	      items[i] = new vis.DataSet(data.participants[participants[i]]);
+	      items[i].add(background_info);
+	    }
+
+	    var opt = {
+	      start: data.time_start,
+	      end: data.time_end,
+	      //timeAxis: {scale: 'seconds', step: 30},
+	      //groupOrder: 'content',  // groupOrder can be a property name or a sorting function
+	      zoomable: false,
+	      showMajorLabels: false,
+	      //showMinorLabels: false,
+	    };
+
+	       //Create timelines
+	    for(var i=0;i<data.n;i++){
+	      timeline = new vis.Timeline(containers[i]);
+	      timeline.setOptions(opt);
+	      timeline.setGroups(groups[i]);
+	      timeline.setItems(items[i]);
+
+
+	      for(var j=0;j<data.criticalTs.length;j++){
+	        timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
+	      }
+	      
+	      timeline.fit();
+	    }
+	    //modify how to present data points and description
+	    var timeAxisElements = document.getElementsByClassName("vis-text vis-minor");
+	    ////console.log(timeAxisElements);
+	    for (var i = 0; i < timeAxisElements.length; i++) {
+	      //if(timeAxisElements[i].textContent != "00:00" && timeAxisElements[i].textContent != "00:14" ){
+	        timeAxisElements[i].style.color = "white";
+	      //}
+	    }     
+
+
+
+   		for(var i = 1; i <= data.n; i++){
+		  	//console.log('visualization'+i);
+		  	var div_cpr = document.getElementById('visualization'+i).querySelectorAll(".cpr");
+		  	if(div_cpr.length > 0){
+		  		var foreground = document.getElementById('visualization'+i).querySelectorAll(".vis-foreground")[0].firstChild;
+		  		////console.log(top);
+		  		//iterate over cpr node childs
+		  		for (var j = 0; j < div_cpr.length; j++) {
+			  		//clone node
+			  		var cln = div_cpr[j].cloneNode(true);
+
+			  		//get element where the content is
+			  		var content = cln.querySelector(".vis-item-content");
+			  		content.innerHTML = "";
+			  		//add a class
+			  		cln.classList.remove("cpr");
+			  		cln.classList.add("cpr-axis");
+
+			  		//get axis node
+			  		var axis = document.getElementById('visualization'+i).querySelectorAll(".vis-axis")[0].firstChild;
+			  		//console.log(axis);
+
+			  		axis.appendChild(cln);
+		  		}
+		  	}
+		  	//console.log(cln);
+	  	}//end for 
+  	}	
+
+  	//modify background for time-response EACH RULE VALIDATION
+	/*	for (var i = 1; i <= data.n; i++) {
+
+	      for(var j = 0; j < background_info.length; j++){
+	        var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
+	        console.log("!!!!!!!!!!!!! ",el);
+	        //el.remove();
+	        var la = document.getElementById('visualization'+i).querySelectorAll(".negative")[j];
+	        //el.style.height = "100% !important";
+	        console.log("!!!!!!!!!!!!! ",la);
+	        var newpos = document.getElementById('visualization'+i).querySelectorAll(".vis-time-axis.vis-background")[0];
+	        console.log(newpos);
+	        if(el != undefined){
+	          newpos.append(el);
+	        }else{
+	          newpos.append(la);
+	        }
+	        
+	      }
+   		}*/
+
+   		//VANE VANILLA TIMELINE
+
+</script>
+  <link href="../../../css/vis.css" rel="stylesheet" type="text/css" />
+  <link href="../../../css/styles.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Lato" />
+<!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+

@@ -26,8 +26,8 @@ $routeProvider
             controller:'manageRules'})
 .when('/reports/:id', {templateUrl: '../views/reports.html',
             controller:'manageReports'})
-/*.when('/timeLine/:id', {templateUrl: '../views/timeLineRules.html',
-            controller:'manageVis'})*/
+.when('/timeLine/:id', {templateUrl: '../views/timeLineRules.html',
+            controller:'manageVis'})
 .when('/delete/:id', {})
 .otherwise({
 redirectTo: '/'
@@ -93,7 +93,7 @@ app.controller('mainController', function($window, $scope, $location, $routePara
     $location.path('/manage/'+sessionID);
   };
 
-  $scope.redirectTimeline = function(sessionID) {
+/*  $scope.redirectTimeline = function(sessionID) {
  
     //$location.path('/timeline/'+sessionID);
     var dataObj = {
@@ -116,12 +116,12 @@ app.controller('mainController', function($window, $scope, $location, $routePara
       .error(function(error){
         console.log('Error: ' + error);
       });
-  };
+  };*/
 
-/*  $scope.redirectTimeline = function(sessionID) {
+  $scope.redirectTimeline = function(sessionID) {
     $location.path('/timeLine/'+sessionID);
 
-  };*/
+  };
 
   $scope.redirectRules = function(sessionID) {
     $location.path('/rules/'+sessionID);
@@ -493,7 +493,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       });
   };
   //console.log('here we are');
-  $scope.endSession = function(){
+  $scope.endSession = () =>{
     var dataObj = {
         id_session : $scope.sessionid
     };
@@ -522,6 +522,40 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
   .error(function(error){
     console.log('Error: ' + error);
   });
+  
+  //from here
+  $scope.timeline = true;
+  console.log('In the app.js session id: ', $scope.sessionid);
+  var dataObj1 = {
+    id : $scope.sessionid
+  };
+  console.log('In the Obj ', dataObj1.id);
+
+  var dataObj = {
+    id_session : $scope.sessionid
+  };
+  $http.post('/api/v1/visualisations/getDataforVis',dataObj)
+    .success(function(data){
+      $http.post('/api/v1/visualisations/generateJson2', data)
+      .success(function(objs){
+        $http.get('/api/v1/visualisations/getJsonFromFile/'+dataObj1.id, dataObj1)
+          .success(function(alldata){
+            $scope.alldata = alldata;
+          })
+          .error(function(error){
+            console.log('Error: ', error);
+          });
+      })
+      .error(function(error){
+        console.log('Error: ' + error);
+      });
+  })
+  .error(function(error){
+    console.log('Error: ' + error);
+  });
+  // to this point
+
+
 
 });
 
