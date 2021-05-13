@@ -4,33 +4,32 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 
 <div id="Divrules">
 	<table class='styled-table'>
-		<colgroup>
-	       <col span="1" style="width: 8%;">
-	       <col span="1" style="width: 92%;">
-	    </colgroup>
 
+		<tr>
+			<td>
+				<a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" onclick='visVanillaTimeLine()'> Vanila Timeline </a>
+			</td>
+			<td ng-repeat="list in sessionRules">
+				<button type="button" class="btn btn-primary" ng-click="seeVis(list.id); seeTimeline();">{{ list.name }}</button>
+			</td>
+
+		</tr>
 	    <tr>
-			<div id="loading">loading...</div>
-			<h2 id="title-page" ><strong></strong></h2>
-			<br>
-	  		<h2 id="rule-name" ><strong></strong></h2>
-			<div id="timelines" ng-show = "timeline">
-			<p id="rules" ng-model = "alldata"></p>
-			<p id="rules1" ng-model = "data"></p>
-
+	    	<td colspan="{{sessionRules.length +1}}">
+		    	<div id="loading">loading...</div>
+				<h2 id="title-page" ><strong></strong></h2>
+				<br>
+		  		<h2 id="rule-name" ><strong></strong></h2>
+				<div id="timelines" ng-show = "timeline">
+				<p id="rules" ng-model = "alldata"></p>
+				<p id="rules1" ng-model = "data"></p>
+	    	</td>
 			<!--<div id="visualisation" ng-show = "vis">!-->
 		</tr>
-		<tr>
-			 <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" onclick='visVanillaTimeLine()'> Vanila Timeline </a>	
-			<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
-	         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
-
-			</div>
-		</tr>
-
-
 	</table>
 </div>
+
+<!--<p>{{sessionRules.length}}</p>!-->
 
 <script type="text/javascript">
 
