@@ -555,6 +555,45 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
   });
   // to this point
 
+  $scope.seeVis = (rulesID) => {
+  //$scope.vis = true;
+  //$location.path('/timeline/'+sessionID);
+  console.log('seeVis session id:',$scope.sessionid);
+  console.log('seeVis rule id:',rulesID);
+
+    var dataObj = {
+      id_session : $scope.sessionid,
+      id_rule : rulesID
+    };
+    $http.post('/api/v1/visualisations/getDataforVis',dataObj)
+      .success(function(dataActions){
+          console.log(dataActions);
+          //$scope.dataForVis = dataActions;
+          $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
+          .success(function(detailRule){
+            //$scope.detailRule = detailRule;
+            const toSend = 
+            {
+              actions: dataActions,
+              rule: detailRule
+            };
+            $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
+            .success(function(objs) {
+              $scope.rulesVal = objs;
+              console.log('I am in the nested call');
+            })
+            .error(function(error){
+                console.log('Error: ', error);
+            });
+          })
+          .error(function(error){
+              console.log('Error: ', error);
+          });
+      })
+      .error(function(error){
+        console.log('Error: ', error);
+      });
+  };
 
 
 });

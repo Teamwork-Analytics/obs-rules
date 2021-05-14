@@ -36,18 +36,17 @@
                     <span>{{ todo.id }} </span> |
                     <span>{{ todo.name }} </span> |
                     <span class="text-info">{{ todo.room }} </span> |
-                    <span class="text-secondary font-weight-light"> Start: {{ todo.time_start | date:'medium' }}</span> <span class="text-secondary font-weight-light"> End: {{ todo.time_end | date:'medium' }}</span>
                   </div>
     
                   <div class=""><a href="javascript:void(0)" class=" mx-2 btn btn-info btn-sm" ng-click="redirectActionstoSession(todo.id)"> Actions </a></div>
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectSources(todo.id)"> Sources </a></div>
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectObjects(todo.id)"> Objects </a></div>
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectCapture(todo.id)"> Capture </a></div>
-                  <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectRules(todo.id)"> Rules </a></div>
+                  <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-info btn-sm" ng-click="redirectRules(todo.id)"> Assessment Criteria </a></div>
 
                   <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="listActions(todo.id)"> Log Actions </a></div>
 
-                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="redirectTimeline(todo.id)"> Timeline </a></div>
+                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="redirectTimeline(todo.id)"> Layers </a></div>
 
                   <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="redirectReports(todo.id)"> Reports </a></div>
 

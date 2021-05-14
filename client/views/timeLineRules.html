@@ -1,3 +1,4 @@
+
 <br>
 Please, click on any of the buttons below to validate group outcomes per rule:
 <br>
@@ -10,33 +11,62 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 				<a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" onclick='visVanillaTimeLine()'> Vanila Timeline </a>
 			</td>
 			<td ng-repeat="list in sessionRules">
-				<button type="button" class="btn btn-primary" ng-click="seeVis(list.id); seeTimeline();">{{ list.name }}</button>
+				<button type="button" class="btn btn-primary" ng-click="seeVis(list.id)" onclick="docReady(gloria())">{{ list.name }}</button>
 			</td>
 
 		</tr>
-	    <tr>
-	    	<td colspan="{{sessionRules.length +1}}">
-		    	<div id="loading">loading...</div>
-				<h2 id="title-page" ><strong></strong></h2>
-				<br>
-		  		<h2 id="rule-name" ><strong></strong></h2>
-				<div id="timelines" ng-show = "timeline">
-				<p id="rules" ng-model = "alldata"></p>
-				<p id="rules1" ng-model = "data"></p>
-	    	</td>
-			<!--<div id="visualisation" ng-show = "vis">!-->
-		</tr>
+
 	</table>
 </div>
+
+<div id="loading">loading...</div>
+<h2 id="title-page" ><strong></strong></h2>
+<br>
+<h2 id="rule-name" ><strong></strong></h2>
+<div id="timelines" ng-show = "timeline" class="row-full"></div>
+<p id="rules" ng-model = "alldata"></p>
+<p id="rules1" ng-model = "data"></p>
 
 <!--<p>{{sessionRules.length}}</p>!-->
 
 <script type="text/javascript">
 
+	function gloria() {
+		var scope1 = angular.element($("#rules")).scope();
+		console.log('in the timeline');
+	    if(scope1!=undefined){
+		    data = scope1.rulesVal;
+		    alldata= scope1.alldata;
+		    console.log('scope1 rulesVal: ', data);
+		    console.log('scope1 alldata: ', alldata);
+
+		    if(data != undefined && alldata!=undefined){
+		      console.log('Goood');
+		      visTimelineActions(data, alldata);
+		    }else{
+		    	//visVanillaTimeLine();
+		    	//window.location.reload();
+		    	//docReady(gloria);
+		    	//element = document.getElementById('bottom-rule');
+				//element.click();
+		    }
+
+	    }else{
+	    	location.reload();
+	    	//document.getElementById("timelines").innerHTML = "";
+
+	    	//docReady(gloria);
+	    	console.log('Scope is null...');
+	    }
+	}
+
 function visVanillaTimeLine(){
+	    //document.getElementById("timelines").innerHTML = "";
+	    //reloadPage();
 		var timeline = [];
 		var scope1 = angular.element($("#rules")).scope();
 		wrapper = document.getElementById('timelines'); 
+		//reloadPage();
 		var containers = [];
 
 
@@ -49,8 +79,11 @@ function visVanillaTimeLine(){
 		    //This is the rule that has been validated
 			alldata = scope1.rulesVal; 
 			console.log('Here are the rules, alldata: ',alldata);
-				if(alldata==undefined && data != undefined){
-							//visVanillaTimeLine(alldata);
+				if(data != undefined){
+				//visVanillaTimeLine(alldata);
+				reloadPage();
+				document.getElementById("title-page").innerHTML = '';
+	    		document.getElementById("rule-name").innerHTML = '';
 				document.getElementById("title-page").innerHTML = data.title;
 			    document.getElementById('loading').style.display = 'none';
 			    var critical_times = [];  
@@ -176,39 +209,29 @@ function visVanillaTimeLine(){
 		}
 	}//end VanillaTimeline
 	
+	
 
-	function gloria() {
-		var scope1 = angular.element($("#rules")).scope();
-		console.log('in the timeline');
-	    if(scope1!=undefined){
-	    	//This is the whole list of actions
-	    	alldata= scope1.alldata;
-	    	//This is the rule that has been validated
-		    data = scope1.rulesVal;
-		    
+  	function reloadPage() {
+	    document.getElementById("timelines").innerHTML = "";
+	}
 
-		    console.log('scope1 rulesVal: ', data);
-		    console.log('scope1 alldata: ', alldata);
-
-		    if(data != undefined && alldata==undefined){
-		      console.log('Goood');
-		      visTimelineActions(data, alldata);
-		    }else{
-		    	//window.location.reload();
-		    	//docReady(gloria);
-		    	//element = document.getElementById('bottom-rule');
-				//element.click();
-		    }
-
-	    }else{
-	    	location.reload();
+	function docReady(fn) {
+	    // see if DOM is already available
+	    if (document.readyState === "complete" || document.readyState === "interactive") {
+	        // call on next available tick
+	        setTimeout(fn, 1);
+	    } else {
+	        document.addEventListener("DOMContentLoaded", fn);
 	    }
 	}
-	
+
+	docReady(gloria);
+
 	function visTimelineActions(dataValid, data){
+		document.getElementById('loading').style.display = 'none';
 	    reloadPage();
 	    console.log("visTimelineActions data: ",data);
-	    console.log("visTimelineActions data: ",dataValid);
+	    console.log("visTimelineActions 	data: ",dataValid);
 	    document.getElementById("title-page").innerHTML = dataValid.ruleName;
 	    document.getElementById("rule-name").innerHTML = dataValid.title;
 
@@ -285,39 +308,8 @@ function visVanillaTimeLine(){
 	      //}
 	    }     
 
-
-
-   		for(var i = 1; i <= data.n; i++){
-		  	//console.log('visualization'+i);
-		  	var div_cpr = document.getElementById('visualization'+i).querySelectorAll(".cpr");
-		  	if(div_cpr.length > 0){
-		  		var foreground = document.getElementById('visualization'+i).querySelectorAll(".vis-foreground")[0].firstChild;
-		  		////console.log(top);
-		  		//iterate over cpr node childs
-		  		for (var j = 0; j < div_cpr.length; j++) {
-			  		//clone node
-			  		var cln = div_cpr[j].cloneNode(true);
-
-			  		//get element where the content is
-			  		var content = cln.querySelector(".vis-item-content");
-			  		content.innerHTML = "";
-			  		//add a class
-			  		cln.classList.remove("cpr");
-			  		cln.classList.add("cpr-axis");
-
-			  		//get axis node
-			  		var axis = document.getElementById('visualization'+i).querySelectorAll(".vis-axis")[0].firstChild;
-			  		//console.log(axis);
-
-			  		axis.appendChild(cln);
-		  		}
-		  	}
-		  	//console.log(cln);
-	  	}//end for 
-  	}	
-
-  	//modify background for time-response EACH RULE VALIDATION
-	/*	for (var i = 1; i <= data.n; i++) {
+	    //modify background for time-response
+	    for (var i = 1; i <= data.n; i++) {
 
 	      for(var j = 0; j < background_info.length; j++){
 	        var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
@@ -335,9 +327,9 @@ function visVanillaTimeLine(){
 	        }
 	        
 	      }
-   		}*/
+   		}
 
-   		//VANE VANILLA TIMELINE
+  	}	
 
 </script>
   <link href="../../../css/vis.css" rel="stylesheet" type="text/css" />
