@@ -3,7 +3,7 @@ const router = express.Router();
 const mysql = require('mysql');
 const path = require('path');
 //const moment = require('moment');
-const {jsPDF} = require("jspdf"); // will automatically load the node version
+//const {jsPDF} = require("jspdf"); // will automatically load the node version
 
 
 const mqtt = require('mqtt');
