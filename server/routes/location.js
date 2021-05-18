@@ -20,10 +20,18 @@ var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {
 });
 
 
-const con = mysql.createConnection({
+/*const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
+  database: 'group_analytics1'
+});*/
+
+
+const con = mysql.createConnection({
+  host: 'localhost',
+  user: 'gloria',
+  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
   database: 'group_analytics1'
 });
 

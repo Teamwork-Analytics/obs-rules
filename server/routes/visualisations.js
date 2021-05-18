@@ -5,10 +5,17 @@ const path = require('path');
 const fs = require('fs');
 const moment = require('moment');
 
-const con = mysql.createConnection({
+/*const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
+  database: 'group_analytics1'
+});*/
+
+const con = mysql.createConnection({
+  host: 'localhost',
+  user: 'gloria',
+  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
   database: 'group_analytics1'
 });
 

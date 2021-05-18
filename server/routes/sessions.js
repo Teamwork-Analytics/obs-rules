@@ -6,10 +6,17 @@ const path = require('path');
 const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:root@138.25.199.243:5432/group-analytics';
 //var promise = require('bluebird');
 
-const con = mysql.createConnection({
+/*const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
+  database: 'group_analytics1'
+});*/
+
+const con = mysql.createConnection({
+  host: 'localhost',
+  user: 'gloria',
+  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
   database: 'group_analytics1'
 });
 

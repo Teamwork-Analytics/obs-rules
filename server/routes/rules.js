@@ -12,10 +12,17 @@ const mqtt_url = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://wfejcfvu:t7Os7ER
 const auth = (mqtt_url.auth || ':').split(':');
 var mqtt_client = [];
 
-const con = mysql.createConnection({
+/*const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
+  database: 'group_analytics1'
+});*/
+
+const con = mysql.createConnection({
+  host: 'localhost',
+  user: 'gloria',
+  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
   database: 'group_analytics1'
 });
 
