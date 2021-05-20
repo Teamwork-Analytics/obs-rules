@@ -292,8 +292,10 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   $scope.typesRules = {};
   $scope.sessionRules = {};
   $scope.actions = {};
+  $scope.selectedRoles = {};
   
   // GET ALL RULES OF A SESSION
+
   $http.get('/api/v2/rules/all/'+$scope.sessionid)
   .success(function(data){
     $scope.sessionRules = data;
@@ -320,10 +322,20 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   $http.get('/api/v2/rules/actions/'+$scope.sessionid)
   .success(function(objs){
     $scope.actions = objs;
-    console.log($scope.sessionid);
+    //console.log('The session id here in actions: ', $scope.sessionid);
   })
   .error(function(error){
     console.log('Error: ' + error);
+  });
+  //LIST OF ROLES
+
+  $http.get('/api/v2/rules/roles/'+$scope.sessionid)
+    .success(function(objs){
+      $scope.roles = objs;
+      console.log('Is bringing the roles ',$scope.roles);
+    })
+    .error(function(error){
+      console.log('Error: ' + error);
   });
 
   //PREVIEW RULES
@@ -347,7 +359,22 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       $scope.IsVisible = $scope.IsVisible = true;
   };
 
-  //FUNCTION TO SHOW FORM ACCORDING TO THE TYPE OF RULE
+    //function Roles
+  $scope.valType = function(optionTrack){
+
+    console.log(optionTrack);
+    if (optionTrack==1) {
+      console.log('All will be tracked a full social network graph will be generated');
+      $scope.selectedRole = $scope.selectedRole = '';
+      $scope.rolesDiv = $scope.rolesDiv = false;
+    }
+    if (optionTrack==2) {
+      $scope.rolesDiv = $scope.rolesDiv = true;
+      console.log('Ego network');
+    }    
+  };
+
+  //FUNCTION TO SHOW FORM ACCORDING TO THE TYPE OF RULE that has been selected
   $scope.ShowInputTime = function(type){
       $scope.ShowSecond = $scope.ShowSecond = true;
       console.log(type);
@@ -356,22 +383,35 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
         $scope.causalityR = $scope.causalityR = false;
         $scope.frequencyR = $scope.frequencyR = false;
         $scope.timeR = $scope.timeR = true;
+        $scope.proximity = $scope.proximity = false;
       }
       if (type==1) {
         $scope.timeR = $scope.timeR = false;
         $scope.causalityR = $scope.causalityR = true;
         $scope.frequencyR = $scope.frequencyR = false;
+        $scope.proximity = $scope.proximity = false;
       }
       if (type==3) {
         $scope.timeR = $scope.timeR = false;
         $scope.causalityR = $scope.causalityR = false;
         $scope.frequencyR = $scope.frequencyR = true;
         $scope.ShowSecond = $scope.ShowSecond = false;
+        $scope.proximity = $scope.proximity = false;
+      }
+      if(type==5){
+        $scope.proximity = $scope.proximity = true;
+        $scope.ShowSecond = $scope.ShowSecond = true;
+        $scope.frequencyR = $scope.frequencyR = false;
+        $scope.causalityR = $scope.causalityR = false;
+        $scope.ShowSecond = $scope.ShowSecond = true;
+        $scope.timeR = $scope.timeR = false;
+
       }
   };
 
   //ADD NEW RULE
   $scope.AddNewRule = function(type, first, causality, second){
+    console.log($scope.selectedRole);
     var magnitude = "";
     var value = "";
     if(causality == 1){causality = 'After'}
@@ -379,6 +419,8 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
     if(type == 1){magnitude='Sequence'; value = causality}
     if(type == 2){magnitude='Time'; value = $scope.TimeFrame}
     if(type == 3){magnitude='Frequency'; value = $scope.Frequency}
+    if(type == 5 && $scope.selectedRole!=undefined){magnitude='Proximity'; value = $scope.selectedRole}
+    if(type == 5 && $scope.selectedRole==undefined){magnitude='Proximity'; value = 'All'}
 
     const dataObjRule = {
       typeRule : type,
@@ -406,6 +448,8 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       $scope.selectedSecond = '';
       $scope.causality = '';
       $scope.sessionRules = allrules;
+      $scope.optionTrack = '';
+      $scope.selectedRole = ''
     })
     .error(function(error){
       console.log('Error: ' + error);
@@ -593,6 +637,22 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
       .error(function(error){
         console.log('Error: ', error);
       });
+  };
+
+  //create the networks according to  the data
+  $scope.createNetwork = (idRule)  =>{
+    console.log('Session for network: ',$scope.sessionid);
+    console.log('Rule for network: ', idRule);
+
+    //1. Which data do we need to pass to the algorithm
+
+
+    //2. Call the python script ans send the parameters
+
+
+    //3. Read the image from a folder? and load it into the visual
+
+
   };
 
 

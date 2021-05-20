@@ -41,7 +41,7 @@ router.post('/countobjssession', (req, res, next) => {
   const new_name = [];
   const objString = [req.body.id_obj, req.body.id_session];
   con.connect(function(err){});
-  con.query('SELECT count(*) as count FROM group_analytics.object_session where id_object = ? and id_session = ?', objString, (err, rows) => {
+  con.query('SELECT count(*) as count FROM object_session where id_object = ? and id_session = ?', objString, (err, rows) => {
   if(err) throw err;
 
   rows.forEach( (row) => {
@@ -122,7 +122,7 @@ router.post('/trackers/', (req, res, next) => {
     }
     else if(req.body.type == 'empatica')
     {  
-    con.query('SELECT * FROM group_analytics.datatype_session WHERE id_session = ? AND id_datatype = 3;',[req.body.id_session], (err,rows) => {
+    con.query('SELECT * FROM datatype_session WHERE id_session = ? AND id_datatype = 3;',[req.body.id_session], (err,rows) => {
     if(err) throw err;
 
       rows.forEach( (row) => {

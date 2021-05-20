@@ -46,7 +46,6 @@ router.use('/api/v1/objects', require('./objects'));
 //router.use('/api/v1/visualisations', require('./visualisations_Carmen'));
 router.use('/api/v1/visualisations', require('./visualisations'));
 router.use('/api/v2/rules', require('./rules'));
-router.use('/api/v2/rules', require('./reports'));
 //router.use('/api/v2/rules', require('./timeLine'));
 //router.use('/profiles', require('./profiles'));
 //router.use('/articles', require('./articles'));

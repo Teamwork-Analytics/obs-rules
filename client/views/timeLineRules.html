@@ -11,7 +11,12 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 				<a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" onclick='visVanillaTimeLine()'> Vanila Timeline </a>
 			</td>
 			<td ng-repeat="list in sessionRules">
-				<button type="button" class="btn btn-primary" ng-click="seeVis(list.id)" onclick="docReady(gloria())">{{ list.name }}</button>
+				<div id= 'actions' ng-if="list.magnitude == 'Sequence' || list.magnitude == 'Time' || list.magnitude == 'Frequency' ">
+					<button type="button" class="btn btn-primary" ng-click="seeVis(list.id)" onclick="docReady(gloria())">{{ list.name }}</button>	
+				</div>
+				<div id= 'localisation' ng-if="list.magnitude == 'Proximity' ">
+					<button type="button" class="btn btn-warning btn-sm" ng-click="createNetwork(list.id)">{{ list.name }}</button>	
+				</div>
 			</td>
 
 		</tr>

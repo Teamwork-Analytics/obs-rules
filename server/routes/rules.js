@@ -50,7 +50,7 @@ router.get('/selectOneRule/:id_rule', (req, res, next) => {
   const results = [];
   console.log('selectOneRule########: ', req.params.id_rule);
 
-  con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id and r.id=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id and r.id=?) AS second_action FROM group_analytics1.rules as r WHERE r.id=?;', 
+  con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id and r.id=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id and r.id=?) AS second_action FROM rules as r WHERE r.id=?;', 
     [req.params.id_rule, req.params.id_rule, req.params.id_rule], (err, rows)=>{
       if(err) throw err;
       rows.forEach( (row) => {
@@ -81,6 +81,20 @@ router.get('/actions/:id_session', (req, res, next) => {
   const results = [];
 
     con.query('SELECT * FROM action_session WHERE id_session = ? ORDER BY id ASC;', [req.params.id_session], (err,rows) => {
+    if(err) throw err;
+    rows.forEach( (row) => {
+      results.push(row);
+      console.log(`${row.action_desc}`);
+    });
+    return res.json(results);
+  });
+});
+
+//get roles from session
+router.get('/roles/:id_session', (req, res, next) => {
+  const results = [];
+
+    con.query('SELECT * FROM object_session WHERE id_session = ? ORDER BY id ASC;', [req.params.id_session], (err,rows) => {
     if(err) throw err;
     rows.forEach( (row) => {
       results.push(row);
