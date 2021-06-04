@@ -4,7 +4,11 @@ const mysql = require('mysql');
 const path = require('path');
 const fs = require('fs');
 const moment = require('moment');
+const { getRoles } = require('./rules');
+const { spawn } = require('child_process');
 
+
+//import{roles} from './rules';
 /*const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -353,7 +357,115 @@ router.get('/getJsonFromFile/:id', (req, res, next) => {
 
   return res.json(obj);
   
-    //return res.json(JSON.parse(results));
+});
+
+//Funtion to execute the python script and get the graph
+
+router.get('/bringGraph/:idRule', (req, res, next) => {
+  let results = [];
+  let exist=false;
+  const timestamps= [];
+  const id_rule = req.params.idRule;
+  console.log('ID_SESSION: ########: ', req.query.id_session);
+  let name='';
+  let returnJson = undefined;
+  let validate= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
+  console.log('TO VALIDATE: ##@@@@@: ',  validate);
+  //var files = fs.readdirSync('../client/data/graphs/');
+  fs.readdirSync('client/data/graphs/').forEach(file => {
+    if(file==validate){
+      exist=true;
+    }
+  });
+  console.log('Exists or not?? *****: ',exist);
+
+  //console.log('TO VALIDATE IF THE FILE EXISTS',validate);
+  const logOutput = (name) => (data) => {
+    //console.log(data.toString());
+    returnJson = './data/graphs/'+data.toString().trim();
+    //console.log(returnJson);
+    res.json({'path': returnJson, 'rule': results});
+  };
+
+  const logOutputError = (name) => (data) => console.log(`[${name}] ${data.toString()}`);
+
+
+  //console.log('ID_SESSION: ########: ', req.query);
+  //const idsession=req.query.id_session;
+
+  console.log('Rule id in the  graph ',id_rule);
+  var dataObjRule = {};
+  let listRoles = [];
+
+  const path='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/ProximityLocalisation.py';
+
+  con.query('SELECT r.id, r.id_session, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, r.id_first_act, r.id_second_act, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id_action and r.id=? and a.id_session=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id_action and r.id=? and a.id_session=?) AS second_action FROM rules as r WHERE r.id=?;', 
+    [id_rule, req.query.id_session, id_rule, req.query.id_session, id_rule], (err, rows)=>{
+      if(err) throw err;
+      results = rows;
+      console.log('Here are  the results to create the graph:!!!! ', results[0]);
+      if(exist==true){
+
+        res.json({'path': './data/graphs/'+validate, 'rule': results});
+
+      }
+      else{
+        var query_string = 'select aobj.time_action from action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) OR (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action asc;';
+        con.query(query_string, [results[0].id_first_act, req.query.id_session, results[0].id_second_act, req.query.id_session,], (err, rows) => {
+        if(err) throw err;
+        rows.forEach( (row) => {
+          timestamps.push(row);
+          //console.log(`${row.id_session} , ${row.id_datatype}`);
+        });
+        //console.log(results);
+        console.log('TIMESTAMP:!!!! ', timestamps);
+        console.log('RESULTS:!!!! ', results);
+
+        console.log('TIMESTAMP ONLY:!!!! ', timestamps[0].time_action);
+        var phases={
+          first_action: timestamps[0].time_action,
+          second_action: timestamps[1].time_action
+        };
+
+        //return res.json(results);
+        var obj = new Object();
+        obj.first_action = timestamps[0].time_action;
+        obj.second_action = timestamps[0].time_action;
+
+        var stringJson= JSON.stringify(obj);
+
+        //
+        getRoles(results[0].id_session, (resultsRoles)=>{
+          console.log('ROLE 1!!!! ', resultsRoles[0]);  
+          //MOVE THE SCRIPT HERE
+          const pythonProcess = spawn('python',[path, JSON.stringify(results), JSON.stringify(timestamps), JSON.stringify(resultsRoles)]);
+          // const pythonProcess = spawn('python',[path, results, timestamps, resultsRoles]);
+/*          pythonProcess.stdout.on('data', (data) => {
+              // Do something with the data returned from python script
+              console.log('Are we receiving something? ',data.toString());
+              name =data.toString();
+              console.log('The path of the file in nodejs is: ', name);
+              //name=res.json(name);
+
+          });*/
+          pythonProcess.stdout.on(
+            'data',
+            logOutput('stdout')
+          );
+/*          pythonProcess.stderr.on('data', (data) => {
+              console.log('Error? ',data.toString());
+          });*/
+
+          pythonProcess.stderr.on(
+            'data',
+            logOutputError('stderr')
+          );
+        });
+
+      });
+      }//close else statement
+  });
+
 });
 
 function closest (num, arr) {

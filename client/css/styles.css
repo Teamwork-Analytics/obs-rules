@@ -47,6 +47,11 @@ body {
   left: 0px !important;
 }
 
+.popover {
+  position: absolute;
+  z-index: 100;
+}
+
 #layers{
 
   margin: 20px !important;

@@ -190,8 +190,8 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
               let rulesInfo = {};
               //var feedbackInfo = {};
               rulesID = data[rule].id;
-              //console.log('THIS IS WHAT IS BEEN PLOTED:',rulesID);
-              $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
+              //console.log('THIS IS WHAT IS BEEN PLOTED:',rulesID);  
+              $http.get(`/api/v2/rules/selectOneRule/${rulesID}?id_session=${dataObj.id_session}`)
               .success(function(detailRule){
                 rulesInfo['id']=detailRule[0].id;
                 rulesInfo['name'] = detailRule[0].name;
@@ -293,6 +293,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   $scope.sessionRules = {};
   $scope.actions = {};
   $scope.selectedRoles = {};
+  pathHelp = './img/Help'
   
   // GET ALL RULES OF A SESSION
 
@@ -344,7 +345,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       id_session : $scope.sessionid,
       id_rule : idRule
     };
-    $http.get(`/api/v2/rules/selectOneRule/${idRule}`)
+    $http.get(`/api/v2/rules/selectOneRule/${idRule}?id_session=${$scope.sessionid}`)
     .success((detailRule) => {
       $scope.detailRule = detailRule;
       $scope.sessionid=dataObj.id_session;
@@ -357,6 +358,32 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
   //function to show input
   $scope.ShowInput = function(){
       $scope.IsVisible = $scope.IsVisible = true;
+      $scope.Help = $scope.Help = false;
+  };
+
+  //HELP
+
+  $scope.showPopover = function(){
+    $scope.HelpImage = $scope.HelpImage = true;
+
+      if($scope.typeRule==1){
+        $scope.path=pathHelp +'1.png';
+      }
+      if($scope.typeRule==2){
+        $scope.path=pathHelp +'2.png';
+      }
+      if($scope.typeRule==3){
+        $scope.path=pathHelp +'3.png';
+      }
+      if($scope.typeRule==5){
+        $scope.path=pathHelp +'5.png';
+      }
+  };
+
+  $scope.hidePopover = function(){
+    $scope.HelpImage = $scope.HelpImage = false;
+    $scope.HelpImage='';
+    $scope.path='';
   };
 
     //function Roles
@@ -379,6 +406,8 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       $scope.ShowSecond = $scope.ShowSecond = true;
       console.log(type);
       $scope.IsVisibleTime = $scope.IsVisibleTime = true;
+      $scope.Help = $scope.Help = true;
+      $scope.typeRule=type;
       if (type==2) {
         $scope.causalityR = $scope.causalityR = false;
         $scope.frequencyR = $scope.frequencyR = false;
@@ -390,6 +419,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
         $scope.causalityR = $scope.causalityR = true;
         $scope.frequencyR = $scope.frequencyR = false;
         $scope.proximity = $scope.proximity = false;
+       
       }
       if (type==3) {
         $scope.timeR = $scope.timeR = false;
@@ -411,16 +441,16 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
 
   //ADD NEW RULE
   $scope.AddNewRule = function(type, first, causality, second){
-    console.log($scope.selectedRole);
+    console.log('Which value?? ',$scope.selectedRole);
     var magnitude = "";
-    var value = "";
+    var value = '';
     if(causality == 1){causality = 'After'}
     if(causality == 2){causality = 'Before'}
     if(type == 1){magnitude='Sequence'; value = causality}
     if(type == 2){magnitude='Time'; value = $scope.TimeFrame}
     if(type == 3){magnitude='Frequency'; value = $scope.Frequency}
-    if(type == 5 && $scope.selectedRole!=undefined){magnitude='Proximity'; value = $scope.selectedRole}
-    if(type == 5 && $scope.selectedRole==undefined){magnitude='Proximity'; value = 'All'}
+    if(type == 5 && $scope.optionTrack==2){magnitude='Proximity'; value = $scope.selectedRole}
+    if(type == 5 && $scope.optionTrack==1){magnitude='Proximity'; value = 'All'}
 
     const dataObjRule = {
       typeRule : type,
@@ -498,44 +528,6 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
       });
   };
 
-  $scope.seeVis = (rulesID) => {
-    $scope.vis = true;
-  //$location.path('/timeline/'+sessionID);
-  //console.log('seeVis',$scope.sessionid);
-
-    var dataObj = {
-      id_session : $scope.sessionid,
-      id_rule : rulesID
-    };
-    $http.post('/api/v1/visualisations/getDataforVis',dataObj)
-      .success(function(dataActions){
-          //console.log(dataActions);
-          $scope.dataForVis = dataActions;
-          $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
-          .success(function(detailRule){
-            $scope.detailRule = detailRule;
-            const toSend = 
-            {
-              actions: dataActions,
-              rule: detailRule
-            };
-            $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
-            .success(function(objs) {
-              $scope.rulesVal = objs;
-              console.log('I am in the nested call');
-            })
-            .error(function(error){
-                console.log('Error: ', error);
-            });
-          })
-          .error(function(error){
-              console.log('Error: ', error);
-          });
-      })
-      .error(function(error){
-        console.log('Error: ', error);
-      });
-  };
   //console.log('here we are');
   $scope.endSession = () =>{
     var dataObj = {
@@ -609,11 +601,13 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
       id_session : $scope.sessionid,
       id_rule : rulesID
     };
+    console.log('####### HERE: ',$scope)
+
     $http.post('/api/v1/visualisations/getDataforVis',dataObj)
       .success(function(dataActions){
           console.log(dataActions);
           //$scope.dataForVis = dataActions;
-          $http.get(`/api/v2/rules/selectOneRule/${rulesID}`)
+          $http.get(`/api/v2/rules/selectOneRule/${rulesID}?id_session=${dataObj.id_session}`)
           .success(function(detailRule){
             //$scope.detailRule = detailRule;
             const toSend = 
@@ -644,18 +638,22 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
     console.log('Session for network: ',$scope.sessionid);
     console.log('Rule for network: ', idRule);
 
-    //1. Which data do we need to pass to the algorithm
+    //GET GRAPH
+    $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
+    .success(function(data){
+      //$scope.sessionRules = data;
+      $scope.graph = $scope.graph = true;
+      $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
+      $scope.graphPath = data.path;
 
+      console.log('Name of rule: :', data.rule[0].first_action);
 
-    //2. Call the python script ans send the parameters
-
-
-    //3. Read the image from a folder? and load it into the visual
-
-
+      //$window.location.href='http://localhost:3000/timeline/'+sessionID;
+    })
+    .error(function(error){
+      console.log('Error: ' + error);
+    });
   };
-
-
 });
 
 app.controller('visController', function($scope, $location, $routeParams, $http, socket) {

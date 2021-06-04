@@ -35,7 +35,7 @@ const con = mysql.createConnection({
 router.get('/all/:id_session', (req, res, next) => {
   const results = [];
 
-  con.query('SELECT * FROM rules WHERE id_session = ? ORDER BY id ASC;', [req.params.id_session], (err, rows)=>{
+  con.query('SELECT * FROM rules WHERE id_session = ? ORDER BY type ASC;', [req.params.id_session], (err, rows)=>{
       if(err) throw err;
       rows.forEach( (row) => {
         results.push(row);
@@ -49,9 +49,10 @@ router.get('/all/:id_session', (req, res, next) => {
 router.get('/selectOneRule/:id_rule', (req, res, next) => {
   const results = [];
   console.log('selectOneRule########: ', req.params.id_rule);
+  console.log('ID_SESSION: ########: ', req.query.id_session);
 
-  con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id and r.id=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id and r.id=?) AS second_action FROM rules as r WHERE r.id=?;', 
-    [req.params.id_rule, req.params.id_rule, req.params.id_rule], (err, rows)=>{
+  con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id_action and r.id=?  and a.id_session=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id_action and r.id=? and a.id_session=?) AS second_action FROM rules as r WHERE r.id=?;', 
+    [req.params.id_rule, req.query.id_session, req.params.id_rule, req.query.id_session, req.params.id_rule], (err, rows)=>{
       if(err) throw err;
       rows.forEach( (row) => {
         results.push(row);
@@ -90,16 +91,22 @@ router.get('/actions/:id_session', (req, res, next) => {
   });
 });
 
-//get roles from session
-router.get('/roles/:id_session', (req, res, next) => {
+const roles = (id_session, callback) => {
   const results = [];
 
-    con.query('SELECT * FROM object_session WHERE id_session = ? ORDER BY id ASC;', [req.params.id_session], (err,rows) => {
+    con.query('SELECT * FROM object_session WHERE id_session = ? ORDER BY id ASC;', [id_session], (err,rows) => {
     if(err) throw err;
     rows.forEach( (row) => {
       results.push(row);
       console.log(`${row.action_desc}`);
     });
+    callback (results);
+  });
+};
+
+//get roles from session
+router.get('/roles/:id_session', (req, res, next) => {
+  return roles(req.params.id_session, (results)=>{  
     return res.json(results);
   });
 });
@@ -281,3 +288,4 @@ router.post('/delete', (req, res, next) => {
 });
 
 module.exports = router;
+module.exports.getRoles = roles;
