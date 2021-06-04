@@ -11,7 +11,9 @@ def main():
 	# intimate, personal, social, public
 	#personal validate distances (0.46-1.2m)
 	proxemic='personal';
-	folderData='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/data';
+	#folderData='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/data';
+	folderData = 'server/routes/localisation/data';
+	#print(folderData);
 	roles = {};
 	centeredRole='';
 	A= json.loads(str(sys.argv[1]));

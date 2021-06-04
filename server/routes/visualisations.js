@@ -397,7 +397,9 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
   var dataObjRule = {};
   let listRoles = [];
 
-  const path='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/ProximityLocalisation.py';
+  //const path='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/ProximityLocalisation.py';
+  const path='server/routes/localisation/ProximityLocalisation.py';
+  console.log('The pythion script should be in here: ',path);
 
   con.query('SELECT r.id, r.id_session, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, r.id_first_act, r.id_second_act, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id_action and r.id=? and a.id_session=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id_action and r.id=? and a.id_session=?) AS second_action FROM rules as r WHERE r.id=?;', 
     [id_rule, req.query.id_session, id_rule, req.query.id_session, id_rule], (err, rows)=>{
