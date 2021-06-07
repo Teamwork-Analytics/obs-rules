@@ -1,6 +1,6 @@
-import getopt
+#import getopt
 import sys
-import ast
+#import ast
 import json
 import formatingDataSetProximity as formating
 import enumerateTrackersProximity as et

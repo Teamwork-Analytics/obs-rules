@@ -1,11 +1,11 @@
 from igraph import *
 import pandas as pd
 from matplotlib import pyplot as plt
-import cairo
+#import cairo
 import formatingDataSetProximity as fd
 import numpy as np
 import os
-import shutil
+#import shutil
 
 #parameters: data frames with PL to aggregate how many seconds do we have per Label
 #return: this function returns a new dataset with the count of the aggregated values per label
