@@ -80,11 +80,14 @@ def nameTrackers(df, listRoles):
         df.loc[df['tracker'] == serial, 'Role'] = role
     return df
 
-def graphDefinition(df, df_trackers, type):
+def graphDefinition(df, df_trackers, typ):
     #print('######################## THIS IS WHAT WE HAVE')
     #print (df_trackers)
+    roles =''
+    values=''
     #vertices = df_trackers[['tracker', 'enumeration']]
     vertices = df_trackers.Role.unique()
+    #print(type(vertices));
     #g = ig.Graph()
     # Defining edges, it can be generate automatically according to the number of trackers
     # SNA.. This is the actual Social Network, we need to think how to explote this for our dataset
@@ -100,6 +103,8 @@ def graphDefinition(df, df_trackers, type):
     i=0
     for item in vertices:
         g.vs[i]['tracker'] = str(item)
+        #print('tracker: ',  str(i) , ' ' , g.vs[i]['tracker'])
+        roles +=  g.vs[i]['tracker'] + ', '
         i+=1
 
     #print (df)
@@ -108,9 +113,11 @@ def graphDefinition(df, df_trackers, type):
     j = 0
     for item in df:
         g.es[j]['proxLabel'] = str(df.iloc[0][item])
+        #print('proxLabel: ', str(j), '  ', g.es[j]['proxLabel'])
+        values +=g.es[j]['proxLabel'] + ', '
         j += 1
 
-    if (type=='porcentages'):
+    if (typ=='porcentages'):
         j = 0
         for item in df:
             # if (float(df.iloc[0][item])==0.0):
@@ -129,7 +136,24 @@ def graphDefinition(df, df_trackers, type):
             j += 1
 
     #summary(g)
-    return g
+    #for int
+    #print(values, roles)
+    values = values.split(',')
+    roles = roles.split(', ')
+    values.insert(0, 'center')
+    #print(values, roles)
+    #print(len(values), len(roles))
+    message=''
+    color =''
+    for i in range(0, len(values)-1):
+        color = ''
+        if i>0:
+            if float(values[i]) < 0.5:
+                color='<span class="message-graph-negative"> '
+            else:
+                color= '<span class="message-graph-possitive"> '
+            message += ' '+roles[i] + ' spent ' + color + values[i] + '%'+' </span>'+ 'of their time with ' +roles[0] +' \n'
+    return g, message
 
 def visualiseGraph(g, session, phase, type, proxemic):
     name= str(session)+'_'+phase+'_'+type+'_'+proxemic+'.png'
@@ -175,8 +199,7 @@ def visualiseGraph1(g, session, type, proxemic, idRule):
     #path = os.path.abspath(name)
     #directory = os.path.dirname(path)
     #shutil.move(directory+'/'+name, actualDir+'/dataLocalisation/')
-    print(name)
-
+    return name
 
 # requiere ordered aggregation of values per phase
 def normalizedata(df_labels):
@@ -187,6 +210,36 @@ def normalizedata(df_labels):
     #minimo = np.min(array_filtered)
     #print ('###MINIMOOOO',array_filtered, minimo)
     maximo = np.max(array_filtered.astype(np.int32))
+    #maximo = np.max(array_filtered)
+    #print(maximo)
+
+    #print(array_filtered, minimo)
+    #print(len(array_filtered))
+    values = []
+    if (minimo == maximo):
+        values = [minimo, minimo, minimo, minimo, minimo]
+    else:
+        #print('they are different @@@@@@')
+        for x in range(0, len(array_filtered)):
+            y = (((int(array_filtered[x]))-float(minimo)) / (float(maximo - minimo)))
+            #print('value  ',y, type(y), (int(array_filtered[x])))
+            values.append(round(y,2))
+    #print ('NORMALISED DATA: ',values)
+    df_labels.loc[0] = values
+    df_labels = df_labels.iloc[1:]
+    #print ('NORMALISE DATASET: ',df_labels)
+    return df_labels
+
+# requiere ordered aggregation of values per phase
+def normalizedataTotalSeconds(df_labels, totalSeconds):
+    array_filtered = df_labels.to_numpy()[0]
+
+    #maximo = numpy.amax(int(array_filtered))
+    minimo = np.min(array_filtered.astype(np.int32))
+    #minimo = np.min(array_filtered)
+    #print ('###MINIMOOOO',array_filtered, minimo)
+    maximo =totalSeconds;
+    #maximo = np.max(array_filtered.astype(np.int32))
     #maximo = np.max(array_filtered)
     #print(maximo)
 

@@ -26,7 +26,18 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 <div id="loading">loading...</div>
 <div ng-show='graph'>
 	<h2 id="textgraph" ><strong>{{textgraph}}</strong></h2>
-	<img src={{graphPath}} alt="Graph" style="width:500px;height:500px;">
+	<table cellspacing="0" cellpadding="0">
+		<tr>
+			<td>
+				<img src={{graphPath}} alt="Graph" style="width:500px;height:500px;">			
+			</td>
+			<td>
+				<h2 id="feedback" >
+					<p ng-bind-html="myFeedback"></p>
+				</h2>			
+			</td>
+		</tr>
+	</table>
 </div>
 <h2 id="title-page" ><strong></strong></h2>
 <br>
@@ -247,6 +258,7 @@ function visVanillaTimeLine(){
 	    var participants = Object.keys(data.participants).sort();
 	    var containers = [];
 	    var points=dataValid.points;
+	    var message=dataValid.message;
 	    wrapper = document.getElementById('timelines'); 
 
 	    //create the background 
@@ -276,12 +288,18 @@ function visVanillaTimeLine(){
 	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
 	      //console.log(groups[i]);
 	    }
+	    //groups[data.n]=groups[data.n-1];
+
+	   	console.log('tha groups %%%%%%%: ',groups);
 
 	    var items = [];
 	    for(var i=0;i<data.n;i++){
 	      items[i] = new vis.DataSet(data.participants[participants[i]]);
 	      items[i].add(background_info);
+	      //items[i].add(points[1]);
+	      items[i].add([message[0]]);
 	    }
+	     console.log('$$$$$$$$$$',items);
 
 	    var opt = {
 	      start: data.time_start,
@@ -299,7 +317,6 @@ function visVanillaTimeLine(){
 	      timeline.setOptions(opt);
 	      timeline.setGroups(groups[i]);
 	      timeline.setItems(items[i]);
-
 
 	      for(var j=0;j<data.criticalTs.length;j++){
 	        timeline.addCustomTime(data.criticalTs[j].when, 't'+(j+1));
@@ -333,7 +350,6 @@ function visVanillaTimeLine(){
 	        }else{
 	          newpos.append(la);
 	        }
-	        
 	      }
    		}
 

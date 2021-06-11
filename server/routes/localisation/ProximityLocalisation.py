@@ -76,6 +76,11 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 	# Call the function that enumerates trackers
 	df_trackers = et.enumerate_trackers(df)
 	df = et.asignEnumTrackers(df, df_trackers)
+
+	# HERE I NEED TO KNOW HOW MANY SECONDS THIS SECTION OF THE SIMULATION LAST
+
+	#print ('AFTER FILTERING: ',len(df.index))
+
 	# WHICH  TRACKER IS THE SELECTED ROLE
 	centeredRole = formating.roleNum(df, df_trackers, centeredRole)
 	## DISTANCES
@@ -111,6 +116,7 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 		# Filtering data according to proxemic label of interest and the role
 
 		filterProxemic = vis.filterPL(df, proxemic, centeredRole)
+		totalSeconds = len(filterProxemic.index);
 		#print(filterProxemic)
 
 		# Once we have the proxemic labels we can try to plot the SN
@@ -127,9 +133,13 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 		# visualise normalized data and porcentages
 
 		dfnorm = vis.normalizedata(filterProxemic)
-		graph = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
+		#dfnorm = vis.normalizedataTotalSeconds(filterProxemic, totalSeconds)
+		graph, message = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
 		#print(graph)
-		vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
+		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
+		response =  {"message":message, "path":name}
+		json_RESPONSE = json.dumps(response)
+		print(json_RESPONSE)
 
 if __name__ == "__main__":
     # execute only if run as a script

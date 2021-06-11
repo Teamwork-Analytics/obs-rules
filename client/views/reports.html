@@ -17,7 +17,7 @@
 	    </colgroup>
 			<tr align="center">
 				<th>Rule</th>
-				<th>Group Feedback</th>
+				<th>Team Feedback</th>
 				<th>Outcome</th>
 			</tr>
 			
@@ -26,7 +26,7 @@
 					{{value.name}} <br> <span style="color:blue">{{value.rule}}</span>
 				</td>
 				<td>
-					{{value.mesage}}
+					<p ng-bind-html="value.mesage"></p>
 				</td>	
 				<td>
 					<div id= 'imageok' ng-if="value.status == 'ok' ">
@@ -34,6 +34,9 @@
 	    			</div>
 	    			<div id='imagewrong' ng-if="value.status == 'wrong' ">
 	        			<img src="./img/wrong.png" alt="Report" style="width:50px;height:50px;">
+	    			</div>
+					<div id='imagewrong' ng-if="value.status == 'reflect' ">
+	        			<img src="./img/reflect.jpeg" alt="Report" style="width:70px;height:70px;">
 	    			</div>
 				</td>	
 			</tr>		
@@ -44,7 +47,7 @@
 	</div>
 	
 </div>
-Or
+ Or
 <br>
 Please, click on any of the buttons below to validate group outcomes per rule:
 <br>
@@ -59,7 +62,6 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 			<th style="text-align:left; vertical-align: top">
 				<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in sessionRules">
 		         <a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id); seeTimeline(); " onclick="gloria()"> {{ list.name }} </a>	
-
 				</div>
 			</th>
 			<td style="text-align:justify-all">

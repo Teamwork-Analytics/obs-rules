@@ -119,10 +119,13 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   rulesValidated={};
   rulesValidated["points"]=[];
   rulesValidated["options"]=[];
+  rulesValidated["message"]=[];
+  //rulesValidated["feedback"]=[];
   rulesValidated["title"] = actions[0].session_name + " - "+ rule[0].name;
   rulesValidated['ruleName'] = rule[0].name;
+  var pointMessage = {};
 
-  start=''
+  start='';
 
   find = false;
   find2=false;
@@ -142,11 +145,15 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
         if (actions[i].action_desc != null && actions[i].action_desc == rule[0].second_action){
           console.log('Si  entro');
           find=true;
+          //point["id"] = actions[i].id;
           point["id"] = actions[i].id;
-          point["content"] = actions[i].action_desc;
-          point["start"] = actions[i].time_action;
-          point["type"] = 'point';
-          point["className"] = 'vis-time-response';
+          point["content"] = 'Description @@@ : '+actions[i].action_desc;
+          point["start"] = actions[i].time_action+0.1;
+          point["type"] = 'box';
+          point["group"] = actions[i].id_object;
+          point["className"] = 'magenta';
+          actionMessage=actions[i].id;
+          groupMessage=actions[i].id_object;
           start=actions[i].time_action;
           rulesValidated["points"].push(point);
         }  
@@ -154,25 +161,34 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
           console.log('Si  entro second validation');
           find2=true;
           point["id"] = actions[i].id;
-          point["content"] = actions[i].action_desc;
+          point["content"] = 'Perform this actions is important'+actions[i].action_desc;
           point["start"] = actions[i].time_action;
-          point["className"] = 'vis-time-response';
-          point["type"] = 'point';
+          point["className"] = 'magenta';
+          point["group"] = actions[i].id_object;
+          point["type"] = 'box';
+          actionMessage=actions[i].id;
+          groupMessage=actions[i].id_object;
           end=actions[i].time_action;
           rulesValidated["points"].push(point);
         }
-      //}
     } 
   }
   var point = {};
   console.log('validating rules');
   console.log(find, find2);
+  pointMessage['type'] = 'box';
+  pointMessage['id'] = actionMessage;
+  pointMessage['group'] = groupMessage;
+
   
   point["id"] = rule[0].id;
   if(find == true && find2==true){
     point["start"] = start;
     point["end"] = end;
     point["type"] = 'background';
+    pointMessage["className"] = 'feedbackok';
+    pointMessage['start'] = end;
+    pointMessage["content"] = 'Well done the team perform this critical action';
 
     if(rule[0].magnitude =='Time'){
       start_time = (new Date(start)).getTime() / 1000;
@@ -180,13 +196,17 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       var difSeconds= end_time-start_time;
       
       if( difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
-        rulesValidated["title"] = rule[0].feedback_wrong;
+        rulesValidated["title"] = rule[0].feedback_wrong + '<span style="color:orange">' + ' Time response: '+parseFloat(difSeconds/60).toFixed(2) +'</span>';
         point["className"] = 'negative';  
         rulesValidated['status'] = 'wrong';
+        pointMessage["className"] = 'feedbackwrong';
+        pointMessage["content"] = 'The team reacted slow';
       }else{
-        rulesValidated["title"] = rule[0].feedback_ok;
+        rulesValidated["title"] = rule[0].feedback_ok + '<span style="color:blue">'+ ' Time response: '+parseFloat(difSeconds/60).toFixed(2)+'</span>';
         point["className"] = 'vis-time-response';  
         rulesValidated['status'] = 'ok';
+        pointMessage["className"] = 'feedbackok';
+        pointMessage["content"] = 'The team reacted timely';
       }
     }else{
       //point["content"] =  rule[0].feedback_ok;
@@ -196,6 +216,9 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     }
   } else if(find == true && find2==false){
     //point["content"] = rule[0].feedback_wrong;
+    pointMessage["className"] = 'feedbackwrong';
+    pointMessage["content"] = 'The team missed an action';
+
     rulesValidated["title"] = rule[0].feedback_wrong;
     point["start"] = start;
     point["type"] = 'background';
@@ -204,7 +227,11 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     point["className"] = 'negative';
     rulesValidated['status'] = 'wrong';
   }else if(find == false && find2==true){
+    pointMessage["className"] = 'feedbackwrong';
+    pointMessage["content"] = 'The team missed an action';
     //point["content"] = rule[0].feedback_wrong;
+    classMessage["className"] = 'feedbackwrong';
+    contentMessage["content"] = 'The team missed an action';
     rulesValidated["title"] = rule[0].feedback_wrong;
     point["end"] = end;
     point["start"] = actions[0].time_action; 
@@ -214,6 +241,10 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     rulesValidated['status'] = 'wrong';
   }
   rulesValidated["points"].push(point);
+  //create an additional point with type box, to plot an additional message
+
+  console.log('This is the last point of the array ####: ',  rulesValidated["points"]);
+
   var options = {};
   options ['start']=actions[0].time_action; 
   options ['end']=actions[actions.length-1].time_action;
@@ -221,7 +252,12 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   //options ['autoResize'] = false;
   options ['moveable'] = false; 
   rulesValidated["options"].push(options);
-
+  if(rule[0].magnitude =='Proximity'){
+    rulesValidated['title']=rule[0].feedback_wrong;
+    rulesValidated['status']='reflect';
+  }
+  rulesValidated['message'].push(pointMessage);  
+  
   console.log(rulesValidated);
   return res.json(rulesValidated);
 });

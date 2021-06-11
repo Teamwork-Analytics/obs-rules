@@ -41,7 +41,7 @@ body {
   font-variant: normal;
   font-weight: 100;
   line-height: 20px;
-    }
+}
 
 .vis-item-content{
   left: 0px !important;
@@ -80,12 +80,30 @@ body {
 .vis-item.vis-box.critical {
       top:0px !important;
 }
+.vis-item.vis-box.message {
+      background-color: #FFC200;
+      border-style: solid;
+      border-color: green;
+      height: 100% !important;
+}
+.vis-item.vis-box.feedbackwrong {
+      background-color: #f0e68c;
+      border-color: orange;
+      font-size: 20px;
+      color: black;
+}
+
+.vis-item.vis-box.feedbackok {
+      background-color: #448ee4;
+      font-size: 20px;
+      border-color: blue;
+      color: white;
+}
+
 .vis-item.vis-box.action {
       text-align: left;
       background-color: transparent;
-    }
-
-
+}
 .vis-item.vis-background.negative {
       background-color: rgba(255, 193, 7, 0.2);
       height: 100% !important;
@@ -120,7 +138,6 @@ body {
 
 .vis-item.vis-dot.action.rn2 {
       border-color: #30cbea;
-      
     }
 
 .vis-item.vis-dot.action.rn3 {
@@ -148,10 +165,9 @@ body {
   border-color: #994fdd;
 }
 
-  .vis-item.vis-line.action {
+.vis-item.vis-line.action {
       border-color: #72748b;
       border-width: 1px;
-    }
 }
 
 .special-time{
@@ -161,8 +177,7 @@ body {
 }
 
 div.vis-item-content{
-      margin-left: none;
-    }}
+  margin-left: none;
 }
 
 .vis-label{
@@ -202,4 +217,12 @@ div.vis-item-content{
  height: 100px;
  margin-top: 100px;
  left: 50%;
+}
+.message-graph-possitive{
+  color:blue;
+  font-weight:bold;
+}
+.message-graph-negative{
+  color:pink;
+  font-weight:bold;
 }

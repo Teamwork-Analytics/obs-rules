@@ -1,4 +1,4 @@
-var app = angular.module('group-analytics', ['ngRoute']);
+var app = angular.module('group-analytics', ['ngRoute', 'ngSanitize']);
 //import pdfmake
 //import pdfMake from 'pdfmake/build/pdfmake.js';
 //import pdfFonts from 'pdfmake/build/vfs_fonts.js';
@@ -642,11 +642,18 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
     $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
     .success(function(data){
       //$scope.sessionRules = data;
+      //$http.get('path/to/service', {timeout: 5000});
       $scope.graph = $scope.graph = true;
       $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
       $scope.graphPath = data.path;
+      message = '<span>'+ data.message + '</span>';
+      //const parser = new DOMParser();
+      //message = parser.parseFromString(message, 'text/html');
+      console.log('Thisa is parsed', message);
+      //console.log('Parser', parser)
+      $scope.myFeedback = message;
 
-      console.log('Name of rule: :', data.rule[0].first_action);
+      //console.log('Name of rule: :', data.rule[0].first_action);
 
       //$window.location.href='http://localhost:3000/timeline/'+sessionID;
     })

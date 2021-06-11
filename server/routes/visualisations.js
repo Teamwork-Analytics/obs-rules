@@ -363,7 +363,9 @@ router.get('/getJsonFromFile/:id', (req, res, next) => {
 
 router.get('/bringGraph/:idRule', (req, res, next) => {
   let results = [];
+  let result = [];
   let exist=false;
+  let fileName='';
   const timestamps= [];
   const id_rule = req.params.idRule;
   console.log('ID_SESSION: ########: ', req.query.id_session);
@@ -381,10 +383,32 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
 
   //console.log('TO VALIDATE IF THE FILE EXISTS',validate);
   const logOutput = (name) => (data) => {
-    //console.log(data.toString());
-    returnJson = './data/graphs/'+data.toString().trim();
-    //console.log(returnJson);
-    res.json({'path': returnJson, 'rule': results});
+    console.log('TYPE OF DATA: ', (typeof data));
+    console.log('ANSWER FROM PYTHON: ',data.toString());
+    //data = data.toString().replace(/[\n]/g,'<br>');
+    jsonResponse = JSON.parse(data.toString());
+    console.log('JSON. RESPONSE : ',jsonResponse['message']);
+    message = jsonResponse['message'].toString().replace(/[\n]/g,'<br>');
+    //fromPython=data.toString().split(',');
+
+    //console.log('ANSWER FROM PYTHON: ', data.toString()[0], data.toString()[0]);
+    //returnJson = './data/graphs/'+fromPython[1].replace(/^'|'$/g, '');
+    //fileName= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
+    var query_string = 'UPDATE rules SET feedback_wrong = ? WHERE (id = ?);';
+    con.query(query_string, [message, id_rule], (err, rows) => {
+      if(err) throw err;
+
+      returnJson = './data/graphs/'+ jsonResponse['path'].toString();
+      return res.json({'path': returnJson, 'rule': results,  'message':message});
+
+      //return res.json(results);
+    });
+
+    //message = jsonResponse['message'].replace(/[\n]/g,'<br>');
+    //console.log(fileName);
+
+    //const parser = new window.DOMParser();
+    //var message = parser.parseFromString(message, 'text/html');
   };
 
   const logOutputError = (name) => (data) => console.log(`[${name}] ${data.toString()}`);
@@ -408,8 +432,14 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
       console.log('Here are  the results to create the graph:!!!! ', results[0]);
       if(exist==true){
 
-        res.json({'path': './data/graphs/'+validate, 'rule': results});
-
+        var query_string = 'select feedback_wrong from rules where (id = ?);';
+        con.query(query_string, [id_rule], (err, rows) => {
+          if(err) throw err;
+          rows.forEach( (row) => {
+            result.push(row);
+          });
+          return res.json({'path': './data/graphs/'+validate, 'rule': results, 'message': result[0].feedback_wrong});
+        });
       }
       else{
         var query_string = 'select aobj.time_action from action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) OR (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action asc;';
