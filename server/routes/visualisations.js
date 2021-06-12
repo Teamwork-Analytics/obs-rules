@@ -494,6 +494,16 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
             'data',
             logOutputError('stderr')
           );
+          pythonProcess.on(
+            'close', (code) => {
+              console.log('The ON message: ',code);
+            }
+          );
+          pythonProcess.on(
+            'error', (code) => {
+              console.log('The ON error: ',code);
+            }
+          );
         });
 
       });
