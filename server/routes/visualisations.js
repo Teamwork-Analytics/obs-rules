@@ -480,6 +480,8 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
               //name=res.json(name);
 
           });*/
+
+          console.log('This is the python', pythonProcess);
           pythonProcess.stdout.on(
             'data',
             logOutput('stdout')
