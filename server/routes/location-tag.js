@@ -1,4 +1,4 @@
-ar express = require('express');
+var express = require('express');
 var mqtt = require('mqtt');
 var router = express.Router();
 var url = require('url');

@@ -193,17 +193,40 @@ router.post('/updateobjname', (req, res, next) => {
   console.log(`Changed ${result.changedRows} row(s)`);
   
   con.query('SELECT * from object_session WHERE id_session = ? ORDER BY id ASC', [req.body.id_session], (err, rows) => {
-  if(err) throw err;
+    if(err) throw err;
 
-  rows.forEach( (row) => {
-    results.push(row);
-    //console.log(`${row.id_session} , ${row.id_datatype}`);
+    rows.forEach( (row) => {
+      results.push(row);
+      //console.log(`${row.id_session} , ${row.id_datatype}`);
+      });
+      return res.json(results);
+      });
+    
+      //return res.json(JSON.parse(results));
     });
-    return res.json(results);
+  }); //end function
+
+
+router.post('/updateobjcoordinates', (req, res, next) => {
+    var results = [];
+    const dtobj_string = [req.body.coordinates, req.body.id_objsession];
+    
+    con.query('UPDATE object_session SET coordinates = ? WHERE id = ?', dtobj_string, (err, result) => {
+    if(err) throw err;
+    console.log(`Changed ${result.changedRows} row(s)`);
+    
+    con.query('SELECT * from object_session WHERE id_session = ? ORDER BY id ASC', [req.body.id_session], (err, rows) => {
+    if(err) throw err;
+
+    rows.forEach( (row) => {
+      results.push(row);
+      //console.log(`${row.id_session} , ${row.id_datatype}`);
+      });
+      return res.json(results);
+      });
+    
+      //return res.json(JSON.parse(results));
     });
-  
-    //return res.json(JSON.parse(results));
-  });
   }); //end function
 
 //delete actions with objects associated

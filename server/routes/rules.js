@@ -124,127 +124,185 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   rulesValidated["title"] = actions[0].session_name + " - "+ rule[0].name;
   rulesValidated['ruleName'] = rule[0].name;
   var pointMessage = {};
+  positionActionA=0;
+  positionActioB=0;
 
   start='';
 
   find = false;
   find2=false;
   console.log(rule[0].magnitude, 'AQUI MAGNITUD');
-  //console.log(rule[0].second_action, 'AQUI');
-  //&& find != true && find2!=true
-  for (var i = 0; i < actions.length && (find != true || find2!=true); i++) {
-    var point = {};
-    console.log(rule[0].second_action, actions[i].action_desc);
-    console.log(rule[0].first_action, actions[i].action_desc);
 
-    //VALITATION OF SEQUENCE RULES
-
-    if(rule[0].magnitude =='Sequence' || rule[0].magnitude =='Time'){
-       // 2 is before 1 is after
-      //if(rule[0].value_of_mag =='After'){
-        if (actions[i].action_desc != null && actions[i].action_desc == rule[0].second_action){
-          console.log('Si  entro');
-          find=true;
-          //point["id"] = actions[i].id;
-          point["id"] = actions[i].id;
-          point["content"] = 'Description @@@ : '+actions[i].action_desc;
-          point["start"] = actions[i].time_action+0.1;
-          point["type"] = 'box';
-          point["group"] = actions[i].id_object;
-          point["className"] = 'magenta';
-          actionMessage=actions[i].id;
-          groupMessage=actions[i].id_object;
-          start=actions[i].time_action;
-          rulesValidated["points"].push(point);
-        }  
-        if (actions[i].action_desc != null && actions[i].action_desc == rule[0].first_action && find==true){
-          console.log('Si  entro second validation');
-          find2=true;
-          point["id"] = actions[i].id;
-          point["content"] = 'Perform this actions is important'+actions[i].action_desc;
-          point["start"] = actions[i].time_action;
-          point["className"] = 'magenta';
-          point["group"] = actions[i].id_object;
-          point["type"] = 'box';
-          actionMessage=actions[i].id;
-          groupMessage=actions[i].id_object;
-          end=actions[i].time_action;
-          rulesValidated["points"].push(point);
-        }
-    } 
+  if(rule[0].magnitude == 'Proximity'){
+    console.log('HELLO I AM A PROXIMITY RULE');
+    rulesValidated["title"]=rule[0].feedback_wrong;
+    rulesValidated["status"]='reflect';
   }
-  var point = {};
-  console.log('validating rules');
-  console.log(find, find2);
-  pointMessage['type'] = 'box';
-  pointMessage['id'] = actionMessage;
-  pointMessage['group'] = groupMessage;
+  else{
+    for (var i = 0; i < actions.length && (find != true); i++) {
+      var point = {};
+      console.log('The second action selected: ', rule[0].second_action, actions[i].action_desc);
+      //VALITATION OF SEQUENCE RULES
 
-  
-  point["id"] = rule[0].id;
-  if(find == true && find2==true){
-    point["start"] = start;
-    point["end"] = end;
-    point["type"] = 'background';
-    pointMessage["className"] = 'feedbackok';
-    pointMessage['start'] = end;
-    pointMessage["content"] = 'Well done the team perform this critical action';
-
-    if(rule[0].magnitude =='Time'){
-      start_time = (new Date(start)).getTime() / 1000;
-      end_time = (new Date(end)).getTime() / 1000;
-      var difSeconds= end_time-start_time;
-      
-      if( difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
-        rulesValidated["title"] = rule[0].feedback_wrong + '<span style="color:orange">' + ' Time response: '+parseFloat(difSeconds/60).toFixed(2) +'</span>';
-        point["className"] = 'negative';  
-        rulesValidated['status'] = 'wrong';
-        pointMessage["className"] = 'feedbackwrong';
-        pointMessage["content"] = 'The team reacted slow';
-      }else{
-        rulesValidated["title"] = rule[0].feedback_ok + '<span style="color:blue">'+ ' Time response: '+parseFloat(difSeconds/60).toFixed(2)+'</span>';
-        point["className"] = 'vis-time-response';  
-        rulesValidated['status'] = 'ok';
-        pointMessage["className"] = 'feedbackok';
-        pointMessage["content"] = 'The team reacted timely';
-      }
-    }else{
-      //point["content"] =  rule[0].feedback_ok;
-      rulesValidated["title"] = rule[0].feedback_ok;
-      point["className"] = 'vis-time-response';  
-      rulesValidated['status'] = 'ok';
+      if(rule[0].magnitude =='Sequence' || rule[0].magnitude =='Time'){
+         // 2 is before 1 is after
+        //if(rule[0].value_of_mag =='After'){
+          if (actions[i].action_desc != null && actions[i].action_desc == rule[0].second_action){
+            console.log('Si  entro');
+            find=true;
+            //point["id"] = actions[i].id;
+            point["id"] = actions[i].id;
+            point["content"] = 'Description @@@ : '+actions[i].action_desc;
+            point["start"] = actions[i].time_action+0.1;
+            point["type"] = 'box';
+            point["group"] = actions[i].id_object;
+            point["className"] = 'magenta';
+            actionMessage=actions[i].id;
+            groupMessage=actions[i].id_object;
+            start=actions[i].time_action;
+            rulesValidated["points"].push(point);
+            positionActionA=i;
+          }  
+      } 
     }
-  } else if(find == true && find2==false){
-    //point["content"] = rule[0].feedback_wrong;
-    pointMessage["className"] = 'feedbackwrong';
-    pointMessage["content"] = 'The team missed an action';
 
-    rulesValidated["title"] = rule[0].feedback_wrong;
-    point["start"] = start;
-    point["type"] = 'background';
-    point["end"] = actions[actions.length-1].time_action;
-    //point["style"] = "color: red; background-color: pink;";
-    point["className"] = 'negative';
-    rulesValidated['status'] = 'wrong';
-  }else if(find == false && find2==true){
-    pointMessage["className"] = 'feedbackwrong';
-    pointMessage["content"] = 'The team missed an action';
-    //point["content"] = rule[0].feedback_wrong;
-    classMessage["className"] = 'feedbackwrong';
-    contentMessage["content"] = 'The team missed an action';
-    rulesValidated["title"] = rule[0].feedback_wrong;
-    point["end"] = end;
-    point["start"] = actions[0].time_action; 
-    point["type"] = 'background';
-    //point["style"] = "color: red; background-color: pink;";
-    point["className"] = 'negative';
-    rulesValidated['status'] = 'wrong';
+    //Find second action
+
+    for (var i = 0; i < actions.length && (find2!=true); i++) {
+      var point = {};
+      //console.log(rule[0].second_action, actions[i].action_desc);
+      console.log('The first action selected: ', rule[0].first_action, actions[i].action_desc);
+
+      //VALITATION OF SEQUENCE RULES
+
+      if(rule[0].magnitude =='Sequence' || rule[0].magnitude =='Time'){ 
+          if (actions[i].action_desc != null && actions[i].action_desc == rule[0].first_action){
+            console.log('Si  entro second validation');
+            find2=true;
+            point["id"] = actions[i].id;
+            point["content"] = 'Perform this actions is important'+actions[i].action_desc;
+            point["start"] = actions[i].time_action;
+            point["className"] = 'magenta';
+            point["group"] = actions[i].id_object;
+            point["type"] = 'box';
+            actionMessage=actions[i].id;
+            groupMessage=actions[i].id_object;
+            end=actions[i].time_action;
+            rulesValidated["points"].push(point);
+            positionActionB=i;
+          }
+      } 
+    }
+
+        //We need to validate if non of the actions happend
+    var point = {};
+    console.log('validating rules, find or not: ', find, find2);
+    pointMessage['type'] = 'box';
+    pointMessage['id'] = actionMessage;
+    pointMessage['group'] = groupMessage;
+
+    
+    point["id"] = rule[0].id;
+    if(find == true && find2==true){
+      if(rule[0].magnitude =='Time'){
+        point["start"] = start;
+        point["end"] = end;
+        point["type"] = 'background';
+        pointMessage['start'] = end;
+
+        start_time = (new Date(start)).getTime() / 1000;
+        end_time = (new Date(end)).getTime() / 1000;
+        var difSeconds= end_time-start_time;
+        
+        if( difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
+          rulesValidated["title"] = rule[0].feedback_wrong + '<span style="color:orange">' + ' Time response: '+parseFloat(difSeconds/60).toFixed(2) +'</span>';
+          point["className"] = 'negative';  
+          rulesValidated['status'] = 'wrong';
+          pointMessage["className"] = 'feedbackwrong';
+          pointMessage["content"] = 'The team reacted slow';
+        }else{
+          rulesValidated["title"] = rule[0].feedback_ok + '<span style="color:blue">'+ ' Time response: '+parseFloat(difSeconds/60).toFixed(2)+'</span>';
+          point["className"] = 'vis-time-response';  
+          rulesValidated['status'] = 'ok';
+          pointMessage["className"] = 'feedbackok';
+          pointMessage["content"] = 'The team reacted timely';
+        }
+      }else{
+        //point["content"] =  rule[0].feedback_ok;
+        //VALIDATING IF ACTION 1 HAPPENDS FIRST
+        console.log('ACTION 1: ', positionActionA, ' ACTION 2: ', positionActionB)
+        if (positionActionA < positionActionB){
+          rulesValidated["title"] = rule[0].feedback_ok;
+          point["className"] = 'vis-time-response';  
+          rulesValidated['status'] = 'ok';
+          point["start"] = start;
+          point["end"] = end;
+          point["type"] = 'background';
+          pointMessage["className"] = 'feedbackok';
+          pointMessage['start'] = end;
+          pointMessage["content"] = 'Well done the team perform this critical action';  
+        }else{
+          rulesValidated["title"] = rule[0].feedback_wrong +'. Next time consider the order of the actions';
+          point["className"] = 'negative';  
+          rulesValidated['status'] = 'wrong';
+          point["start"] = end;
+          point["end"] = start;
+          point["type"] = 'background';
+          pointMessage["className"] = 'feedbackwrong';
+          pointMessage['start'] = end;
+          pointMessage["content"] = rule[0].feedback_wrong +'. Next time consider the order of the actions.';        
+        }
+      }
+    } else if(find == true && find2==false){
+      //point["content"] = rule[0].feedback_wrong;
+      pointMessage["className"] = 'feedbackwrong';
+      pointMessage["content"] = 'The team missed an action';
+      pointMessage['start'] = start;
+
+      rulesValidated["title"] = rule[0].feedback_wrong;
+      point["start"] = start;
+      point["type"] = 'background';
+      point["end"] = actions[actions.length-1].time_action;
+      //point["style"] = "color: red; background-color: pink;";
+      point["className"] = 'negative';
+      rulesValidated['status'] = 'wrong';
+    }else if(find == false && find2==true){
+      pointMessage["className"] = 'feedbackwrong';
+      pointMessage["content"] = 'The team missed an action';
+      pointMessage['start'] = end;
+      //point["content"] = rule[0].feedback_wrong;
+      //classMessage["className"] = 'feedbackwrong';
+      //contentMessage["content"] = 'The team missed an action';
+      rulesValidated["title"] = rule[0].feedback_wrong;
+      point["end"] = end;
+      point["start"] = actions[0].time_action; 
+      point["type"] = 'background';
+      //point["style"] = "color: red; background-color: pink;";
+      point["className"] = 'negative';
+      rulesValidated['status'] = 'wrong';
+    }
+    else if(find == false && find2==false){
+      pointMessage["className"] = 'feedbackwrong';
+      pointMessage["content"] = 'The team missed critical actions';
+      pointMessage['start'] = actions[actions.length].time_action;
+      //point["content"] = rule[0].feedback_wrong;
+      //classMessage["className"] = 'feedbackwrong';
+      //contentMessage["content"] = 'The team missed an action';
+      rulesValidated["title"] = rule[0].feedback_wrong;
+      point["end"] = actions[actions.length].time_action;
+      point["start"] = actions[0].time_action; 
+      point["type"] = 'background';
+      //point["style"] = "color: red; background-color: pink;";
+      point["className"] = 'negative';
+      rulesValidated["status"] = 'wrong';
+    }
+    rulesValidated["points"].push(point);
+    //create an additional point with type box, to plot an additional message
+
+    console.log('This is the last point of the array ####: ',  rulesValidated["points"]);
+
   }
-  rulesValidated["points"].push(point);
-  //create an additional point with type box, to plot an additional message
-
-  console.log('This is the last point of the array ####: ',  rulesValidated["points"]);
-
+  
   var options = {};
   options ['start']=actions[0].time_action; 
   options ['end']=actions[actions.length-1].time_action;
@@ -252,13 +310,10 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   //options ['autoResize'] = false;
   options ['moveable'] = false; 
   rulesValidated["options"].push(options);
-  if(rule[0].magnitude =='Proximity'){
-    rulesValidated['title']=rule[0].feedback_wrong;
-    rulesValidated['status']='reflect';
-  }
+
   rulesValidated['message'].push(pointMessage);  
   
-  console.log(rulesValidated);
+  //console.log('Rules Validated @@@@@: ',rulesValidated);
   return res.json(rulesValidated);
 });
 

@@ -13,7 +13,7 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 				<div id= 'actions' ng-if="list.magnitude == 'Sequence' || list.magnitude == 'Time' || list.magnitude == 'Frequency' ">
 					<button type="button" class="btn btn-primary" ng-click="seeVis(list.id)" onclick="docReady(gloria())">{{ list.name }}</button>	
 				</div>
-				<div id= 'localisation' ng-if="list.magnitude == 'Proximity' ">
+				<div id= 'localisation' ng-if="list.magnitude == 'Proximity'">
 					<button type="button" class="btn btn-warning btn-sm" ng-click="createNetwork(list.id)">{{ list.name }}</button>	
 				</div>
 			</td>
@@ -134,15 +134,11 @@ function visVanillaTimeLine(){
 			        groups[i] = new vis.DataSet([
 			          {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
 			      }
-			      console.log('The groups: ',groups);
-
 
 			      var items = [];
 			      for(var i=0;i<data.n;i++){
 			        items[i] = new vis.DataSet(data.participants[participants[i]]);
-			        //items[i].add(background_info);
 			      }
-			      console.log('These are the items: ',items);
 
 			      //console.log(items);
 
@@ -205,22 +201,6 @@ function visVanillaTimeLine(){
 				  	}
 				  	//console.log(cln);
 				  }
-
-/*				//modify background for time-response
-                    for (var i = 1; i <= data.n; i++) {
-
-                            for(var j = 0; j < background_info.length; j++){
-                              var el = document.getElementById('visualization'+i).querySelectorAll(".vis-time-response")[j];
-                              //console.log(el);
-                              el.remove();
-                              //el.style.height = "100% !important";
-                              var newpos = document.getElementById('visualization'+i).querySelectorAll(".vis-time-axis.vis-background")[0];
-                              console.log(newpos);
-                              newpos.append(el);
-                            }
-                       
-                    }//end first for to modify background*/
-
 			}
 			else{
 				console.log('Rien a pase');
@@ -282,11 +262,17 @@ function visVanillaTimeLine(){
 	      containers[i] = document.getElementById('visualization'+(i+1));
 	    }
 	    //create groups
+	    //THE PTN is here
 	    var groups = [];
+	    var value ={};
 	    for(var i=0;i<data.n;i++){
-	      groups[i] = new vis.DataSet([
-	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);
-	      //console.log(groups[i]);
+	    	if(participants[i]=='PTN'){
+	    		groups[i] = new vis.DataSet([
+	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i], style:"color: white; background-color: white;"}]);
+	    	}else{
+	    		groups[i] = new vis.DataSet([
+	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i]}]);	
+	    	}
 	    }
 	    //groups[data.n]=groups[data.n-1];
 

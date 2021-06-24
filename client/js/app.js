@@ -124,6 +124,7 @@ app.controller('mainController', function($window, $scope, $location, $routePara
   };
 
   $scope.redirectRules = function(sessionID) {
+    console.log(sessionID);
     $location.path('/rules/'+sessionID);
   };
 
@@ -1035,7 +1036,9 @@ app.controller('objectsController', function($scope, $location, $routeParams, $h
   $http.get('/api/v1/objects/objectsession/'+$scope.sessionid)
   .success(function(datapersession){
     $scope.objectsperSessionData = datapersession;
-    //console.log(datapersession)
+
+    //$scope.x=datapersession.coordinates.split(',')[0];
+    console.log('Session objects: ',datapersession)
   })
   .error(function(error){
     console.log('Error: ' + error);
@@ -1146,6 +1149,26 @@ $scope.updateObjectName = function(objsId){
      $http.post('/api/v1/objects/updateobjname', dataObj )
         .success(function(data){
         $scope.objectsperSessionData = data;
+        })
+        .error((error) => {
+          console.log('Error: ' + error);
+        });
+
+  };//end updateObjectName
+
+  $scope.addFixedCoordinates = function(objsId, coordinates){
+    //alert(item);
+    console.log(coordinates);
+    var dataObj = {
+        id_session : $scope.sessionid,
+        id_objsession : objsId,
+        coordinates: coordinates
+      };
+
+     $http.post('/api/v1/objects/updateobjcoordinates', dataObj )
+        .success(function(data){
+        $scope.objectsperSessionData = data;
+
         })
         .error((error) => {
           console.log('Error: ' + error);

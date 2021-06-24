@@ -121,6 +121,7 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 
 		# Once we have the proxemic labels we can try to plot the SN
 		df_trackers_ordered = vis.orderTrackers(centeredRole, df_trackers)
+		#print(df_trackers_ordered)
 		trackers_names = vis.nameTrackers(df_trackers_ordered, roles)
 		#print('NAME  TRACKERS: @@@@ ',trackers_names)
 		#print('ORDERED TRACKERS: @@@@ ', df_trackers_ordered)
@@ -133,6 +134,7 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 		# visualise normalized data and porcentages
 
 		dfnorm = vis.normalizedata(filterProxemic)
+		#print(dfnorm)
 		#dfnorm = vis.normalizedataTotalSeconds(filterProxemic, totalSeconds)
 		graph, message = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
 		#print(graph)

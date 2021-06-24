@@ -277,40 +277,51 @@
 
       <div class="alert alert-danger" role="alert">
         Edit the label of the patient to PTN (remove character '1').
-              </div>
-            <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="item in objectsperSessionData">
-              <div class="d-flex justify-content-sm-between align-items-center w-100">
-                <div class="flex-fill"><span><input type="text" ng-model="fObjectName[item.id]" ng-init="fObjectName[item.id]=item.name"></span>
-                   <span><a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="updateObjectName(item.id)"> Change </a></span>
-                  <div><span class="text-secondary font-italic"> tag: {{selectedTracker}} </span>
-                        <span class="text-secondary font-italic"> empatica: {{selectedWristband}} </span>
-                  </div>
-                </div>
-
-              <div class="p-2"> 
-              <select ng-init="selectedTracker = item.serial"  
-                      ng-model="selectedTracker"
-                      ng-change="updateTagObjSession(item.id, selectedTracker)">
-                <option value="">--Tag--</option>
-                <option ng-repeat="x in trackers_pozyx" value="{{x.serial}}">{{x.serial}}</option>
-              </select>
-              </div>
-
-              <div class="p-2  w-50"> 
-              <select ng-if="item.id_object == 6 || item.id_object == 1" ng-init="selectedWristband = item.empatica"  
-                      ng-model="selectedWristband"
-                      ng-change="updateWristbandObjSession(item.id, selectedWristband)">
-                <option value="">--Empatica--</option>
-                <option ng-repeat="x in trackers_empatica" value="{{x.id_empatica}}">{{x.name}}:{{x.id_empatica}}</option>
-              </select>
-              <p class="text-secondary" ng-if="!(item.id_object == 6 || item.id_object == 1)"> Not available </p>
-              </div>
-
-               <div class="p-2"><a href="javascript:void(0)" class="btn btn-outline-danger btn-sm" ng-click="deleteObjectSession(item.id)"> Delete </a></div>
-
-             </div>
-            </div>
       </div>
+
+      <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="item in objectsperSessionData">
+        <div class="d-flex justify-content-sm-between align-items-center w-100">
+          <div class="flex-fill">
+            <span>
+              <input type="text" ng-model="fObjectName[item.id]" ng-init="fObjectName[item.id]=item.name">
+            </span>
+             <span><a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="updateObjectName(item.id)"> Change </a>
+             </span>
+            <div>
+              <span class="text-secondary font-italic"> tag: {{selectedTracker}} </span>
+              <span class="text-secondary font-italic"> empatica: {{selectedWristband}} </span>
+            </div>
+          </div>
+
+        <div class="p-2"> 
+        <select ng-init="selectedTracker = item.serial"  
+                ng-model="selectedTracker"
+                ng-change="updateTagObjSession(item.id, selectedTracker)">
+          <option value="">--Tag--</option>
+          <option ng-repeat="x in trackers_pozyx" value="{{x.serial}}">{{x.serial}}</option>
+        </select>
+        </div>
+
+        <div class="p-2  w-50"> 
+        <select ng-if="item.id_object == 6 || item.id_object == 1" ng-init="selectedWristband = item.empatica"  
+                ng-model="selectedWristband"
+                ng-change="updateWristbandObjSession(item.id, selectedWristband)">
+          <option value="">--Empatica--</option>
+          <option ng-repeat="x in trackers_empatica" value="{{x.id_empatica}}">{{x.name}}:{{x.id_empatica}}</option>
+        </select>
+        <p class="text-secondary" ng-if="!(item.id_object == 6 || item.id_object == 1 || item.id_object == 4)"> Not available </p>
+        <p class="text-secondary" ng-if="item.id_object == 4">
+              (x, y) <input type="text" ng-model='coordinates' ng-init="coordinates=item.coordinates">
+               <span><a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="addFixedCoordinates(item.id, coordinates)"> Add </a>
+        </p>
+        </div>
+         <div class="p-2">
+            <a href="javascript:void(0)" class="btn btn-outline-danger btn-sm" ng-click="deleteObjectSession(item.id)"> Delete </a>
+         </div>
+
+       </div>
+    </div>
+    </div>
           
           <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="controlSources()">Manage Capture</button>
           <br>
@@ -351,7 +362,7 @@
             </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="listRules()">Add Rules</button>
+      <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="redirectRules(sessionid)">Add Assessment criteria</button>
 
 </main>
 </script>

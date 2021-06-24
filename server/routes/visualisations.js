@@ -94,7 +94,6 @@ router.post('/generateJson2', (req, res, next) => {
             alldata["time_end"] = dataActions[i].time_action;
           }
           
-
           //add actions that were done by a student
           if(dataActions[i].duration != null && dataActions[i].name != null ){
             var item = {};
@@ -431,7 +430,7 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
       results = rows;
       console.log('Here are  the results to create the graph:!!!! ', results[0]);
       if(exist==true){
-
+        //This is for bringing the feedback for the graph
         var query_string = 'select feedback_wrong from rules where (id = ?);';
         con.query(query_string, [id_rule], (err, rows) => {
           if(err) throw err;

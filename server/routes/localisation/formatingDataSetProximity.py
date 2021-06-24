@@ -13,7 +13,7 @@ from dateutil import parser
 
 def readingData(filename, path, phase, session):
     filename, file_extension = os.path.splitext(path)
-    print (file_extension)
+    #print (file_extension)
     ## TO DO - Other extensions should be supported
     if(file_extension == '.xlsx' or file_extension == '.xls'):
         session_data = pd.read_excel(path, lines=True)
@@ -51,7 +51,8 @@ def readingData1(filename, path, phase, session):
 
 def readingDataJson(file, session):
     #print('This is the file path: ',file)
-    session_data= pd.read_json(file, lines=True)
+    session_data= pd.read_json(file, lines=True, orient='records')
+    #print(session_data.head(10));
     df=formatJson(session_data, session)
     # Delete trackers - I will delete the Patient from my list of trackers
     df = normalization(df)
@@ -352,6 +353,7 @@ def nameTrackers(df, listRoles):
     #df["Role"] = df["enumeration"].apply(lambda x: listRoles.get(x))
     #If there is a tracker that was not capture in  the webtool, all registers for that trackers will desapear
     #df = df.query('Role.notna()')
+    #print(df['tracker'].head(10), listRoles)
     df.dropna(subset=["Role"], inplace=True)
     #df['Role'].replace('', np.nan, inplace=True)
     return df

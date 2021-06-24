@@ -1,7 +1,7 @@
 from igraph import *
 import pandas as pd
 from matplotlib import pyplot as plt
-#import cairo
+import cairo
 import formatingDataSetProximity as fd
 import numpy as np
 import os
@@ -62,6 +62,7 @@ def filterPL(df, proxemicLabel, role):
 def orderTrackers(role, df_trackers):
     index = int(role)
     # Order the vertices... Role should be the first one.
+    #print(role, df_trackers)
     df_shifted=pd.concat([df_trackers.iloc[[index-1], :], df_trackers.drop(index-1, axis=0)], axis=0)
     df_shifted.reset_index(level=0, inplace=True)
     return df_shifted
@@ -159,10 +160,11 @@ def visualiseGraph(g, session, phase, type, proxemic):
     name= str(session)+'_'+phase+'_'+type+'_'+proxemic+'.png'
     layout = g.layout("kk")
     #print (g.vs['tracker'])
-    #print(g.es['proxLabel'])
+    #print(g.es[3]['proxLabel'])
     g.vs['label'] = g.vs['tracker']
     g.es['label'] = g.es['proxLabel']
     g.vs['color'] = 'light blue'
+
     g.es["color"] = ["pink" if float(proxLabel) < 0.5 else "blue" for proxLabel in g.es["proxLabel"]]
     visual_style = {}
     visual_style["vertex_size"] = 20
@@ -178,11 +180,11 @@ def visualiseGraph1(g, session, type, proxemic, idRule):
     name=str(session)+'_'+str(idRule)+'_'+type+'_'+proxemic+'.png'
     layout = g.layout("kk")
     #print (g.vs['tracker'])
-    #print(g.es['proxLabel'])
+    #print(g.es[4]['proxLabel'])
     g.vs['label'] = g.vs['tracker']
     g.es['label'] = g.es['proxLabel']
     g.vs['color'] = 'light blue'
-    g.es["color"] = ["pink" if float(proxLabel) < 0.5 else "blue" for proxLabel in g.es["proxLabel"]]
+    g.es["color"] = ["pink" if (proxLabel!=None) and float(proxLabel) < 0.5  else "blue" for proxLabel in g.es["proxLabel"]]
     #g.es["edge_width"] = [10 if float(proxLabel) < 0.5 else 50 for proxLabel in g.es["proxLabel"]]
     #g.es['width'] = [float(x) * 5 if float(x) != 0.0 else 0.1 * 5 for x in g.es["proxLabel"]]
     visual_style = {}
