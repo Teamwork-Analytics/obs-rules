@@ -40,9 +40,10 @@ def aggregateLaberlsPhase(df):
 # when the analysis want to be focussed on an specific proxemic label
 #parameters:  df with labels, string that indicated the proxemicLabel we want to filter
 #return: a new data set with the values according to the proxec label
-def filterPL(df, proxemicLabel, role):
+def filterPL(df, proxemicLabel,proxemicLabel2, role):
+
     if (role == 0):
-        df = df[df['proxemic'] == proxemicLabel]
+        df = df[(df['proxemic'] == proxemicLabel) | (df['proxemic'] == proxemicLabel2)]
         role = 'PL_'
         spike_cols = [col for col in df.columns if role in col]
         df = df[spike_cols]
@@ -50,7 +51,12 @@ def filterPL(df, proxemicLabel, role):
         #Filtering the proxemic label
         #role
         role = '_'+str(role)
-        df= df[df['proxemic']== proxemicLabel]
+        #df= df[(df['proxemic']== proxemicLabel) | (df['proxemic'] == proxemicLabel2)]
+        df = df[(df['proxemic'] == proxemicLabel) | (df['proxemic'] == proxemicLabel2)]
+        #print('Filtering personal and intimate proxemics: ', df)
+        #df=df.sum(axis=1, skipna=True)
+        #print('Adding values: ', df)
+
         #Filtering the roles
         spike_cols = [col for col in df.columns if role in col]
         #print(list(df.columns))
@@ -92,7 +98,18 @@ def graphDefinition(df, df_trackers, typ):
     #g = ig.Graph()
     # Defining edges, it can be generate automatically according to the number of trackers
     # SNA.. This is the actual Social Network, we need to think how to explote this for our dataset
-    g = Graph([(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)])
+
+    items = []
+    for x in range(1, len(vertices)):
+        value = (0, x)
+        items.append(value)
+    l = list()
+    for item in items:
+        l.append(item)
+    #print(tuple(l))
+
+    #g = Graph()
+    g = Graph(tuple(l))
 
     # if(len(df_trackers.tracker.unique()) == 6):
     #     g = Graph([(0,1), (0,2), (0,3), (0,4), (0,5)])
@@ -107,6 +124,8 @@ def graphDefinition(df, df_trackers, typ):
         #print('tracker: ',  str(i) , ' ' , g.vs[i]['tracker'])
         roles +=  g.vs[i]['tracker'] + ', '
         i+=1
+
+    #g.add_edges(tuple(l))
 
     #print (df)
     # To fill the name of edges
@@ -219,7 +238,10 @@ def normalizedata(df_labels):
     #print(len(array_filtered))
     values = []
     if (minimo == maximo):
-        values = [minimo, minimo, minimo, minimo, minimo]
+        minimo = 20;
+        for x in range(0, len(array_filtered)):
+            y = (((int(array_filtered[x])) - float(minimo)) / (float(maximo - minimo)))
+            values.append(round(y,2))
     else:
         #print('they are different @@@@@@')
         for x in range(0, len(array_filtered)):
@@ -240,7 +262,7 @@ def normalizedataTotalSeconds(df_labels, totalSeconds):
     minimo = np.min(array_filtered.astype(np.int32))
     #minimo = np.min(array_filtered)
     #print ('###MINIMOOOO',array_filtered, minimo)
-    maximo =totalSeconds;
+    maximo=totalSeconds;
     #maximo = np.max(array_filtered.astype(np.int32))
     #maximo = np.max(array_filtered)
     #print(maximo)
@@ -248,14 +270,11 @@ def normalizedataTotalSeconds(df_labels, totalSeconds):
     #print(array_filtered, minimo)
     #print(len(array_filtered))
     values = []
-    if (minimo == maximo):
-        values = [minimo, minimo, minimo, minimo, minimo]
-    else:
-        #print('they are different @@@@@@')
-        for x in range(0, len(array_filtered)):
-            y = (((int(array_filtered[x]))-float(minimo)) / (float(maximo - minimo)))
-            #print('value  ',y, type(y), (int(array_filtered[x])))
-            values.append(round(y,2))
+    for x in range(0, len(array_filtered)):
+        #y = (((int(array_filtered[x]))-float(minimo)) / (float(maximo - minimo)))
+        y = (((int(array_filtered[x])) * 100 / (float(maximo))))*0.01
+        #print('value  ',y, type(y), (int(array_filtered[x])))
+        values.append(round(y,2))
     #print ('NORMALISED DATA: ',values)
     df_labels.loc[0] = values
     df_labels = df_labels.iloc[1:]

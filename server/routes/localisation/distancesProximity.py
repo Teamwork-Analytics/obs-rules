@@ -47,7 +47,7 @@ def proxemicsLabels(df_distancesBetTrackers, numberOfTrackers):
             df_distancesBetTrackers[column_nameresult] = np.where(
                 (((df_distancesBetTrackers[column_name] / 1000) >= 0.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 1)),
                 # Identifies the case to apply to
-                'personal',  # This is the value that is inserted
+                'intimate',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
             df_distancesBetTrackers[column_nameresult] = np.where(
                 (((df_distancesBetTrackers[column_name] / 1000) >= 1) & ((df_distancesBetTrackers[column_name]) / 1000 < 4)),

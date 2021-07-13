@@ -1,5 +1,5 @@
   <div>
-    <h1>Assessment Criteria</h1>
+    <h1>Assessment Criteria (Rules)</h1>
     <hr>
   </div>
   <div class="p-2"> 
@@ -30,7 +30,7 @@
       	</select>
 
       	<div ng-show = "timeR">
-          The previous action happens in a <span style="color:darkcyan;font-size:15.0pt">Time frame</span> of: <input type="text"  ng-model="TimeFrame"> (minutes)
+          The previous action happens in a <span style="color:darkcyan;font-size:15.0pt">Time frame</span> of: <input type="text"  ng-model="TimeFrame"> (minutes) AFTER
         </div>
       	<div ng-show = "causalityR">
 	      	The previous action happens:
@@ -41,7 +41,7 @@
 	      	</select>
       	</div>
       	<div ng-show = "frequencyR">
-          The previous action have a <span style="color:darkcyan;font-size:15.0pt">Frequency</span> of: <input type="text"  ng-model="Frequency"> (minutes)
+          The previous action happens with a <span style="color:darkcyan;font-size:15.0pt">Frequency</span> of: <input type="text"  ng-model="Frequency"> (minutes)
         </div>
         <div ng-show="ShowSecond">
           Please select an <span style="color:darkcyan;font-size:15.0pt">action (B)</span> from the list:
@@ -56,12 +56,13 @@
           <select style="width: 700px;font-size:15.0pt" id='optionProximity' ng-model="optionTrack" ng-change="valType(optionTrack)">
             <option value=1>All of them (e.g. were they together after the handover?) - Full social network</option>
             <option value=2>Particular role (e.g. were nurses close to the patient when he was asking for help?) - ego network</option>
+            <option value=3>Bar char - ONLY for the 4 beds sim</option>
           </select>          
         </div>
         <div ng-show = "rolesDiv">
           Choose the <span style="color:darkcyan;font-size:15.0pt">central role</span> you want to validate:
           <select style="width: 700px;font-size:15.0pt" ng-init="role = item.serial" ng-model="selectedRole">
-            <option value="">--Select the central role in the network--</option>
+            <option value="">--Select the role that will be in the centre of the network--</option>
             <option ng-repeat="x in roles" value="{{x.serial}}">{{x.name}}-{{x.serial}}</option>
           </select>
             <!--<a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="addRole(selectedRole)"> Add other role </a>-->
@@ -76,10 +77,10 @@
        	<a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="AddNewRule(selectedType, selectedFirst,causality,selectedSecond)"> Save Criteria</a>
        	<br>	
     </div>
-	<button type="button" class="btn btn-primary btn-sm" ng-click="ShowInput()"> Add New Criteria </button>
+	<button type="button" class="btn btn-primary btn-sm" ng-click="ShowInput()"> Add assessment item (rule) </button>
 </div>
   	<hr>
-    <p class="lead font-weight-bold">Criteria defined for this session:</p>
+    <p class="lead font-weight-bold">Assesment criteria defined for this session (rules):</p>
 
 	<br/>
 	
@@ -94,22 +95,39 @@
       </div>
   </div>
 
-  <hr>
-    <p class="lead font-weight-bold">Detail of the criteria:</p>
+  <div ng-show='editingRules'>
+    
+  
+    <p class="lead font-weight-bold">Detail of the criteria (rule):</p>
 
 <!--<h1>{{detailRule}} </h1> -->
  <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="list in detailRule">
       <div class="d-flex justify-content-end align-items-center w-100">
           <div class="flex-grow-1">
-            <span>{{ list.name }} </span> |  <span>{{ list.magnitude }} </span> |<br>
-            <span>{{ list.first_action }} </span> - <span style="color:blue">{{ list.value_of_mag }} </span> - <span>{{ list.second_action }} </span> <br>
-            <span style="color:green">{{ list.feedback_ok }} </span> <br>
-            <span style="color:orange">{{ list.feedback_wrong }} </span> <br>
+            <span>{{ list.magnitude }} </span> |
+            <span>Title for the criteria: </span>
+            <input type="text" ng-model='name' ng-init="name=list.name" style="width: 1050px;">
+            <br>
+            <span>Action (A): {{ list.first_action }} </span> | |
+            <input type="text" ng-model='value_of_mag' ng-init="value_of_mag=list.value_of_mag"> | |
+            Action (B): <span>{{ list.second_action }} </span> 
+            <br>
+            <span>Feedback if correct:</span>
+            <br>
+            <textarea style="color:green" type="text"  rows="3" ng-model="feedback_ok" cols="130" ng-init="feedback_ok=list.feedback_ok">
+            </textarea>
+            <br>
+            <span>Feedback if wrong:</span>
+            <textarea style="color:orange" type="text"  rows="3" ng-model="feedback_wrong" cols="130" ng-init="feedback_wrong=list.feedback_wrong">
+            </textarea>
+            <br>
+          <a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="editRule(list.id, list.name, value_of_mag, feedback_wrong, feedback_ok)"> Edit </a>
           </div>
 
           <!--<div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id)" onclick="gloria()"> Vis </a></div>
           <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeTimeline()" onclick="gloria()"> Complete Vis </a></div>-->
       </div>
+  </div>
   </div>
 
 <!--<p>{{dataForVis}} <p>{{rulesVal}} </p></p>-->

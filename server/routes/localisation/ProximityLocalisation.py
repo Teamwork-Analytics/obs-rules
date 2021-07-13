@@ -6,11 +6,14 @@ import formatingDataSetProximity as formating
 import enumerateTrackersProximity as et
 import distancesProximity as distances
 import visualisationProximity as vis
+from datetime import datetime
+from time import gmtime, strftime
 
 def main():
 	# intimate, personal, social, public
 	#personal validate distances (0.46-1.2m)
-	proxemic='personal';
+	proxemic='intimate'
+	proxemic2='intimate'
 	#folderData='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/data';
 	folderData = 'server/routes/localisation/data';
 	#print(folderData);
@@ -27,11 +30,21 @@ def main():
 	typeOfGraph = A[0]['value_of_mag'];
 	if typeOfGraph == 'All':
 		typeOfGraph='full';
+	if typeOfGraph == 'Priority':
+		typeOfGraph='barchar';
 	else:
 		typeOfGraph='role-centered';
 	#PHASES
-	phase1=B[0]['time_action']
-	phase2=B[1]['time_action']
+	myFormat = '%Y-%m-%d %I:%M:%S'
+	phase1 = B[0]['time_action']
+	phase2 = B[1]['time_action']
+	#print('dates in the python script: ', phase1, phase2)
+	#phase1 = datetime.strptime(phase1.split('.')[0], myFormat)
+
+
+	#phase2 = datetime.strptime(phase2.split('.')[0], myFormat)
+
+	#print('dates in the python script AFTER : ', phase1, phase2)
 	#CENTERED ROLE
 	if typeOfGraph == 'role-centered':
 		centeredRole= A[0]['value_of_mag'];
@@ -47,10 +60,12 @@ def main():
 
 	# Reminder: to know who the patient is, use the roles dictionary
 	#print(typeOfGraph, phase1, phase2, centeredRole, len(C), roles, session);
-	initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGraph, session, idRule);
+	if(typeOfGraph=='barchar'):
+		createBarChar();
+	else:
+		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule);
 
-
-def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGraph, session, idRule):
+def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule):
 	#READ DATA
 	df = formating.readingDataJson(file,session);
 	#print(df.head(5));
@@ -69,39 +84,48 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 	#FILTERING PER PHASE
 	#df = formating.asign_phases(df, phase1, phase2)
 	df, toSend = formating.filteringPhases(df1, phase1, phase2)
+	#Total of seconds
+
+	#print('This is the data filtered dataframe: ',df)
+	#print('This is the data number of rows: ',len(df.index))
+	totalSeconds = len(df.index)
 	if df.empty:
 		#print('No matching rows: ', toSend);
 		df, toSend= formating.filteringPhasesAdding(df1, phase1, phase2)
 		#print(df, toSend)
 	# Call the function that enumerates trackers
 	df_trackers = et.enumerate_trackers(df)
+	#print('df_trackers: $$$$$',df_trackers)
 	df = et.asignEnumTrackers(df, df_trackers)
-
+	#print('Assign enum trackers: $$$$$',df)
 	# HERE I NEED TO KNOW HOW MANY SECONDS THIS SECTION OF THE SIMULATION LAST
 
 	#print ('AFTER FILTERING: ',len(df.index))
 
-	# WHICH  TRACKER IS THE SELECTED ROLE
+	# WHICH  TRACKER IS THE SELECTED ROLE, returns the enum tracker
 	centeredRole = formating.roleNum(df, df_trackers, centeredRole)
+	#print('Selected role in the miedle: $$$$$', centeredRole)
 	## DISTANCES
-	# To run the calculation of distances it requires the number of trackers and the datase
+	# To run the calculation of distances it requires the number of trackers and the dataset
 	df_distancesBetTrackers = distances.distancesBetweenTrackers(df, n)
+	#print('Distances between trackers: $$$$$', df_distancesBetTrackers)
 	#print(df_distancesBetTrackers.head(10))
 
 	# The next steep is to asign proxemic labels according to the distances
 	df_proxemic_labels, prox_labels = distances.proxemicsLabels(df_distancesBetTrackers, n)
+	#print('Labels according to the distance: $$$$$', df_proxemic_labels, prox_labels)
 	#print(df_proxemic_labels, prox_labels)
 	# Agregate the proxemic labels per session
 	df = vis.aggregateLabels(df_proxemic_labels, prox_labels)
-	#print(df.head(5))
+	#print('Agregation of the proxemic labels', df.head(5))
 
 	if (typeOfGraph == 'full'):
 		# trackers_names = vis.nameTrackers(df, listRoles)
 		trackers_names = vis.nameTrackers(df_trackers, roles)
 
-		filterProxemic = vis.filterPL(df, proxemic, role=0)
+		filterProxemic = vis.filterPL(df, proxemic,proxemic2, role=0)
 		graph = vis.generateFullGraph(filterProxemic, trackers_names)
-		vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
+		vis.visualiseGraph1(graph, session, 'porcentages', proxemic,proxemic2, idRule)
 
 		# Indicators of centrality
 		print('GRAPH DEGREE: ', vis.graphDegree(graph))
@@ -115,9 +139,9 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 		#print('ready to print the graph: centered role: ' +str(centeredRole))
 		# Filtering data according to proxemic label of interest and the role
 
-		filterProxemic = vis.filterPL(df, proxemic, centeredRole)
-		totalSeconds = len(filterProxemic.index);
-		#print(filterProxemic)
+		filterProxemic = vis.filterPL(df, proxemic, proxemic2, centeredRole)
+		#totalSeconds = len(filterProxemic.index)
+		#print('Filter the data according to the proxemic label: ',filterProxemic)
 
 		# Once we have the proxemic labels we can try to plot the SN
 		df_trackers_ordered = vis.orderTrackers(centeredRole, df_trackers)
@@ -142,6 +166,9 @@ def initAnalisis(file, centeredRole, proxemic, phase1, phase2, roles, typeOfGrap
 		response =  {"message":message, "path":name}
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
+
+def createBarChar():
+	print('We will create a Bar char');
 
 if __name__ == "__main__":
     # execute only if run as a script

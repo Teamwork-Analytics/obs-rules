@@ -19,11 +19,16 @@ var mqtt_client = [];
   database: 'group_analytics1'
 });*/
 
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
+//const database='group_analytics1';
+//const database='MonashInterviews';
+
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'gloria',
   password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: 'group_analytics1'
+  database: database
 });
 
 // router.get('/', (req, res, next) => {
@@ -62,6 +67,35 @@ router.get('/selectOneRule/:id_rule', (req, res, next) => {
   });
 });
 
+//Edit one rule
+router.post('/editRule/:id_rule', (req, res, next) => {
+  const results = [];
+  data = req.body;
+  //rule = data.rule;
+  console.log('editOneRule########: ', req.params.id_rule);
+  console.log('ID_SESSION: ########: ', req.query.id_session);
+
+  const dtobj_string = [data.name, data.value_of_mag, data.feedback_wrong, data.feedback_ok, req.params.id_rule];  
+  //var rule_string = {name:req.body.name, type: req.body.typeRule, id_session: req.body.sessionid, id_first_act: req.body.firstAction, id_second_act: req.body.secondAction, magnitude: req.body.magnitude, value_of_mag: req.body.value, feedback_ok: req.body.feedbackCorrect, feedback_wrong: req.body.feedbackWrong};  
+
+  console.log("The values for the update are", data.name, data.value_of_mag, data.feedback_wrong, data.feedback_ok, data.id_Rule);
+
+
+  con.query('UPDATE rules SET name = ?, value_of_mag =?, feedback_wrong=?, feedback_ok = ? WHERE (id = ?);', dtobj_string, (err, rows)=>{
+      if(err) throw err;
+     con.query('SELECT r.id, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id_action and r.id=?  and a.id_session=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id_action and r.id=? and a.id_session=?) AS second_action FROM rules as r WHERE r.id=?;', 
+    [req.params.id_rule, req.query.id_session, req.params.id_rule, req.query.id_session, req.params.id_rule], (err, rows)=>{
+    if(err) throw err;
+
+    rows.forEach( (row) => {
+      results.push(row);
+        //console.log(`${row.id_session} , ${row.id_datatype}`);
+    });
+    return res.json(results);
+    });
+  });
+}); //end function
+
 //get types of rules
 router.get('/types', (req, res, next) => {
   const results = [];
@@ -94,7 +128,7 @@ router.get('/actions/:id_session', (req, res, next) => {
 const roles = (id_session, callback) => {
   const results = [];
 
-    con.query('SELECT * FROM object_session WHERE id_session = ? ORDER BY id ASC;', [id_session], (err,rows) => {
+    con.query('SELECT * FROM object_session WHERE id_session = ? and id_object !=4 ORDER BY id ASC;', [id_session], (err,rows) => {
     if(err) throw err;
     rows.forEach( (row) => {
       results.push(row);
@@ -109,6 +143,142 @@ router.get('/roles/:id_session', (req, res, next) => {
   return roles(req.params.id_session, (results)=>{  
     return res.json(results);
   });
+});
+
+//VALIDATE FREEQUENCY RULES
+router.post('/validateFrequencyRule/:rulesID', (req, res, next) => {
+  
+  data = req.body;
+  rule = data.rule;
+  actions = data.actions;
+  actionOcurrance ={};
+  actionOcurrance['rule']= [];
+  var rulesValidated={};
+  var pointMessage = {};
+  rulesValidated["points"]=[];
+  rulesValidated["options"]=[];
+  rulesValidated["message"]=[];
+  rulesValidated['ruleName'] = rule[0].name;
+  rulesValidated['type'] = 'Frequency';
+  var actionMessage = '';
+  var groupMessage ='';
+  var startTimeOk='';
+ 
+  //add the very first action
+  var action = {};
+  action["id"] = actions[0].id;
+  action["start"] =actions[0].time_action;
+  action["content"] = actions[0].action_desc;
+  action["group"]=actions[0].id_object
+  actionOcurrance['rule'].push(action);
+
+  for (var i = 0; i < actions.length; i++) {
+    var action = {};
+
+    if (actions[i].action_desc != null && actions[i].action_desc == rule[0].first_action){
+      action["id"] = actions[i].id;
+      action["start"] =actions[i].time_action;
+      action["content"] = actions[i].action_desc;
+      action["group"]=actions[i].id_object
+      actionOcurrance['rule'].push(action);
+    }
+  }
+
+  //add the very last action
+
+  var action = {};
+  console.log('About to add thelast');
+  console.log(actions[actions.length -1].id);
+  action["id"] = actions[actions.length-1].id;
+  action["start"] =actions[actions.length-1].time_action;
+  action["content"] = actions[actions.length-1].action_desc;
+  action["group"]=actions[actions.length-1].id_object
+  actionOcurrance['rule'].push(action);
+  
+
+  coincidences = actionOcurrance['rule'];
+
+  console.log('Size of coincidences: ', coincidences.length);
+  var flag = true;
+  //var point = {};
+  //rulesValidated["points"].push(point);
+
+  for (var i = 0; i < (coincidences.length-1); i++){
+    //console.log('The action was identified in different ocations: ',coincidences[i].id); 
+    //COMPARE IF DATES ARE ACCORDING TO THE RULE
+
+    timeA = (new Date(coincidences[i].start)).getTime() / 1000;
+    timeB = (new Date(coincidences[i+1].start)).getTime() / 1000;
+    var difSeconds = timeB-timeA;
+
+
+    if(difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
+      console.log('One of the actions took more than expected: ', difSeconds);
+      flag=false;
+      var point = {};
+      point["start"] = coincidences[i].start;
+      point["end"] = coincidences[i+1].start;
+      point["type"] = 'background';
+      point["id"]=rule[0].id;
+      //point["content"] = 'This was not performed within proper time';
+      point["className"] = 'negative'; 
+      point["group"] = coincidences[i].group; 
+      actionMessage = coincidences[i].id;
+      groupMessage = coincidences[i].group;
+      startTimeWrong=coincidences[i].start;
+      rulesValidated["points"].push(point);
+    }else{
+      console.log('Well done, action performed in the right time', difSeconds);
+      var point = {};
+      point["start"] = coincidences[i].start;
+      point["end"] = coincidences[i+1].start;
+      point["type"] = 'background';
+      //point["content"] = 'Well done!!';
+      point["className"] = 'vis-time-response'; 
+      point["id"] = coincidences[i].id;
+      point["group"] = coincidences[i].group; 
+      actionMessage = coincidences[i].id;
+      groupMessage = coincidences[i].group;
+      rulesValidated["points"].push(point);
+      startTimeOk=coincidences[i].start;
+    }
+    
+  }
+
+  if (flag == true){
+    rulesValidated['status'] = 'ok';
+    console.log('TRUE the team did well');
+    rulesValidated["title"] = actions[0].session_name + " - "+ rule[0].name +' <br>'+ '<span style="color:blue">' +rule[0].feedback_ok + '</span>';
+    pointMessage['type'] = 'box';
+    pointMessage['id'] = actionMessage;
+    pointMessage["className"] = 'feedbackok';
+    pointMessage["content"] = 'Well done! The actions frequency was correct';
+    pointMessage['group'] = groupMessage;
+    pointMessage['start'] = startTimeOk;
+    rulesValidated["message"].push(pointMessage);
+  }else{
+    console.log('FALSE the team failed');
+    rulesValidated['status'] = 'wrong';
+    rulesValidated["title"] = actions[0].session_name + " - "+'<br>'+ '<span style="color:orange">'+ rule[0].feedback_wrong + '</span>';
+    pointMessage['type'] = 'box';
+    pointMessage['id'] = actionMessage;
+    pointMessage["className"] = 'feedbackwrong';
+    pointMessage["content"] = 'Something went wrong with the frequency';
+    pointMessage['group'] = groupMessage;
+    pointMessage['start'] = startTimeWrong;
+    rulesValidated["message"].push(pointMessage);
+  }
+
+
+  var options = {};
+  options ['start']=actions[0].time_action; 
+  options ['end']=actions[actions.length-1].time_action;
+  options ['editable']=false;
+  //options ['autoResize'] = false;
+  options ['moveable'] = false; 
+  rulesValidated["options"].push(options);  
+  console.log('Rules Validated @@@@@: ',rulesValidated);
+  return res.json(rulesValidated);
 });
 
 //VALIDATE SEQUENCY RULES
@@ -135,12 +305,12 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
 
   if(rule[0].magnitude == 'Proximity'){
     console.log('HELLO I AM A PROXIMITY RULE');
-    rulesValidated["title"]=rule[0].feedback_wrong;
+    rulesValidated["title"]='<span style="color:orange">' +rule[0].feedback_wrong +'</span>';
     rulesValidated["status"]='reflect';
   }
   else{
-    for (var i = 0; i < actions.length && (find != true); i++) {
-      var point = {};
+    var point = {};
+    for (var i = 0; i < actions.length; i++) {
       console.log('The second action selected: ', rule[0].second_action, actions[i].action_desc);
       //VALITATION OF SEQUENCE RULES
 
@@ -152,24 +322,26 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
             find=true;
             //point["id"] = actions[i].id;
             point["id"] = actions[i].id;
-            point["content"] = 'Description @@@ : '+actions[i].action_desc;
-            point["start"] = actions[i].time_action+0.1;
+            point["content"] = 'Description: '+actions[i].action_desc;
+            point["start"] = actions[i].time_action;
             point["type"] = 'box';
             point["group"] = actions[i].id_object;
             point["className"] = 'magenta';
             actionMessage=actions[i].id;
             groupMessage=actions[i].id_object;
             start=actions[i].time_action;
-            rulesValidated["points"].push(point);
             positionActionA=i;
           }  
       } 
     }
+    if(find==true){
+      rulesValidated["points"].push(point);
+    }
 
     //Find second action
+    var point = {};
+    for (var i = 0; i < actions.length; i++) {
 
-    for (var i = 0; i < actions.length && (find2!=true); i++) {
-      var point = {};
       //console.log(rule[0].second_action, actions[i].action_desc);
       console.log('The first action selected: ', rule[0].first_action, actions[i].action_desc);
 
@@ -180,7 +352,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
             console.log('Si  entro second validation');
             find2=true;
             point["id"] = actions[i].id;
-            point["content"] = 'Perform this actions is important'+actions[i].action_desc;
+            point["content"] = 'Perform this actions is important: '+actions[i].action_desc;
             point["start"] = actions[i].time_action;
             point["className"] = 'magenta';
             point["group"] = actions[i].id_object;
@@ -188,10 +360,13 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
             actionMessage=actions[i].id;
             groupMessage=actions[i].id_object;
             end=actions[i].time_action;
-            rulesValidated["points"].push(point);
+            //rulesValidated["points"].push(point);
             positionActionB=i;
           }
       } 
+    }
+    if(find2==true){
+      rulesValidated["points"].push(point);
     }
 
         //We need to validate if non of the actions happend
@@ -203,6 +378,8 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
 
     
     point["id"] = rule[0].id;
+    console.log('ACTION 1: ', positionActionA, ' ACTION 2: ', positionActionB)
+
     if(find == true && find2==true){
       if(rule[0].magnitude =='Time'){
         point["start"] = start;
@@ -212,16 +389,29 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
 
         start_time = (new Date(start)).getTime() / 1000;
         end_time = (new Date(end)).getTime() / 1000;
+        console.log('date fist and second action: ',start_time, end_time);
+        negative=false;
+        if (start_time > end_time ){
+          console.log('The diference will be negative');
+          negative =true;
+        }
         var difSeconds= end_time-start_time;
         
-        if( difSeconds > (parseInt(rule[0].value_of_mag) * 60)){
-          rulesValidated["title"] = rule[0].feedback_wrong + '<span style="color:orange">' + ' Time response: '+parseFloat(difSeconds/60).toFixed(2) +'</span>';
-          point["className"] = 'negative';  
+        if((difSeconds > (parseInt(rule[0].value_of_mag) * 60 ))|| (negative==true)){
+          if(negative==true){
+            point["start"] = end;
+            point["end"] = start;
+            pointMessage["content"] = 'The action was detected before the critical incident. Next time consider the order of the actions.';
+          }else{
+            pointMessage["content"] = 'The team reacted slow';
+          }
+          rulesValidated["title"] = '<span style="color:orange">' +rule[0].feedback_wrong +  ' Time response: '+parseFloat(difSeconds/60).toFixed(2) +'</span>';
+          point["className"] = 'negative';
           rulesValidated['status'] = 'wrong';
           pointMessage["className"] = 'feedbackwrong';
-          pointMessage["content"] = 'The team reacted slow';
+          
         }else{
-          rulesValidated["title"] = rule[0].feedback_ok + '<span style="color:blue">'+ ' Time response: '+parseFloat(difSeconds/60).toFixed(2)+'</span>';
+          rulesValidated["title"] ='<span style="color:blue">'+rule[0].feedback_ok + ' Time response: '+parseFloat(difSeconds/60).toFixed(2)+'</span>';
           point["className"] = 'vis-time-response';  
           rulesValidated['status'] = 'ok';
           pointMessage["className"] = 'feedbackok';
@@ -230,9 +420,8 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       }else{
         //point["content"] =  rule[0].feedback_ok;
         //VALIDATING IF ACTION 1 HAPPENDS FIRST
-        console.log('ACTION 1: ', positionActionA, ' ACTION 2: ', positionActionB)
         if (positionActionA < positionActionB){
-          rulesValidated["title"] = rule[0].feedback_ok;
+          rulesValidated["title"] = '<span style="color:blue">'+rule[0].feedback_ok +'</span>';
           point["className"] = 'vis-time-response';  
           rulesValidated['status'] = 'ok';
           point["start"] = start;
@@ -242,7 +431,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
           pointMessage['start'] = end;
           pointMessage["content"] = 'Well done the team perform this critical action';  
         }else{
-          rulesValidated["title"] = rule[0].feedback_wrong +'. Next time consider the order of the actions';
+          rulesValidated["title"] = '<span style="color:orange">'+ rule[0].feedback_wrong + "</span>" +'. Next time consider the order of the actions';
           point["className"] = 'negative';  
           rulesValidated['status'] = 'wrong';
           point["start"] = end;
@@ -259,7 +448,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       pointMessage["content"] = 'The team missed an action';
       pointMessage['start'] = start;
 
-      rulesValidated["title"] = rule[0].feedback_wrong;
+      rulesValidated["title"] = '<span style="color:orange">'+ rule[0].feedback_wrong + "</span>";
       point["start"] = start;
       point["type"] = 'background';
       point["end"] = actions[actions.length-1].time_action;
@@ -273,7 +462,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       //point["content"] = rule[0].feedback_wrong;
       //classMessage["className"] = 'feedbackwrong';
       //contentMessage["content"] = 'The team missed an action';
-      rulesValidated["title"] = rule[0].feedback_wrong;
+      rulesValidated["title"] = '<span style="color:orange">'+ rule[0].feedback_wrong+ "</span>";
       point["end"] = end;
       point["start"] = actions[0].time_action; 
       point["type"] = 'background';
@@ -288,7 +477,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
       //point["content"] = rule[0].feedback_wrong;
       //classMessage["className"] = 'feedbackwrong';
       //contentMessage["content"] = 'The team missed an action';
-      rulesValidated["title"] = rule[0].feedback_wrong;
+      rulesValidated["title"] = '<span style="color:orange">'+rule[0].feedback_wrong + "</span>";
       point["end"] = actions[actions.length].time_action;
       point["start"] = actions[0].time_action; 
       point["type"] = 'background';
@@ -353,7 +542,7 @@ router.post('/addRule', (req, res, next) => {
       if(err) throw err;
       rows.forEach( (row) => {
         results.push(row);
-        console.log(`${row.name} , ${row.magnitude}`);
+        //console.log(`${row.name} , ${row.magnitude}`);
       });
       return res.json(results);
   });

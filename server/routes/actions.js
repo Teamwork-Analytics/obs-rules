@@ -15,11 +15,16 @@ var fs = require('fs');
   database: 'group_analytics1'
 });*/
 
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
+//const database='group_analytics1';
+//const database='MonashInterviews';
+
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'gloria',
   password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: 'group_analytics1'
+  database: database
 });
 
 router.get('/', (req, res, next) => {
@@ -186,8 +191,10 @@ router.post('/addactionsectionobject', (req, res, next) => {
 //new table created to allow multiplicity
 //added 26-04-2019
 router.post('/addstartstopaction', (req, res, next) => {
+
   var results = [];
   var action_string = {id_session:req.body.id_session, id_action: req.body.id_action, action_desc: req.body.desc, time_action: new Date()};
+  console.log('Here it is??? ', action_string);
   con.query('INSERT INTO action_session_object SET ?', action_string, (err, result) => {
   
   if(err) throw err;

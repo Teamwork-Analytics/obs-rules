@@ -8,6 +8,12 @@ const { getRoles } = require('./rules');
 const { spawn } = require('child_process');
 
 
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
+//const database='group_analytics1';
+//const database='MonashInterviews';
+
+
 //import{roles} from './rules';
 /*const con = mysql.createConnection({
   host: 'localhost',
@@ -20,7 +26,7 @@ const con = mysql.createConnection({
   host: 'localhost',
   user: 'gloria',
   password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: 'group_analytics1'
+  database: database
 });
 
 
@@ -358,6 +364,17 @@ router.get('/getJsonFromFile/:id', (req, res, next) => {
   
 });
 
+//Function to create the bar char
+
+router.get('/createBarChar/:idRule', (req, res, next) => {
+  //console.log('value of id_session',req.query.id);
+  const id_rule = req.params.idRule;
+  console.log('Ready to create the bar char');
+
+  
+});
+
+
 //Funtion to execute the python script and get the graph
 
 router.get('/bringGraph/:idRule', (req, res, next) => {
@@ -393,6 +410,8 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
     //console.log('ANSWER FROM PYTHON: ', data.toString()[0], data.toString()[0]);
     //returnJson = './data/graphs/'+fromPython[1].replace(/^'|'$/g, '');
     //fileName= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
+    console.log('HTML MESSAGE : ',message);
+
     var query_string = 'UPDATE rules SET feedback_wrong = ? WHERE (id = ?);';
     con.query(query_string, [message, id_rule], (err, rows) => {
       if(err) throw err;
@@ -449,15 +468,16 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
           //console.log(`${row.id_session} , ${row.id_datatype}`);
         });
         //console.log(results);
-        console.log('TIMESTAMP:!!!! ', timestamps);
-        console.log('RESULTS:!!!! ', results);
+        //console.log('TIMESTAMP:!!!! ', timestamps);
+        //console.log('RESULTS:!!!! ', results);
 
-        console.log('TIMESTAMP ONLY:!!!! ', timestamps[0].time_action);
+        //console.log('TIMESTAMP ONLY:!!!! ', timestamps[0].time_action.toISOString().replace(/\.\d+/, "").slice(0, -1));
+
         var phases={
-          first_action: timestamps[0].time_action,
-          second_action: timestamps[1].time_action
+          first_action: (timestamps[0].time_action/1000),
+          second_action: (timestamps[1].time_action/1000)
         };
-
+        //console.log('Date in nodejs: ',phases.first_action)
         //return res.json(results);
         var obj = new Object();
         obj.first_action = timestamps[0].time_action;

@@ -207,7 +207,21 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
                   actions: dataActions,
                   rule: detailRule
                 };
-                $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
+                if (detailRule[0].magnitude=='Frequency'){
+                  console.log('I am validating a freqency rule');
+                  $http.post('/api/v2/rules/validateFrequencyRule/'+rulesID, toSend)
+                  .success(function(objs) {
+                    rulesInfo['id'] = detailRule[0].id;
+                    rulesInfo['status'] = objs.status;
+                    rulesInfo['mesage'] = objs.title;
+                    infoReport['dataReport'].push(rulesInfo);
+                  })
+                  .error(function(error){
+                      console.log('Error: ', error);
+                  });
+
+                }else{
+                  $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
                   .success(function(objs) {
                     //$scope.forReport = objs;
                     //console.log('How to access status', objs);
@@ -223,7 +237,9 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
                   .error(function(error){
                       console.log('Error: ', error);
                   });
-             
+
+
+                }               
                 })
                 .error(function(error){
                   console.log('Error: ', error);
@@ -342,6 +358,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
 
   //PREVIEW RULES
   $scope.seeRule = (idRule) => {
+    $scope.editingRules = $scope.editingRules = true;
     const dataObj = {
       id_session : $scope.sessionid,
       id_rule : idRule
@@ -350,6 +367,28 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
     .success((detailRule) => {
       $scope.detailRule = detailRule;
       $scope.sessionid=dataObj.id_session;
+    })
+    .error((data) => {
+      console.log('Error: ' + data);
+    });
+  };
+
+  //EDIT RULES
+  $scope.editRule = (idRule, name, value_of_mag, feedback_wrong, feedback_ok) => {
+    const dataObj = {
+      id_session : $scope.sessionid,
+      id_rule : idRule,
+      name : name,
+      value_of_mag : value_of_mag,
+      feedback_wrong : feedback_wrong,
+      feedback_ok : feedback_ok
+    };
+    console.log('Value of magnitude', value_of_mag);
+    $http.post(`/api/v2/rules/editRule/${idRule}?id_session=${$scope.sessionid}`, dataObj)
+    .success((detailRule) => {
+      $scope.detailRule = detailRule;
+      $scope.sessionid=dataObj.id_session;
+      //$scope.name = detailRule[0].name;
     })
     .error((data) => {
       console.log('Error: ' + data);
@@ -399,7 +438,11 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
     if (optionTrack==2) {
       $scope.rolesDiv = $scope.rolesDiv = true;
       console.log('Ego network');
-    }    
+    } 
+    else{
+      $scope.selectedRole = $scope.selectedRole = '';
+      $scope.rolesDiv = $scope.rolesDiv = false;
+    }
   };
 
   //FUNCTION TO SHOW FORM ACCORDING TO THE TYPE OF RULE that has been selected
@@ -415,6 +458,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
         $scope.timeR = $scope.timeR = true;
         $scope.proximity = $scope.proximity = false;
       }
+      //Rules based on sequence
       if (type==1) {
         $scope.timeR = $scope.timeR = false;
         $scope.causalityR = $scope.causalityR = true;
@@ -422,6 +466,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
         $scope.proximity = $scope.proximity = false;
        
       }
+      //Rules based on frequency
       if (type==3) {
         $scope.timeR = $scope.timeR = false;
         $scope.causalityR = $scope.causalityR = false;
@@ -452,6 +497,7 @@ app.controller('manageRules', function($window, $scope, $location, $routeParams,
     if(type == 3){magnitude='Frequency'; value = $scope.Frequency}
     if(type == 5 && $scope.optionTrack==2){magnitude='Proximity'; value = $scope.selectedRole}
     if(type == 5 && $scope.optionTrack==1){magnitude='Proximity'; value = 'All'}
+    if(type == 5 && $scope.optionTrack==3){magnitude='Proximity'; value = 'Priority'}
 
     const dataObjRule = {
       typeRule : type,
@@ -550,10 +596,32 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
   $scope.sessionid = $routeParams.id;
   $scope.nparticipants = 0;
   var containers = [];
+  var actionRules = [];
+  var positioningRules = [];
+  var otherRules=[];
+
   //GET ALL RULES OF A SESSION
   $http.get('/api/v2/rules/all/'+$scope.sessionid)
   .success(function(data){
-    $scope.sessionRules = data;
+
+    //$scope.sessionRules = data;
+    console.log('This is the data: ',data);
+    for(var i=0; i< data.length; i++){
+      console.log('Magnitude of the rule: ', data[i].magnitude);
+      if(data[i].magnitude == 'Sequence' || data[i].magnitude == 'Time'|| data[i].magnitude == 'Frequency'){
+        actionRules.push(data[i]);
+      }
+      if(data[i].magnitude == 'Proximity'){
+        positioningRules.push(data[i]);
+      }
+      else if(data[i].magnitude == 'Frequency'){
+        otherRules.push(data[i]);
+      }
+    }
+    $scope.actionrules = actionRules;
+    $scope.positioningrules = positioningRules;
+    $scope.othergrules = otherRules;
+    //$scope.sessionRules =data;
     //$window.location.href='http://localhost:3000/timeline/'+sessionID;
   })
   .error(function(error){
@@ -616,14 +684,29 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
               actions: dataActions,
               rule: detailRule
             };
-            $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
-            .success(function(objs) {
-              $scope.rulesVal = objs;
-              console.log('I am in the nested call');
-            })
-            .error(function(error){
-                console.log('Error: ', error);
-            });
+            
+            if (detailRule[0].magnitude=='Frequency'){
+              console.log('I am validating a freqency rule');
+              $http.post('/api/v2/rules/validateFrequencyRule/'+rulesID, toSend)
+              .success(function(objs) {
+                $scope.rulesVal = objs;
+                console.log('I am in the nested call');
+              })
+              .error(function(error){
+                  console.log('Error: ', error);
+              });
+
+            }else{
+              $http.post('/api/v2/rules/validateRule/'+rulesID, toSend)
+              .success(function(objs) {
+                $scope.rulesVal = objs;
+                console.log('I am in the nested call');
+              })
+              .error(function(error){
+                  console.log('Error: ', error);
+              });
+            }
+
           })
           .error(function(error){
               console.log('Error: ', error);
@@ -635,34 +718,49 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
   };
 
   //create the networks according to  the data
-  $scope.createNetwork = (idRule)  =>{
+  $scope.createNetwork = (idRule,  typeOfRule)  =>{
     console.log('Session for network: ',$scope.sessionid);
     console.log('Rule for network: ', idRule);
+    console.log('Type of rule ', typeOfRule);
 
-    //GET GRAPH
-    $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
-    .success(function(data){
-      //$scope.sessionRules = data;
-      //$http.get('path/to/service', {timeout: 5000});
-      $scope.graph = $scope.graph = true;
-      $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
-      $scope.graphPath = data.path;
-      message = '<span>'+ data.message + '</span>';
-      //const parser = new DOMParser();
-      //message = parser.parseFromString(message, 'text/html');
-      console.log('Thisa is parsed', message);
-      //console.log('Parser', parser)
-      $scope.myFeedback = message;
+    if(typeOfRule=='Priority'){
+      //GET BARCHAR
+      $http.get(`/api/v1/visualisations/createBarChar/${idRule}?id_session=${$scope.sessionid}`)
+      .success(function(data){
+        //$scope.sessionRules = data;
 
-      //console.log('Name of rule: :', data.rule[0].first_action);
+      })
+      .error(function(error){
+        console.log('Error: ' + error);
+      });
+    }
+    else{
+      //GET GRAPH
+      $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
+      .success(function(data){
+        //$scope.sessionRules = data;
+        //$http.get('path/to/service', {timeout: 5000});
+        $scope.graph = $scope.graph = true;
+        $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
+        $scope.graphPath = data.path;
+        message = '<span>'+ data.message + '</span>';
+        //const parser = new DOMParser();
+        //message = parser.parseFromString(message, 'text/html');
+        console.log('This is parsed', message);
+        //console.log('Parser', parser)
+        $scope.myFeedback = message;
 
-      //$window.location.href='http://localhost:3000/timeline/'+sessionID;
-    })
-    .error(function(error){
-      console.log('Error: ' + error);
-    });
+        //console.log('Name of rule: :', data.rule[0].first_action);
+
+        //$window.location.href='http://localhost:3000/timeline/'+sessionID;
+      })
+      .error(function(error){
+        console.log('Error: ' + error);
+      });
+    }
   };
-});
+
+}); //close manageVis controller
 
 app.controller('visController', function($scope, $location, $routeParams, $http, socket) {
   $scope.sessionid = $routeParams.id;
@@ -789,7 +887,7 @@ app.controller('actionsController', function($window, $scope, $location, $route,
         id_action: actID,
         desc: actDesc
     };
-    console.log(dataObj);
+    console.log('$$$$$$ ',dataObj);
     //add action-session-object
     $http.post('/api/v1/actions/addstartstopaction', dataObj )
         .success(function(data){
@@ -1445,7 +1543,7 @@ app.controller('actionsessionController', function($scope, $location, $routePara
       console.log('Error: ' + error);
     });   
 
-    };//end scope
+  };//end scope
 
     //added 1-05-2019
      $scope.deleteAction = function(actID){

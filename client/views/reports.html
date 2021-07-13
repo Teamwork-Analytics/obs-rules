@@ -47,12 +47,14 @@
 	</div>
 	
 </div>
+
+<!--This section present the layers
  Or
 <br>
 Please, click on any of the buttons below to validate group outcomes per rule:
 <br>
-
-<div id="Divrules">
+-->
+<div id="Divrules" ng-show="Divrules">
 	<table class='styled-table'>
 		<colgroup>
 	       <col span="1" style="width: 8%;">
@@ -232,7 +234,7 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 		//const elementHTML = document.getElementById('rep').innerHTML;
 
 		const doc = new jsPDF({
-   			orientation: 'p',
+   		orientation: 'p',
  			unit: 'pt',
  			format: 'a4',
  			compressPdf: true
@@ -251,26 +253,28 @@ Please, click on any of the buttons below to validate group outcomes per rule:
     	};
 
 		html2canvas(elementHTML, options).then(canvas => {
-		      const contentDataURL = canvas.toDataURL('image/jpeg', 1.0)
-		      console.log(contentDataURL);  
-		      let pdf = new jspdf('l', 'px', 'a4', true); //Generates PDF in landscape mode
+		    const contentDataURL = canvas.toDataURL('image/jpeg', 1.0)
+		    console.log(contentDataURL);  
+		    let pdf = new jspdf('l', 'px', 'a4', true); //Generates PDF in landscape mode
 		      // let pdf = new jspdf('p', 'cm', 'a4'); //Generates PDF in portrait mode
-		    const pageWidth = pdf.internal.pageSize.width;
-		    const pageHeight = pdf.internal.pageSize.height;
+		    //const pageWidth = pdf.internal.pageSize.width;
+		    //const pageHeight = pdf.internal.pageSize.height;
 
-		    const widthRatio = pageWidth / canvas.width;
-		    const heightRatio = pageHeight / canvas.height;
-		    const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+		    //const widthRatio = pageWidth / canvas.width;
+		    //const heightRatio = pageHeight / canvas.height;
+		    //const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
 
-		    const canvasWidth = canvas.width * ratio;
-		    const canvasHeight = canvas.height * ratio;
+		    //const canvasWidth = canvas.width * ratio;
+		    //const canvasHeight = canvas.height * ratio;
 
-		    const marginX = (pageWidth - canvasWidth) / 2;
-		    const marginY = (pageHeight - canvasHeight) / 2;
+		    //const marginX = (pageWidth - canvasWidth) / 2;
+		    //const marginY = (pageHeight - canvasHeight) / 2;
 
 		    //pdf.addImage(contentDataURL, 'PNG',marginX, marginY, canvasWidth, canvasHeight);  
-		    pdf.addImage(contentDataURL, 'PNG', 20, 40, marginX, marginY);  
-		    pdf.save('Filename.pdf');   
+		    //pdf.addImage(contentDataURL, 'PNG', 10, 20, marginX, marginY);  
+		    pdf.addImage(contentDataURL, 'PNG', 10, 20);  
+		    
+		    pdf.save('Filename.pdf');
 		}); 
 /*	    html2canvas(elementHTML, options).then((canvas) => {
 

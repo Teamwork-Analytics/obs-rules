@@ -190,16 +190,21 @@ def filteringPhases(df, phase1, phase2):
     #myFormatB = '%Y-%m-%d %H:%M:%S'
     #myFormatB = '%Y-%m-%d %I:%M:%S.%f'
     myFormatB = '%Y-%m-%d %I:%M:%S'
-    phase1= phase1.split(".")
-    phase2 = phase2.split(".")
+    phase1= pd.to_datetime(phase1.split(".")[0])
+    phase2 = pd.to_datetime(phase2.split(".")[0])
+
+    #phase1= phase1.split(".")
+    #phase2 = phase2.split(".")
+    #print(phase1, phase2, pd.to_datetime(df['timestamp'].head(2)))
     toSend= df['timestamp']
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
     #print('First timestamp: ', phase1, 'second timestamp: ', phase2, pd.to_datetime(phase1[0]).strftime(myFormatB))
     #filtered = df[df['timestamp'] >= datetime.datetime.strptime(phase1[0], myFormatB) & df['timestamp'] <= datetime.datetime.strptime(phase2[0], myFormatB)]
-    filtered = df[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB))]
+    #filtered = df[(df['timestamp'] >= pd.to_datetime(phase1).strftime(myFormatB)) & (df['timestamp'] <= pd.to_datetime(phase2).strftime(myFormatB))]
+    filtered = df[((pd.to_datetime(df['timestamp']) >= phase1) & (
+                pd.to_datetime(df['timestamp']) <= phase2))]
 
     #df.loc[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB))]
-
     return filtered, toSend
 
 

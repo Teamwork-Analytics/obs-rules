@@ -1,25 +1,35 @@
 
 <br>
-Please, click on any of the buttons below to validate group outcomes per rule:
+Please, click on any of the buttons below to validate group outcomes per assessment item (rule):
 <br>
 
 <div id="Divrules">
+	<!--Rules based on ACTIONS!-->
 	<table class='styled-table'>
 		<tr>
 			<td>
 				<a id="bottom-rule" href="javascript:void(0)" class="btn btn-primary" onclick='visVanillaTimeLine()'> Vanila Timeline </a>
 			</td>
-			<td ng-repeat="list in sessionRules">
-				<div id= 'actions' ng-if="list.magnitude == 'Sequence' || list.magnitude == 'Time' || list.magnitude == 'Frequency' ">
-					<button type="button" class="btn btn-primary" ng-click="seeVis(list.id)" onclick="docReady(gloria())">{{ list.name }}</button>	
-				</div>
-				<div id= 'localisation' ng-if="list.magnitude == 'Proximity'">
-					<button type="button" class="btn btn-warning btn-sm" ng-click="createNetwork(list.id)">{{ list.name }}</button>	
-				</div>
+			<td ng-repeat="ruleA in actionrules">
+				<button type="button" class="btn btn-primary" ng-click="seeVis(ruleA.id)" onclick="docReady(gloria())">{{ ruleA.name }}</button>	
 			</td>
-
 		</tr>
-
+	</table>
+	<!--Rules based on POSITIONING!-->
+	<table class='styled-table'>
+		<tr>
+			<td ng-repeat="ruleP in positioningrules">
+				<button type="button" class="btn btn-warning btn-sm" ng-click="createNetwork(ruleP.id, ruleP.value_of_mag)">{{ ruleP.name }}</button>	
+			</td>
+		</tr>
+	</table>
+	<!--Rules based on OTHER modalities!-->
+	<table class='styled-table'>
+		<tr>
+			<td ng-repeat="ruleO in otherRules">
+				<button type="button" class="btn btn-warning btn-sm" ng-click="seeVis(ruleO.id)" onclick="docReady(gloria())">{{ ruleO.name }}</button>	
+			</td>
+		</tr>
 	</table>
 </div>
 
@@ -242,13 +252,23 @@ function visVanillaTimeLine(){
 	    wrapper = document.getElementById('timelines'); 
 
 	    //create the background 
-
+	    var background_info;
+    if(dataValid.type!=undefined && dataValid.type=='Frequency' ){
+    	background_info = [];
+    	for(var i=0;i<points.length;i++){
+    		background_info.push(points[i]);
+    		console.log([points[i]]);
+    	}
+    	//var background_info = [points[2]];
+    }else{
 	    if(points.length < 3){
-	      var background_info =[points[1]]
+	      background_info =[points[1]];
 	    }else{
-	      var background_info =[points[2]]
-	    }
-	    console.log("This is how it looks like: ",background_info, points.length);
+	      background_info =[points[2]];
+	    }	
+    }
+	    
+	    //console.log("This is how it looks like: ",background_info, points.length);
 
 
 	    //create containers for each timeline
@@ -333,7 +353,7 @@ function visVanillaTimeLine(){
 	        console.log(newpos);
 	        if(el != undefined){
 	          newpos.append(el);
-	        }else{
+	        }else {
 	          newpos.append(la);
 	        }
 	      }

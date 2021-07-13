@@ -10,11 +10,16 @@ const path = require('path');
   database: 'group_analytics1'
 });*/
 
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
+//const database='group_analytics1';
+//const database='MonashInterviews';
+
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'gloria',
   password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: 'group_analytics1'
+  database: database
 });
 
 router.get('/', (req, res, next) => {
@@ -93,7 +98,7 @@ router.get('/objectsession/:ids', (req, res, next) => {
 router.get('/studentsession/:ids', (req, res, next) => {
   const results = [];
     //id_object = 1 = students
-    con.query('SELECT * FROM object_session WHERE id_session = ? ORDER BY name ASC;',[req.params.ids], (err,rows) => {
+    con.query('SELECT * FROM object_session WHERE id_session = ? AND id_object != 4 ORDER BY name ASC;',[req.params.ids], (err,rows) => {
     if(err) throw err;
 
     rows.forEach( (row) => {

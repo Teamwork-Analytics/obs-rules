@@ -13,11 +13,17 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:root
   database: 'group_analytics1'
 });*/
 
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
+//const database='group_analytics1';
+//const database='MonashInterviews';
+
+
 const con = mysql.createConnection({
   host: 'localhost',
   user: 'gloria',
   password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: 'group_analytics1'
+  database: database
 });
 
 router.get('/', (req, res, next) => {
