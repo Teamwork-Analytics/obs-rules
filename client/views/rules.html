@@ -2,9 +2,9 @@
     <h1>Assessment Criteria (Rules)</h1>
     <hr>
   </div>
-  <div class="p-2" id='AssessmentCriteriaForm'> 
+  <div class="p-2" id='assessmentcriteriaform'> 
 
-  	<div id='TypeRule' class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
+  	<div id='typerule' class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
 
   		<select style="font-size:15.0pt" ng-init="selectedType = item.name" ng-model="selectedType" ng-change="ShowInputTime(selectedType)">
         	<option value="">--What to validate?--</option>
@@ -90,14 +90,14 @@
             <span>{{ list.magnitude }} </span> |
             <span>{{ list.name }} </span> 
           </div>
-          <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeRule(list.id)"> Detail </a></div>
+          <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeRule(list.id)" id='detailrule'> Detail </a></div>
           <div id="deleteRule">
-            <a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="deleteRule(list.id)"> Delete </a>
+            <a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="deleteRule(list.id)" id='deleterule'> Delete </a>
           </div>
       </div>
   </div>
 
-  <div ng-show='editingRules'>
+  <div id='editrules' ng-show='editingRules'>
     
   
     <p class="lead font-weight-bold">Detail of the criteria (rule):</p>
@@ -123,7 +123,7 @@
             <textarea style="color:orange" type="text"  rows="3" ng-model="feedback_wrong" cols="130" ng-init="feedback_wrong=list.feedback_wrong">
             </textarea>
             <br>
-          <a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="editRule(list.id, list.name, value_of_mag, feedback_wrong, feedback_ok)"> Edit </a>
+          <a id='changerule' href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="editRule(list.id, list.name, value_of_mag, feedback_wrong, feedback_ok)"> Edit </a>
           </div>
 
           <!--<div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeVis(list.id)" onclick="gloria()"> Vis </a></div>
