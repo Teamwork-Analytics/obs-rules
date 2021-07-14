@@ -2,9 +2,9 @@
     <h1>Assessment Criteria (Rules)</h1>
     <hr>
   </div>
-  <div class="p-2"> 
+  <div class="p-2" id='AssessmentCriteriaForm'> 
 
-  	<div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
+  	<div id='TypeRule' class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
 
   		<select style="font-size:15.0pt" ng-init="selectedType = item.name" ng-model="selectedType" ng-change="ShowInputTime(selectedType)">
         	<option value="">--What to validate?--</option>
@@ -15,7 +15,7 @@
       </span>
     </div>
     <!--<h1>{{typeRule}} </h1>-->
-    <div ng-show = "HelpImage">
+    <div ng-show = "HelpImage" id='help'>
         <img src= {{path}} alt="Help" style="width:1000px;height:800px;">
     </div>
 
