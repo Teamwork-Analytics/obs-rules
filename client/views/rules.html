@@ -91,7 +91,9 @@
             <span>{{ list.name }} </span> 
           </div>
           <div class=""><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="seeRule(list.id)"> Detail </a></div>
-          <div class=""><a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="deleteRule(list.id)"> Delete </a></div>
+          <div id="deleteRule">
+            <a href="javascript:void(0)" class="mx-2 btn btn-warning btn-sm" ng-click="deleteRule(list.id)"> Delete </a>
+          </div>
       </div>
   </div>
 
