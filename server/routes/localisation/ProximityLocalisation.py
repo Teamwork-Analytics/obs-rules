@@ -28,12 +28,15 @@ def main():
 	idRule = A[0]['id']
 	#TYPE OF GRAPH
 	typeOfGraph = A[0]['value_of_mag'];
+
 	if typeOfGraph == 'All':
 		typeOfGraph='full';
-	if typeOfGraph == 'Priority':
-		typeOfGraph='barchar';
 	else:
 		typeOfGraph='role-centered';
+
+	if typeOfGraph == 'Priority':
+		typeOfGraph='barchar';
+
 	#PHASES
 	myFormat = '%Y-%m-%d %I:%M:%S'
 	phase1 = B[0]['time_action']
@@ -48,6 +51,8 @@ def main():
 	#CENTERED ROLE
 	if typeOfGraph == 'role-centered':
 		centeredRole= A[0]['value_of_mag'];
+	else:
+		centeredRole=0;
 	# ROLES
 	for x in range(len(C)):
 		roles[x] = C[x]['name']+','+ C[x]['serial'];
@@ -120,46 +125,43 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	#print('Agregation of the proxemic labels', df.head(5))
 
 	if (typeOfGraph == 'full'):
+		filterProxemic = vis.filterPL(df, proxemic, proxemic2, role=0)
 		# trackers_names = vis.nameTrackers(df, listRoles)
+		#df_trackers_ordered = vis.orderTrackers(centeredRole, df_trackers)
 		trackers_names = vis.nameTrackers(df_trackers, roles)
+		#trackers_names = vis.nameTrackers(df_trackers, roles)
 
-		filterProxemic = vis.filterPL(df, proxemic,proxemic2, role=0)
-		graph = vis.generateFullGraph(filterProxemic, trackers_names)
-		vis.visualiseGraph1(graph, session, 'porcentages', proxemic,proxemic2, idRule)
+		#filterProxemic = vis.filterPL(df, proxemic,proxemic2, role=0)
+		graph, message = vis.generateFullGraph(filterProxemic, trackers_names)
+		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
+		response = {"message": message, "path": name}
+		json_RESPONSE = json.dumps(response)
+		print(json_RESPONSE)
 
 		# Indicators of centrality
-		print('GRAPH DEGREE: ', vis.graphDegree(graph))
-		print('VERTEX 1 DEGREE: ', vis.vertexDegree(1, graph))
-		print('EDGE DEGREE: ', vis.edgeBetweennes(graph))
-		print('VERTEX DEGREE: ', vis.vertexBetweennes(graph))
-		print('LARGEST BETWEENESS: ', vis.largestBetweeness(graph, 'tracker'))
-		print('PAGE RANK: ', vis.pageRabk(graph))
-		print('PERSONALISE PAGE RANK: ', vis.PpageRabk(graph, 'proxLabel'))
+		#print('GRAPH DEGREE: ', vis.graphDegree(graph))
+		#print('VERTEX 1 DEGREE: ', vis.vertexDegree(1, graph))
+		#print('EDGE DEGREE: ', vis.edgeBetweennes(graph))
+		#print('VERTEX DEGREE: ', vis.vertexBetweennes(graph))
+		#print('LARGEST BETWEENESS: ', vis.largestBetweeness(graph, 'tracker'))
+		#print('PAGE RANK: ', vis.pageRabk(graph))
+		#print('PERSONALISE PAGE RANK: ', vis.PpageRabk(graph, 'proxLabel'))
 	else:
-		#print('ready to print the graph: centered role: ' +str(centeredRole))
 		# Filtering data according to proxemic label of interest and the role
-
 		filterProxemic = vis.filterPL(df, proxemic, proxemic2, centeredRole)
 		#totalSeconds = len(filterProxemic.index)
 		#print('Filter the data according to the proxemic label: ',filterProxemic)
-
 		# Once we have the proxemic labels we can try to plot the SN
 		df_trackers_ordered = vis.orderTrackers(centeredRole, df_trackers)
 		#print(df_trackers_ordered)
 		trackers_names = vis.nameTrackers(df_trackers_ordered, roles)
 		#print('NAME  TRACKERS: @@@@ ',trackers_names)
 		#print('ORDERED TRACKERS: @@@@ ', df_trackers_ordered)
-		#graph = vis.graphDefinition(filterProxemic, trackers_names, 'numbers')
 
 		# VISUALISE
-		#vis.visualiseGraph(graph)
-		# vis.visualiseGraph1(graph, session, phase, 'numbers', proxemic)
-
 		# visualise normalized data and porcentages
-
 		dfnorm = vis.normalizedata(filterProxemic)
 		#print(dfnorm)
-		#dfnorm = vis.normalizedataTotalSeconds(filterProxemic, totalSeconds)
 		graph, message = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
 		#print(graph)
 		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
