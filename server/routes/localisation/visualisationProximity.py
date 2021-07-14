@@ -43,7 +43,7 @@ def aggregateLaberlsPhase(df):
 def filterPL(df, proxemicLabel,proxemicLabel2, role):
 
     if (role == 0):
-        df = df[(df['proxemic'] == proxemicLabel) | (df['proxemic'] == proxemicLabel2)]
+        df = df[(df['proxemic'] == proxemicLabel)]
         role = 'PL_'
         spike_cols = [col for col in df.columns if role in col]
         df = df[spike_cols]
@@ -86,94 +86,6 @@ def nameTrackers(df, listRoles):
         role=listRoles.get(x).split(',')[0]
         df.loc[df['tracker'] == serial, 'Role'] = role
     return df
-
-def graphDefinition(df, df_trackers, typ):
-    #print('######################## THIS IS WHAT WE HAVE')
-    #print (df_trackers)
-    roles =''
-    values=''
-    #vertices = df_trackers[['tracker', 'enumeration']]
-    vertices = df_trackers.Role.unique()
-    #print(type(vertices));
-    #g = ig.Graph()
-    # Defining edges, it can be generate automatically according to the number of trackers
-    # SNA.. This is the actual Social Network, we need to think how to explote this for our dataset
-
-    items = []
-    for x in range(1, len(vertices)):
-        value = (0, x)
-        items.append(value)
-    l = list()
-    for item in items:
-        l.append(item)
-    #print(tuple(l))
-
-    #g = Graph()
-    g = Graph(tuple(l))
-
-    # if(len(df_trackers.tracker.unique()) == 6):
-    #     g = Graph([(0,1), (0,2), (0,3), (0,4), (0,5)])
-    # if (len(df_trackers.tracker.unique()) == 5):
-    #     g = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
-    # else:
-    #     print('The SN need to be define here')
-    # To fill the value of vertices
-    i=0
-    for item in vertices:
-        g.vs[i]['tracker'] = str(item)
-        #print('tracker: ',  str(i) , ' ' , g.vs[i]['tracker'])
-        roles +=  g.vs[i]['tracker'] + ', '
-        i+=1
-
-    #g.add_edges(tuple(l))
-
-    #print (df)
-    # To fill the name of edges
-    # g.es['proxLabel'] = ["0", "6", "0", "0", "0", "0"]
-    j = 0
-    for item in df:
-        g.es[j]['proxLabel'] = str(df.iloc[0][item])
-        #print('proxLabel: ', str(j), '  ', g.es[j]['proxLabel'])
-        values +=g.es[j]['proxLabel'] + ', '
-        j += 1
-
-    if (typ=='porcentages'):
-        j = 0
-        for item in df:
-            # if (float(df.iloc[0][item])==0.0):
-            #     g.es[j]['width'] = 0.1 * 5
-            # else:
-            #     g.es[j]['width'] = float(df.iloc[0][item]) * 4
-            g.es[j]['width'] = float(df.iloc[0][item]) * 4
-            j += 1
-    else:
-        j = 0
-        for item in df:
-            if (int(df.iloc[0][item])==0):
-                g.es[j]['width'] = 0.1 * 5
-            else:
-                g.es[j]['width'] = int(df.iloc[0][item])*0.05
-            j += 1
-
-    #summary(g)
-    #for int
-    #print(values, roles)
-    values = values.split(',')
-    roles = roles.split(', ')
-    values.insert(0, 'center')
-    #print(values, roles)
-    #print(len(values), len(roles))
-    message=''
-    color =''
-    for i in range(0, len(values)-1):
-        color = ''
-        if i>0:
-            if float(values[i]) < 0.5:
-                color='<span class="message-graph-negative"> '
-            else:
-                color= '<span class="message-graph-possitive"> '
-            message += ' '+roles[i] + ' spent ' + color + values[i] + '%'+' </span>'+ 'of their time with ' +roles[0] +' \n'
-    return g, message
 
 def visualiseGraph(g, session, phase, type, proxemic):
     name= str(session)+'_'+phase+'_'+type+'_'+proxemic+'.png'
@@ -287,9 +199,11 @@ def generateFullGraph(df, df_trackers):
     return g
 
 def fullGraphDefinition(df, df_trackers):
-    print('######################## FULL GRAPH DEFINITION')
+    #print('######################## FULL GRAPH DEFINITION')
+    roles =''
+    values=''
     # Use the enumeration to generate values
-    print (df_trackers)
+    #print (df_trackers)
     #vertices = df_trackers[['tracker', 'enumeration']]
     vertices = df_trackers.Role.unique()
     #g = ig.Graph()
@@ -298,7 +212,7 @@ def fullGraphDefinition(df, df_trackers):
     # SNA.. This is the actual Social Network, we need to think how to explote this for our dataset
     value = ''
     items =[]
-    print ('VERTICES ', vertices)
+    #print ('VERTICES ', vertices)
     for x in range(0, len(vertices)):
         for i in range(x + 1, len(vertices)):
             value = (x, i)
@@ -308,20 +222,21 @@ def fullGraphDefinition(df, df_trackers):
     for item in items:
         l.append(item)
 
-    print (tuple(l))
+    #print (tuple(l))
     g = Graph()
     g.add_vertices(len(df_trackers))
     g.add_edges(tuple(l))
 
-    summary(g)
+    #summary(g)
 
     #Asign names to vertices
     i=0
     for item in vertices:
         g.vs[i]['tracker'] = str(item)
+        roles += g.vs[i]['tracker'] + ', '
         i+=1
 
-    print (df)
+    #print (df)
     # # To fill the name of edges
 
     #Asign numbers to the edges, the proxemic porcentage
@@ -329,6 +244,7 @@ def fullGraphDefinition(df, df_trackers):
     for item in df:
         #Asign the proxemic label value to the edges, the porcentage
         g.es[j]['proxLabel'] = str(df.iloc[0][item])
+        values += g.es[j]['proxLabel'] + ', '
         # indicated the with of each edge
         if (float(df.iloc[0][item]) == 0.0):
             g.es[j]['width'] = 0.1 * 5
@@ -336,8 +252,113 @@ def fullGraphDefinition(df, df_trackers):
             g.es[j]['width'] = float(df.iloc[0][item]) * 4
         j += 1
 
-    summary(g)
-    return g
+    #summary(g)
+
+    # for int
+    #print(values, roles)
+    values = values.split(',')
+    roles = roles.split(', ')
+    #values.insert(0, 'center')
+    #print(values, roles)
+    # print(len(values), len(roles))
+    message = ''
+    color = ''
+    k=0
+    for j in range (0,len(roles)-1):
+        for i in range (j+1, len(roles)-1):
+            color = ''
+            if float(values[k]) < 0.5:
+                color = '<span class="message-graph-negative"> '
+            else:
+                color = '<span class="message-graph-possitive"> '
+            message += ' ' + roles[j] + ' spent ' + color + values[k] + '%' + ' </span>' + 'of their time with ' + roles[i] + ' \n'
+            k +=1
+    return g, message
+
+def graphDefinition(df, df_trackers, typ):
+    roles =''
+    values=''
+    #vertices = df_trackers[['tracker', 'enumeration']]
+    vertices = df_trackers.Role.unique()
+    #print(type(vertices));
+    #g = ig.Graph()
+    # Defining edges, it can be generate automatically according to the number of trackers
+    # SNA.. This is the actual Social Network, we need to think how to explote this for our dataset
+    items = []
+    for x in range(1, len(vertices)):
+        value = (0, x)
+        items.append(value)
+    l = list()
+    for item in items:
+        l.append(item)
+    #print(tuple(l))
+
+    #g = Graph()
+    g = Graph(tuple(l))
+
+    # if(len(df_trackers.tracker.unique()) == 6):
+    #     g = Graph([(0,1), (0,2), (0,3), (0,4), (0,5)])
+    # if (len(df_trackers.tracker.unique()) == 5):
+    #     g = Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
+    # else:
+    #     print('The SN need to be define here')
+    # To fill the value of vertices
+    i=0
+    for item in vertices:
+        g.vs[i]['tracker'] = str(item)
+        #print('tracker: ',  str(i) , ' ' , g.vs[i]['tracker'])
+        roles +=  g.vs[i]['tracker'] + ', '
+        i+=1
+
+    #g.add_edges(tuple(l))
+
+    #print (df)
+    # To fill the name of edges
+    # g.es['proxLabel'] = ["0", "6", "0", "0", "0", "0"]
+    j = 0
+    for item in df:
+        g.es[j]['proxLabel'] = str(df.iloc[0][item])
+        #print('proxLabel: ', str(j), '  ', g.es[j]['proxLabel'])
+        values +=g.es[j]['proxLabel'] + ', '
+        j += 1
+
+    if (typ=='porcentages'):
+        j = 0
+        for item in df:
+            # if (float(df.iloc[0][item])==0.0):
+            #     g.es[j]['width'] = 0.1 * 5
+            # else:
+            #     g.es[j]['width'] = float(df.iloc[0][item]) * 4
+            g.es[j]['width'] = float(df.iloc[0][item]) * 4
+            j += 1
+    else:
+        j = 0
+        for item in df:
+            if (int(df.iloc[0][item])==0):
+                g.es[j]['width'] = 0.1 * 5
+            else:
+                g.es[j]['width'] = int(df.iloc[0][item])*0.05
+            j += 1
+
+    #summary(g)
+    #for int
+    #print(values, roles)
+    values = values.split(',')
+    roles = roles.split(', ')
+    values.insert(0, 'center')
+    print(values, roles)
+    #print(len(values), len(roles))
+    message=''
+    color =''
+    for i in range(0, len(values)-1):
+        color = ''
+        if i>0:
+            if float(values[i]) < 0.5:
+                color='<span class="message-graph-negative"> '
+            else:
+                color= '<span class="message-graph-possitive"> '
+            message += ' '+roles[i] + ' spent ' + color + values[i] + '%'+' </span>'+ 'of their time with ' +roles[0] +' \n'
+    return g, message
 
 # The degree of a vertex equals the number of edges adjacent to it.
 def graphDegree(g):
