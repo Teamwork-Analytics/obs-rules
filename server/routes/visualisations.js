@@ -8,10 +8,10 @@ const { getRoles } = require('./rules');
 const { spawn } = require('child_process');
 
 
-const database='AllUTSsessions';
+//const database='AllUTSsessions';
 //const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-//const database='MonashInterviews';
+const database='MonashInterviews';
 
 
 //import{roles} from './rules';
@@ -387,11 +387,12 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
   console.log('ID_SESSION: ########: ', req.query.id_session);
   let name='';
   let returnJson = undefined;
-  let validate= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
+  let validate= req.query.id_session +'_'+ id_rule+'_'+'porcentages_intimate.png';
+  let validatePosibility= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
   console.log('TO VALIDATE: ##@@@@@: ',  validate);
   //var files = fs.readdirSync('../client/data/graphs/');
   fs.readdirSync('client/data/graphs/').forEach(file => {
-    if(file==validate){
+    if(file==validate || file==validatePosibility){
       exist=true;
     }
   });
