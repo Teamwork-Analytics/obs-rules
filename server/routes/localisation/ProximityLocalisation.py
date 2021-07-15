@@ -15,27 +15,29 @@ def main():
 	proxemic='intimate'
 	proxemic2='intimate'
 	#folderData='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/data';
-	folderData = 'server/routes/localisation/data';
+	folderData = 'server/routes/localisation/data'
 	#print(folderData);
-	roles = {};
-	centeredRole='';
-	A= json.loads(str(sys.argv[1]));
-	B= json.loads(str(sys.argv[2]));
-	C= json.loads(str(sys.argv[3]));
+	roles = {}
+	coordinates={}
+	centeredRole=''
+	A= json.loads(str(sys.argv[1]))
+	B= json.loads(str(sys.argv[2]))
+	C= json.loads(str(sys.argv[3]))
 
 	# GETTING PARAMETERS FROM NODE
 	#ID rule
 	idRule = A[0]['id']
 	#TYPE OF GRAPH
-	typeOfGraph = A[0]['value_of_mag'];
-
-	if typeOfGraph == 'All':
-		typeOfGraph='full';
-	else:
-		typeOfGraph='role-centered';
+	typeOfGraph = A[0]['value_of_mag']
+	spetialSim=''
 
 	if typeOfGraph == 'Priority':
-		typeOfGraph='barchar';
+		spetialSim='barchar'
+
+	if typeOfGraph == 'All':
+		typeOfGraph='full'
+	else:
+		typeOfGraph='role-centered'
 
 	#PHASES
 	myFormat = '%Y-%m-%d %I:%M:%S'
@@ -55,27 +57,34 @@ def main():
 		centeredRole=0;
 	# ROLES
 	for x in range(len(C)):
-		roles[x] = C[x]['name']+','+ C[x]['serial'];
+		roles[x] = C[x]['name']+','+ C[x]['serial']
 
 	# WHICH SESSION
-	session = A[0]['id_session'];
-	file = folderData + '/' + str(session) + '.json';
+	session = A[0]['id_session']
+	file = folderData + '/' + str(session) + '.json'
 	#print(A, B, str(sys.argv[3]));
 	#print(typeOfGraph, phase1, phase2, centeredRole, len(C), roles, session);
 
 	# Reminder: to know who the patient is, use the roles dictionary
 	#print(typeOfGraph, phase1, phase2, centeredRole, len(C), roles, session);
-	if(typeOfGraph=='barchar'):
-		createBarChar();
+	if(spetialSim=='barchar'):
+		#print('Here we are about to generate a barchar')
+		D = json.loads(str(sys.argv[4]))
+		#COORDINATES
+		for x in range(len(D)):
+			coordinates[x] = D[x]['coordinates']
+		#print('This is the first group of coordinates: ', D[0]["coordinates"], D[0]["name"])
+
+		createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule)
 	else:
-		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule);
+		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule)
 
 def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule):
 	#READ DATA
 	df = formating.readingDataJson(file,session);
 	#print(df.head(5));
 	#FORMATING
-	session = session;
+	#session = session;
 
 	#FILTER DATA ACCORDING TO PHASES
 	df1= formating.nameTrackers(df, roles)
@@ -169,8 +178,33 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
-def createBarChar():
-	print('We will create a Bar char');
+def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule):
+	#Read the file
+	df = formating.readingDataJson(file, session)
+	#FilterDataSet
+	df, toSend = formating.filteringPhases(df, phase1, phase2)
+	if df.empty:
+		# print('No matching rows: ', toSend);
+		df, toSend = formating.filteringPhasesAdding(df, phase1, phase2)
+	#print(df.head(10), toSend)
+
+	#print('This is the data number of rows: ',len(df.index))
+
+	#Calculate distancesRolesAndBeds
+	df = distances.calculateDistancesRolesToBeds(df, coordinates)
+	#Were they in intimate proxemity with the patient asign label?
+	numberOfPatients = len(coordinates)
+	#print('The number of patients is: ', numberOfPatients);
+	# careful with this functions of do you want to validate different distances. works only for intimate and personal
+	df = distances.asignProximityLabel(df, numberOfPatients)
+	#Agregate values according to the proximity of each patient Create a summary
+	# bed 1: %, bed 2: %, bed  3: %
+	itemsPlot, message, indexMax=distances.aggregateProximity(df, proxemic, numberOfPatients)
+	name = vis.plotBarChart(itemsPlot, session, idRule, indexMax)
+	response = {"message": message, "path": name}
+	json_RESPONSE = json.dumps(response)
+	print(json_RESPONSE)
+
 
 if __name__ == "__main__":
     # execute only if run as a script

@@ -10,10 +10,10 @@ const path = require('path');
   database: 'group_analytics1'
 });*/
 
-//const database='AllUTSsessions';
+const database='AllUTSsessions';
 //const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 
 const con = mysql.createConnection({
   host: 'localhost',
@@ -234,6 +234,29 @@ router.post('/updateobjcoordinates', (req, res, next) => {
     });
   }); //end function
 
+//Bring all coordinates of a session
+
+const coordinates = (id_session, callback) => {
+  
+  const results = [];
+  console.log('The value for the rule you are querying is: ',id_session);
+  con.query('SELECT coordinates, name FROM object_session where id_session =? and name like \'bed%\' ORDER BY name ASC;', [id_session], (err,rows) => {
+    if(err) throw err;
+    rows.forEach( (row) => {
+      results.push(row);
+      console.log(`${row.coordinates}`);
+    });
+    callback (results);
+  });
+};
+
+//get coordinates from session
+router.get('/coordinates/:id_session', (req, res, next) => {
+  return coordinates(req.params.id_session, (results)=>{ 
+    return res.json(results);
+  });
+});
+
 //delete actions with objects associated
 //added 24-04-2019
 router.post('/deleteobjectsession', (req, res, next) => {
@@ -259,3 +282,4 @@ router.post('/deleteobjectsession', (req, res, next) => {
 });
 
 module.exports = router;
+module.exports.getCoordinates = coordinates;

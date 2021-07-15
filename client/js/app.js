@@ -723,41 +723,36 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
     console.log('Rule for network: ', idRule);
     console.log('Type of rule ', typeOfRule);
 
-    if(typeOfRule=='Priority'){
-      //GET BARCHAR
-      $http.get(`/api/v1/visualisations/createBarChar/${idRule}?id_session=${$scope.sessionid}`)
-      .success(function(data){
-        //$scope.sessionRules = data;
+    // if(typeOfRule=='Priority'){
+    //   //GET BARCHAR
+    //   $http.get(`/api/v1/visualisations/createBarChar/${idRule}?id_session=${$scope.sessionid}`)
+    //   .success(function(data){
+    //     //$scope.sessionRules = data;
 
-      })
-      .error(function(error){
-        console.log('Error: ' + error);
-      });
-    }
-    else{
-      //GET GRAPH
-      $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
-      .success(function(data){
-        //$scope.sessionRules = data;
-        //$http.get('path/to/service', {timeout: 5000});
-        $scope.graph = $scope.graph = true;
-        $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
-        $scope.graphPath = data.path;
-        message = '<span>'+ data.message + '</span>';
-        //const parser = new DOMParser();
-        //message = parser.parseFromString(message, 'text/html');
-        console.log('This is parsed', message);
-        //console.log('Parser', parser)
-        $scope.myFeedback = message;
-
-        //console.log('Name of rule: :', data.rule[0].first_action);
-
-        //$window.location.href='http://localhost:3000/timeline/'+sessionID;
-      })
-      .error(function(error){
-        console.log('Error: ' + error);
-      });
-    }
+    //   })
+    //   .error(function(error){
+    //     console.log('Error: ' + error);
+    //   });
+    // }
+    
+    //GET GRAPH
+    $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
+    .success(function(data){
+      //$scope.sessionRules = data;
+      //$http.get('path/to/service', {timeout: 5000});
+      $scope.graph = $scope.graph = true;
+      $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
+      $scope.graphPath = data.path;
+      message = '<span>'+ data.message + '</span>';
+      //const parser = new DOMParser();
+      //message = parser.parseFromString(message, 'text/html');
+      console.log('This is parsed', message);
+      //console.log('Parser', parser)
+      $scope.myFeedback = message;
+    })
+    .error(function(error){
+      console.log('Error: ' + error);
+    });
   };
 
 }); //close manageVis controller

@@ -1,6 +1,7 @@
 from igraph import *
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib as mpl
 import cairo
 import formatingDataSetProximity as fd
 import numpy as np
@@ -108,7 +109,7 @@ def visualiseGraph(g, session, phase, type, proxemic):
     plot(g, name, **visual_style)
 
 def visualiseGraph1(g, session, type, proxemic, idRule):
-    name=str(session)+'_'+str(idRule)+'_'+type+'_'+proxemic+'.png'
+    name=str(session)+'_'+str(idRule)+'.png'
     layout = g.layout("kk")
     #print (g.vs['tracker'])
     #print(g.es[4]['proxLabel'])
@@ -396,3 +397,22 @@ def pageRabk(g):
 #personalize pagerank
 def PpageRabk(g, weight):
     return g.personalized_pagerank(weights=weight, implementation="prpack")
+
+def plotBarChart(items, session, idRule, indexMax):
+    name=str(session)+'_'+str(idRule)+'.png'
+
+    #plt.bar(len(items.index), items['values'], color=(0.5, 0.1, 0.5, 0.6))
+    #plt.title('Team average time on beds')
+    #plt.xlabel('patient bed')
+    #plt.ylabel('porcentage of time')
+    # Create names on the x axis
+    #plt.xticks(4, items['beds'])
+    actualDir = os.getcwd()
+    #plt.savefig(actualDir+'/client/data/graphs/'+name)
+    out = items.plot.bar(x='beds', y='values', rot=0, title='Team average time on beds')
+    for p in out.patches:
+        out.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
+    out.figure.savefig(actualDir+'/client/data/graphs/'+name)
+    return name
+
+

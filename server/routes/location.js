@@ -27,10 +27,10 @@ var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {
   database: 'group_analytics1'
 });*/
 
-//const database='AllUTSsessions';
+const database='AllUTSsessions';
 //const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 
 
 

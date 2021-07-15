@@ -5,13 +5,14 @@ const path = require('path');
 const fs = require('fs');
 const moment = require('moment');
 const { getRoles } = require('./rules');
+const { getCoordinates } = require('./objects');
 const { spawn } = require('child_process');
 
 
-//const database='AllUTSsessions';
+const database='AllUTSsessions';
 //const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 
 
 //import{roles} from './rules';
@@ -367,7 +368,7 @@ router.get('/getJsonFromFile/:id', (req, res, next) => {
 //Function to create the bar char
 
 router.get('/createBarChar/:idRule', (req, res, next) => {
-  //console.log('value of id_session',req.query.id);
+  console.log('ID_SESSION: ########: ', req.query.id_session);
   const id_rule = req.params.idRule;
   console.log('Ready to create the bar char');
 
@@ -387,12 +388,12 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
   console.log('ID_SESSION: ########: ', req.query.id_session);
   let name='';
   let returnJson = undefined;
-  let validate= req.query.id_session +'_'+ id_rule+'_'+'porcentages_intimate.png';
-  let validatePosibility= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
+  let validate= req.query.id_session +'_'+ id_rule+'_'+'.png';
+  //let validatePosibility= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
   console.log('TO VALIDATE: ##@@@@@: ',  validate);
   //var files = fs.readdirSync('../client/data/graphs/');
   fs.readdirSync('client/data/graphs/').forEach(file => {
-    if(file==validate || file==validatePosibility){
+    if(file==validate){
       exist=true;
     }
   });
@@ -442,6 +443,7 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
 
   //const path='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/ProximityLocalisation.py';
   const path='server/routes/localisation/ProximityLocalisation.py';
+
   console.log('The pythion script should be in here: ',path);
 
   con.query('SELECT r.id, r.id_session, r.name, r.magnitude, r.feedback_ok, r.feedback_wrong, r.value_of_mag, r.id_first_act, r.id_second_act, (select a.action_desc from action_session as a, rules as r where r.id_first_act=a.id_action and r.id=? and a.id_session=?) AS first_action, (select a.action_desc from action_session as a, rules as r where r.id_second_act=a.id_action and r.id=? and a.id_session=?) AS second_action FROM rules as r WHERE r.id=?;', 
@@ -489,42 +491,46 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
         //
         getRoles(results[0].id_session, (resultsRoles)=>{
           console.log('ROLE 1!!!! ', resultsRoles[0]);  
-          //MOVE THE SCRIPT HERE
-          const pythonProcess = spawn('python',[path, JSON.stringify(results), JSON.stringify(timestamps), JSON.stringify(resultsRoles)]);
-          // const pythonProcess = spawn('python',[path, results, timestamps, resultsRoles]);
-/*          pythonProcess.stdout.on('data', (data) => {
-              // Do something with the data returned from python script
-              console.log('Are we receiving something? ',data.toString());
-              name =data.toString();
-              console.log('The path of the file in nodejs is: ', name);
-              //name=res.json(name);
+          getCoordinates(results[0].id_session, (resultCoordinates)=>{
+            console.log('COORDINATES BED 1!!!! ', resultCoordinates[0]);  
+              //MOVE THE SCRIPT HERE
+            const pythonProcess = spawn('python',[path, JSON.stringify(results), JSON.stringify(timestamps), JSON.stringify(resultsRoles), JSON.stringify(resultCoordinates)]);
+            // const pythonProcess = spawn('python',[path, results, timestamps, resultsRoles]);
+  /*          pythonProcess.stdout.on('data', (data) => {
+                // Do something with the data returned from python script
+                console.log('Are we receiving something? ',data.toString());
+                name =data.toString();
+                console.log('The path of the file in nodejs is: ', name);
+                //name=res.json(name);
 
-          });*/
+            });*/
 
-          console.log('This is the python', pythonProcess);
-          pythonProcess.stdout.on(
-            'data',
-            logOutput('stdout')
-          );
-/*          pythonProcess.stderr.on('data', (data) => {
-              console.log('Error? ',data.toString());
-          });*/
+            console.log('This is the python', pythonProcess);
+            pythonProcess.stdout.on(
+              'data',
+              logOutput('stdout')
+            );
+  /*          pythonProcess.stderr.on('data', (data) => {
+                console.log('Error? ',data.toString());
+            });*/
 
-          pythonProcess.stderr.on(
-            'data',
-            logOutputError('stderr')
-          );
-          pythonProcess.on(
-            'close', (code) => {
-              console.log('The ON message: ',code);
-            }
-          );
-          pythonProcess.on(
-            'error', (code) => {
-              console.log('The ON error: ',code);
-            }
-          );
-        });
+            pythonProcess.stderr.on(
+              'data',
+              logOutputError('stderr')
+            );
+            pythonProcess.on(
+              'close', (code) => {
+                console.log('The ON message: ',code);
+              }
+            );
+            pythonProcess.on(
+              'error', (code) => {
+                console.log('The ON error: ',code);
+              }
+            );
+          }); //close getCoordinates
+          
+        }); // close getRoles
 
       });
       }//close else statement
