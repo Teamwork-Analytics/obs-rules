@@ -347,7 +347,7 @@ def graphDefinition(df, df_trackers, typ):
     values = values.split(',')
     roles = roles.split(', ')
     values.insert(0, 'center')
-    print(values, roles)
+    #print(values, roles)
     #print(len(values), len(roles))
     message=''
     color =''
