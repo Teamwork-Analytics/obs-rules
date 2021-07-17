@@ -38,7 +38,7 @@ router.post('/getDataforVis', (req, res, next) => {
   
   con.connect(function(err){});
   // Get mysql client from the connection pool
-  var query_string = 'SELECT session.name as session_name, action_session_object.id_session, objects.name as object_type, actions.action_type, action_session_object.id, action_session_object.action_desc, action_session_object.notes, action_session_object.id_object, action_session_object.time_action, action_session_object.duration, object_session.name FROM action_session_object LEFT JOIN object_session ON action_session_object.id_object=object_session.id AND action_session_object.id_session=object_session.id_session JOIN actions ON action_session_object.id_action = actions.id LEFT JOIN objects ON object_session.id_object = objects.id JOIN session ON action_session_object.id_session = session.id WHERE action_session_object.id_session = ? ORDER BY action_session_object.id ASC;';
+  var query_string = 'SELECT session.name as session_name, action_session_object.id_session, objects.name as object_type, actions.action_type, action_session_object.id, action_session_object.action_desc, action_session_object.notes, action_session_object.id_object, action_session_object.time_action, action_session_object.duration, object_session.name FROM action_session_object LEFT JOIN object_session ON action_session_object.id_object=object_session.id AND action_session_object.id_session=object_session.id_session JOIN actions ON action_session_object.id_action = actions.id LEFT JOIN objects ON object_session.id_object = objects.id JOIN session ON action_session_object.id_session = session.id WHERE action_session_object.id_session = ? ORDER BY action_session_object.time_action ASC';
   con.query(query_string, [req.body.id_session], (err, rows) => {
   if(err) throw err;
 
@@ -413,15 +413,21 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
     //returnJson = './data/graphs/'+fromPython[1].replace(/^'|'$/g, '');
     //fileName= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
     console.log('HTML MESSAGE : ',message);
+    var output = [];
 
     var query_string = 'UPDATE rules SET feedback_wrong = ? WHERE (id = ?);';
-    con.query(query_string, [message, id_rule], (err, rows) => {
+    var query_string1 = 'SELECT feedback_wrong from rules where id=?;';
+    con.query(query_string1, [id_rule], (err, rows) => {
       if(err) throw err;
+      rows.forEach( (row) => {output.push(row);});
+      wrong_feedback = output[0].feedback_wrong +'<br>';  
+      message  = wrong_feedback + message;
+      con.query(query_string, [message,  id_rule], (err, rows) => {
+        if(err) throw err;
 
-      returnJson = './data/graphs/'+ jsonResponse['path'].toString();
-      return res.json({'path': returnJson, 'rule': results,  'message':message});
-
-      //return res.json(results);
+        returnJson = './data/graphs/'+ jsonResponse['path'].toString();
+        return res.json({'path': returnJson, 'rule': results,  'message':message});
+      });
     });
 
     //message = jsonResponse['message'].replace(/[\n]/g,'<br>');

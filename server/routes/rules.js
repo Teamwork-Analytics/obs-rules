@@ -219,7 +219,8 @@ router.post('/validateFrequencyRule/:rulesID', (req, res, next) => {
       point["start"] = coincidences[i].start;
       point["end"] = coincidences[i+1].start;
       point["type"] = 'background';
-      point["id"]=rule[0].id;
+      //point["id"]=rule[0].id;
+      point["id"]=Math.random();
       //point["content"] = 'This was not performed within proper time';
       point["className"] = 'negative'; 
       point["group"] = coincidences[i].group; 
@@ -250,7 +251,7 @@ router.post('/validateFrequencyRule/:rulesID', (req, res, next) => {
     console.log('TRUE the team did well');
     rulesValidated["title"] = actions[0].session_name + " - "+ rule[0].name +' <br>'+ '<span style="color:blue">' +rule[0].feedback_ok + '</span>';
     pointMessage['type'] = 'box';
-    pointMessage['id'] = actionMessage;
+    pointMessage['id'] = Math.random();
     pointMessage["className"] = 'feedbackok';
     pointMessage["content"] = 'Well done! The actions frequency was correct';
     pointMessage['group'] = groupMessage;
@@ -261,7 +262,7 @@ router.post('/validateFrequencyRule/:rulesID', (req, res, next) => {
     rulesValidated['status'] = 'wrong';
     rulesValidated["title"] = actions[0].session_name + " - "+'<br>'+ '<span style="color:orange">'+ rule[0].feedback_wrong + '</span>';
     pointMessage['type'] = 'box';
-    pointMessage['id'] = actionMessage;
+    pointMessage['id'] = Math.random();
     pointMessage["className"] = 'feedbackwrong';
     pointMessage["content"] = 'Something went wrong with the frequency';
     pointMessage['group'] = groupMessage;
@@ -321,7 +322,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
             console.log('Si  entro');
             find=true;
             //point["id"] = actions[i].id;
-            point["id"] = actions[i].id;
+            point["id"] = Math.random();
             point["content"] = 'Description: '+actions[i].action_desc;
             point["start"] = actions[i].time_action;
             point["type"] = 'box';
@@ -351,7 +352,8 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
           if (actions[i].action_desc != null && actions[i].action_desc == rule[0].first_action){
             console.log('Si  entro second validation');
             find2=true;
-            point["id"] = actions[i].id;
+            //point["id"] = actions[i].id;
+            point["id"] = Math.random();
             point["content"] = 'Perform this actions is important: '+actions[i].action_desc;
             point["start"] = actions[i].time_action;
             point["className"] = 'magenta';
@@ -373,11 +375,11 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
     var point = {};
     console.log('validating rules, find or not: ', find, find2);
     pointMessage['type'] = 'box';
-    pointMessage['id'] = actionMessage;
+    pointMessage['id'] = Math.random();
     pointMessage['group'] = groupMessage;
 
     
-    point["id"] = rule[0].id;
+    point["id"] = Math.random();
     console.log('ACTION 1: ', positionActionA, ' ACTION 2: ', positionActionB)
 
     if(find == true && find2==true){

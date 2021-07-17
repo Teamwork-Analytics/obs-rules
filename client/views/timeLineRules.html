@@ -353,8 +353,12 @@ function visVanillaTimeLine(){
 	        console.log(newpos);
 	        if(el != undefined){
 	          newpos.append(el);
-	        }else {
+	        }
+	        if(la != undefined){
 	          newpos.append(la);
+	        }
+	        else {
+	          console.log('nothing happends');
 	        }
 	      }
    		}
