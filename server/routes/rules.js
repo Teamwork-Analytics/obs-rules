@@ -296,7 +296,7 @@ router.post('/validateRule/:rulesID', (req, res, next) => {
   rulesValidated['ruleName'] = rule[0].name;
   var pointMessage = {};
   positionActionA=0;
-  positionActioB=0;
+  positionActionB=0;
 
   start='';
 
