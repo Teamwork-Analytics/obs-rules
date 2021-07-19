@@ -7,7 +7,7 @@
   	<div id='typerule' class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisible">
 
   		<select style="font-size:15.0pt" ng-init="selectedType = item.name" ng-model="selectedType" ng-change="ShowInputTime(selectedType)">
-        	<option value="">--What to validate?--</option>
+        	<option value="">--Give feedback on:--</option>
         	<option ng-repeat="x in typeRules" value="{{x.id}}">{{x.name}}</option>
       </select>
       <span ng-show = "Help" ng-mouseover="showPopover()" ng-mouseleave="hidePopover()">
@@ -20,20 +20,20 @@
     </div>
 
      <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-show = "IsVisibleTime">
-        <span style="color:darkcyan;font-size:15.0pt">Title</span> for this criteria:<br>
-        <input type="text"  ng-model="Name"  style="width: 1050px;">
+        <span style="color:darkcyan;font-size:15.0pt">Name</span> this rule:<br>
+        <input type="text"  ng-model="Name"  style="width: 1080px;">
         <br>
-        Please select an <span style="color:darkcyan;font-size:15.0pt">action (A)</span> from the list:
-        <select style="width: 700px;font-size:15.0pt" ng-init="selectedFirst = item.action_desc" ng-model="selectedFirst">
+        This <span style="color:darkcyan;font-size:15.0pt">action (A)</span>:
+        <select style="width: 950px;font-size:15.0pt" ng-init="selectedFirst = item.action_desc" ng-model="selectedFirst">
         	<option value="">--Select--</option>
         	<option ng-repeat="x in actions" value="{{x.id_action}}">{{x.action_desc}}</option>
       	</select>
 
       	<div ng-show = "timeR">
-          The previous action happens in a <span style="color:darkcyan;font-size:15.0pt">Time frame</span> of: <input type="text"  ng-model="TimeFrame"> (minutes) AFTER
+          Shoud take place  <span style="color:darkcyan;font-size:15.0pt">within</span>: <input type="text"  ng-model="TimeFrame"> (minutes) AFTER
         </div>
       	<div ng-show = "causalityR">
-	      	The previous action happens:
+	      	Should take place:
 	        <select style="font-size:15.0pt" ng-init="causality = item.action_desc" ng-model="causality">
 	        	<option value="">--Select--</option>
 	        	<option value="1" selected>After</option>
@@ -41,37 +41,37 @@
 	      	</select>
       	</div>
       	<div ng-show = "frequencyR">
-          The previous action happens with a <span style="color:darkcyan;font-size:15.0pt">Frequency</span> of: <input type="text"  ng-model="Frequency"> (minutes)
+          Should take place <span style="color:darkcyan;font-size:15.0pt">every</span>: <input type="text"  ng-model="Frequency"> (minutes)
         </div>
         <div ng-show="ShowSecond">
-          Please select an <span style="color:darkcyan;font-size:15.0pt">action (B)</span> from the list:
-          <select style="width: 700px;font-size:15.0pt" ng-init="selectedSecond = item.action_desc" ng-model="selectedSecond" >
+          This <span style="color:darkcyan;font-size:15.0pt">action (B)</span> from the list:
+          <select style="width: 850px;font-size:15.0pt" ng-init="selectedSecond = item.action_desc" ng-model="selectedSecond" >
             <option value="">--Select--</option>
             <option ng-repeat="x in actions" value="{{x.id_action}}">{{x.action_desc}}</option>
           </select>
         </div>
         <div ng-show = "proximity">
-          <p>The previos actions will be used as a reference to analyse the proximity of the following roles, from action (A) to action (B):</p>
+          <p>The time from Action A and Action B will be used as a reference to analyse proximity of the following roles:</p>
           Which <span style="color:darkcyan;font-size:15.0pt">Roles</span> do you want to validate?
           <select style="width: 700px;font-size:15.0pt" id='optionProximity' ng-model="optionTrack" ng-change="valType(optionTrack)">
-            <option value=1>All of them (e.g. were they together after the handover?) - Full social network</option>
-            <option value=2>Particular role (e.g. were nurses close to the patient when he was asking for help?) - ego network</option>
-            <option value=3>Bar char - ONLY for the 4 beds sim</option>
+            <option value=1>Social Network for ALL roles (e.g. were they standing together after the handover?)</option>
+            <option value=2>Ego Network for a specific role (e.g. were nurse’s close to patient when asking for help?)</option>
+            <option value=3>Bar chart - ONLY for the 4-bed sim</option>
           </select>          
         </div>
         <div ng-show = "rolesDiv">
-          Choose the <span style="color:darkcyan;font-size:15.0pt">central role</span> you want to validate:
+          Choose the <span style="color:darkcyan;font-size:15.0pt">role</span> that will be validated:
           <select style="width: 700px;font-size:15.0pt" ng-init="role = item.serial" ng-model="selectedRole">
-            <option value="">--Select the role that will be in the centre of the network--</option>
+            <option value="">--Center Role--</option>
             <option ng-repeat="x in roles" value="{{x.serial}}">{{x.name}}-{{x.serial}}</option>
           </select>
             <!--<a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="addRole(selectedRole)"> Add other role </a>-->
         </div>
 
-        Feedback if <span style="color:darkcyan;font-size:15.0pt">correct</span>:
+        Feedback message if done <span style="color:darkcyan;font-size:15.0pt">correctly</span>:
         <br> <textarea type="text"  rows="3" ng-model="inputIfCorrect" cols="130">Type here</textarea>
         <br>
-        Feedback if <span style="color:darkcyan;font-size:15.0pt">wrong</span>: 
+        Feedback message if done <span style="color:darkcyan;font-size:15.0pt">incorrectly</span>: 
         <br><textarea type="text" rows="3" ng-model="inputIfWrong" cols="130">Type here</textarea>
          <br>  
        	<a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="AddNewRule(selectedType, selectedFirst,causality,selectedSecond)"> Save Criteria</a>
