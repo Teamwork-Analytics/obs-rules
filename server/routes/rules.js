@@ -100,7 +100,7 @@ router.post('/editRule/:id_rule', (req, res, next) => {
 router.get('/types', (req, res, next) => {
   const results = [];
 
-    con.query('SELECT * FROM rules_obs;', (err,rows) => {
+    con.query('SELECT * FROM rules_obs WHERE (id <> 4) and (id <> 6);', (err,rows) => {
     if(err) throw err;
 
     rows.forEach( (row) => {
