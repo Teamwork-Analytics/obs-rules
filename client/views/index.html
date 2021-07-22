@@ -13,7 +13,7 @@
               // Please use Strings, Numbers, or Bools for value types.
               pendo.initialize({
                   visitor: {
-                      //id:              sessionid   // Required if user is logged in
+                        id:              '1'
                       // email:        // Recommended if using Pendo Feedback, or NPS Email
                       // full_name:    // Recommended if using Pendo Feedback
                       // role:         // Optional
@@ -398,6 +398,8 @@
             </div>
       </div>
 
+    <button class="btn btn-success" ng-click="startAll(sessionid)">Start All</button>
+    <button class="btn btn-danger" ng-click="stopAll(sessionid)">Stop All</button>
 
       <button type="submit" class="btn btn-primary btn-lg btn-block" ng-click="redirectRules(sessionid)">Add Assessment criteria</button>
 
