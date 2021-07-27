@@ -14,6 +14,7 @@ def main():
 	#personal validate distances (0.46-1.2m)
 	proxemic='intimate'
 	proxemic2='intimate'
+	patientIDDevice=''
 	#folderData='/Users/13371327/Documents/Gloria/2020/RulesApp/obs-rules/server/routes/localisation/data';
 	folderData = 'server/routes/localisation/data'
 	#print(folderData);
@@ -56,9 +57,13 @@ def main():
 	else:
 		centeredRole=0;
 	# ROLES
+
 	for x in range(len(C)):
 		roles[x] = C[x]['name']+','+ C[x]['serial']
+		if (C[x]['id_object']) == 7:
+			patientIDDevice = C[x]['serial']
 
+	#print('After the loop: ',patientIDDevice)
 	# WHICH SESSION
 	session = A[0]['id_session']
 	file = folderData + '/' + str(session) + '.json'
@@ -75,13 +80,16 @@ def main():
 			coordinates[x] = D[x]['coordinates']
 		#print('This is the first group of coordinates: ', D[0]["coordinates"], D[0]["name"])
 
-		createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule)
+		createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice)
 	else:
-		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule)
+		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice)
 
-def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule):
+def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice):
 	#READ DATA
 	df = formating.readingDataJson(file,session);
+	if (patientIDDevice != '') & (typeOfGraph=='full'):
+		query = 'tracker !=' + patientIDDevice
+		df = df.query(query)
 	#print(df.head(5));
 	#FORMATING
 	#session = session;
@@ -134,6 +142,7 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	#print('Agregation of the proxemic labels', df.head(5))
 
 	if (typeOfGraph == 'full'):
+		#print(df.head(10))
 		filterProxemic = vis.filterPL(df, proxemic, proxemic2, role=0)
 		# trackers_names = vis.nameTrackers(df, listRoles)
 		#df_trackers_ordered = vis.orderTrackers(centeredRole, df_trackers)
@@ -178,9 +187,15 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
-def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule):
+def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice):
 	#Read the file
 	df = formating.readingDataJson(file, session)
+	#Remove the patient' data from the dataFrame, if it was tracked
+	#print('Patient ID device', patientIDDevice)
+	#print(df.head(10))
+	if patientIDDevice!='':
+		query='tracker !=' + patientIDDevice
+		df = df.query(query)
 	#FilterDataSet
 	df, toSend = formating.filteringPhases(df, phase1, phase2)
 	if df.empty:

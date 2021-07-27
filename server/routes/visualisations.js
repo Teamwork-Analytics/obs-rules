@@ -384,11 +384,13 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
   let exist=false;
   let fileName='';
   const timestamps= [];
+
   const id_rule = req.params.idRule;
   console.log('ID_SESSION: ########: ', req.query.id_session);
   let name='';
+  var message='';
   let returnJson = undefined;
-  let validate= req.query.id_session +'_'+ id_rule+'_'+'.png';
+  let validate= req.query.id_session +'_'+ id_rule+'.png';
   //let validatePosibility= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
   console.log('TO VALIDATE: ##@@@@@: ',  validate);
   //var files = fs.readdirSync('../client/data/graphs/');
@@ -397,7 +399,7 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
       exist=true;
     }
   });
-  console.log('Exists or not?? *****: ',exist);
+  console.log('Does it exists or not?? *****: ',exist);
 
   //console.log('TO VALIDATE IF THE FILE EXISTS',validate);
   const logOutput = (name) => (data) => {

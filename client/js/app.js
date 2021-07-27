@@ -1307,6 +1307,9 @@ app.controller('manageSourcesController', function($scope, $location, $routePara
     console.log('Error: ' + error);
   });
 
+
+
+///To this point
   $scope.startCapture = function(sessionId, datatypeId, datasessionId){
     var dataObj = {
         id_session : sessionId,
@@ -1425,6 +1428,96 @@ app.controller('manageSourcesController', function($scope, $location, $routePara
     });
   } //end else
   };
+
+$scope.startAll = function(sessionId) {
+
+    console.log("start all");
+    var oReqBio = new XMLHttpRequest();
+    oReqBio.open('GET', 'http://localhost:7301/bio/start/' + sessionId, true);
+    oReqBio.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqBio.send();
+    oReqBio.onreadystatechange = function () {
+        if (oReqBio.readyState === 4 && oReqBio.status === 200) {
+            console.log(oReqBio.responseText);
+        }
+    };
+
+    var oReqPos = new XMLHttpRequest();
+    oReqPos.open('GET', 'http://localhost:7201/pos/start/' + sessionId, true);
+    oReqPos.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqPos.send();
+    oReqPos.onreadystatechange = function () {
+        if (oReqPos.readyState === 4 && oReqPos.status === 200) {
+            console.log(oReqPos.responseText);
+        }
+    };
+    var oReqAudio = new XMLHttpRequest();
+    oReqAudio.open('GET', 'http://localhost:7501/audio/start/' + sessionId, true);
+    oReqAudio.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqAudio.send();
+    oReqAudio.onreadystatechange = function () {
+        if (oReqAudio.readyState === 4 && oReqAudio.status === 200) {
+            console.log(oReqAudio.responseText);
+        }
+    };
+
+    var oReqVideo = new XMLHttpRequest();
+    oReqVideo.open('GET', 'http://localhost:7101/video/start/' + sessionId, true);
+    oReqVideo.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqVideo.send();
+    oReqVideo.onreadystatechange = function () {
+        if (oReqVideo.readyState === 4 && oReqVideo.status === 200) {
+            console.log(oReqVideo.responseText);
+        }
+    };
+
+    console.log("recording start");
+};
+
+$scope.stopAll = function(sessionId) {
+    console.log("recording stop");
+
+    var oReqVideo = new XMLHttpRequest();
+    oReqVideo.open('GET', 'http://localhost:7101/video/stop', true);
+    oReqVideo.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqVideo.send();
+    oReqVideo.onreadystatechange = function () {
+        if (oReqVideo.readyState === 4 && oReqVideo.status === 200) {
+            console.log(oReqVideo.responseText);
+        }
+    };
+
+    var oReqPos = new XMLHttpRequest();
+    oReqPos.open('GET', 'http://localhost:7201/pos/stop', true);
+    oReqPos.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqPos.send();
+    oReqPos.onreadystatechange = function () {
+        if (oReqPos.readyState === 4 && oReqPos.status === 200) {
+            console.log(oReqPos.responseText);
+        }
+    };
+    var oReqBio = new XMLHttpRequest();
+    oReqBio.open('GET', 'http://localhost:7301/bio/stop', true);
+    oReqBio.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqBio.send();
+    oReqBio.onreadystatechange = function () {
+        if (oReqBio.readyState === 4 && oReqBio.status === 200) {
+            console.log(oReqBio.responseText);
+        }
+    };
+
+    var oReqAudio = new XMLHttpRequest();
+    oReqAudio.open('GET', 'http://49.127.:7501/audio/stop', true);
+    oReqAudio.setRequestHeader("Access-Control-Allow-Origin", "http://localhost");
+    oReqAudio.send();
+    oReqAudio.onreadystatechange = function () {
+        if (oReqAudio.readyState === 4 && oReqAudio.status === 200) {
+            console.log(oReqAudio.responseText);
+        }
+    };
+
+};
+  
 
   // $scope.endSession = function(){
   //   var dataObj = {

@@ -89,7 +89,7 @@ def nameTrackers(df, listRoles):
     return df
 
 def visualiseGraph(g, session, phase, type, proxemic):
-    name= str(session)+'_'+phase+'_'+type+'_'+proxemic+'.png'
+    name=str(session)+'_'+str(idRule)+'.png'
     layout = g.layout("kk")
     #print (g.vs['tracker'])
     #print(g.es[3]['proxLabel'])
