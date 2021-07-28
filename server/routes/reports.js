@@ -23,9 +23,9 @@ var mqtt_client = [];
 });*/
 
 //const database='AllUTSsessions';
-//const database='MonashAugustDataCollection';
+const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 
 
 const con = mysql.createConnection({

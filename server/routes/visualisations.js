@@ -10,9 +10,9 @@ const { spawn } = require('child_process');
 
 
 //const database='AllUTSsessions';
-//const database='MonashAugustDataCollection';
+const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 
 
 //import{roles} from './rules';

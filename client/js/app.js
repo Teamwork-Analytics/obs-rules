@@ -163,7 +163,7 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
       });
   };
 
-  $scope.generateReport=()=>{
+  $scope.generateReport=(type)=>{
     console.log('seeVis session id:',$scope.sessionid);
     $scope.Divreport = $scope.Divreport = true;
     var infoReport = {};
@@ -228,6 +228,9 @@ app.controller('manageReports', function($window, $scope, $location, $routeParam
                     rulesInfo['id'] = detailRule[0].id;
                     rulesInfo['status'] = objs.status;
                     rulesInfo['mesage'] = objs.title;
+                    rulesInfo['type'] = type;
+                    rulesInfo['resourseLink'] = './data/graphs/'+dataObj.id_session + '_' +detailRule[0].id + '.png'
+
                     // create a json file    
                     
                     infoReport['dataReport'].push(rulesInfo);
@@ -1517,7 +1520,7 @@ $scope.stopAll = function(sessionId) {
     };
 
 };
-  
+
 
   // $scope.endSession = function(){
   //   var dataObj = {

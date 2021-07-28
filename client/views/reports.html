@@ -1,7 +1,8 @@
  <div>
     <h1>Manage Reports</h1>
     <p>Please click here to see the teacher summary report:
-    	<a href="javascript:void(0)" ng-click="generateReport()"> <img id='reporticon' src="./img/report.png" alt="Report" style="width:80px;height:80px;"></a>
+    	<a href="javascript:void(0)" ng-click="generateReport('written')"> <img id='plain_report' src="./img/writtenReport.jpeg" alt="Report" style="width:110px;height:110px;"></a>
+    	<a href="javascript:void(0)" ng-click="generateReport('mixed')"> <img id='mix_report' src="./img/report.png" alt="Report" style="width:80px;height:80px;"></a>
     </p>
    
     <div id='rep' ng-show="Divreport">
@@ -27,6 +28,10 @@
 				</td>
 				<td>
 					<p ng-bind-html="value.mesage"></p>
+					<br>
+					<div id= 'graph' ng-if="value.status == 'reflect' && value.type == 'mixed'">
+	        			<img src={{value.resourseLink}} alt="Graph" style="width:500px;height:500px;">
+	    			</div>
 				</td>	
 				<td>
 					<div id= 'imageok' ng-if="value.status == 'ok' ">
@@ -255,24 +260,24 @@ Please, click on any of the buttons below to validate group outcomes per rule:
 		html2canvas(elementHTML, options).then(canvas => {
 		    const contentDataURL = canvas.toDataURL('image/jpeg', 1.0)
 		    console.log(contentDataURL);  
-		    let pdf = new jspdf('l', 'px', 'a4', true); //Generates PDF in landscape mode
-		      // let pdf = new jspdf('p', 'cm', 'a4'); //Generates PDF in portrait mode
-		    //const pageWidth = pdf.internal.pageSize.width;
-		    //const pageHeight = pdf.internal.pageSize.height;
+		    //let pdf = new jspdf('l', 'px', 'a4', true); //Generates PDF in landscape mode
+		    let pdf = new jspdf('p', 'cm', 'a4'); //Generates PDF in portrait mode
+		    const pageWidth = pdf.internal.pageSize.width;
+		    const pageHeight = pdf.internal.pageSize.height;
 
-		    //const widthRatio = pageWidth / canvas.width;
-		    //const heightRatio = pageHeight / canvas.height;
-		    //const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+		    const widthRatio = pageWidth / canvas.width;
+		    const heightRatio = pageHeight / canvas.height;
+		    const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
 
-		    //const canvasWidth = canvas.width * ratio;
-		    //const canvasHeight = canvas.height * ratio;
+		    const canvasWidth = canvas.width * ratio;
+		    const canvasHeight = canvas.height * ratio;
 
-		    //const marginX = (pageWidth - canvasWidth) / 2;
-		    //const marginY = (pageHeight - canvasHeight) / 2;
+		    const marginX = (pageWidth - canvasWidth) / 2;
+		    const marginY = (pageHeight - canvasHeight) / 2;
 
-		    //pdf.addImage(contentDataURL, 'PNG',marginX, marginY, canvasWidth, canvasHeight);  
+		    pdf.addImage(contentDataURL, 'PNG',marginX, marginY, canvasWidth, canvasHeight);  
 		    //pdf.addImage(contentDataURL, 'PNG', 10, 20, marginX, marginY);  
-		    pdf.addImage(contentDataURL, 'PNG', 10, 20);  
+		    //pdf.addImage(contentDataURL, 'PNG', 10, 20);  
 		    
 		    pdf.save('Filename.pdf');
 		}); 
