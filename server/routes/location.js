@@ -20,25 +20,11 @@ var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {
 });
 
 
-/*const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'group_analytics1'
-});*/
-
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
-//const database='group_analytics1';
-//const database='MonashInterviews';
-
-
-
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'gloria',
-  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: database
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_password,
+  database: process.env.db_database
 });
 
 router.get('/', (req, res, next) => {

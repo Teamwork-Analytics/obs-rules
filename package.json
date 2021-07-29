@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "start-nodemon": "nodemon -r dotenv/config bin/www"
+}
+}
