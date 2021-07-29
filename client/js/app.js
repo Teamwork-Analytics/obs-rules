@@ -887,10 +887,13 @@ app.controller('actionsController', function($window, $scope, $location, $route,
     };
     console.log('$$$$$$ ',dataObj);
     //add action-session-object
-    $http.post('/api/v1/actions/addstartstopaction', dataObj )
+    $http.post('/api/v1/actions/addstartstopaction', dataObj)
         .success(function(data){
-          $scope.selectedactions = data;
-          console.log(data);
+          if(data.error!=''){
+            window.alert("An error ocurred, please try later: " + data.error);
+          }
+          $scope.selectedactions = data.results;
+          //window.alert("All works properly: " + data.error);
         })
         .error((error) => {
           console.log('Error: ' + error);
@@ -1646,7 +1649,10 @@ app.controller('actionsessionController', function($scope, $location, $routePara
     //console.log(dataObj);
     $http.post('/api/v1/actions/deleteaction', dataObj )
         .success(function(data){
-          $scope.actionData = data;
+          if(data.error!=''){
+            window.alert('An error ocurred: ' + data.error);
+          }
+          $scope.actionData = data.results;
         })
         .error((error) => {
           console.log('Error: ' + error);

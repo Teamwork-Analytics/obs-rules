@@ -116,7 +116,7 @@ router.post('/generateJson2', (req, res, next) => {
 
             else {
                    //add critical items to R1 - they don't have student associated
-                    if(dataActions[i].action_type == "critical" && dataActions[i].name == "PTN"){
+                    if(dataActions[i].action_type == "critical" && (dataActions[i].name == "PTN" || dataActions[i].name == "B1P")){
                       var ct = {};
                       ct["event"] = dataActions[i].action_desc;
                       ct["when"] = dataActions[i].time_action;
@@ -124,7 +124,11 @@ router.post('/generateJson2', (req, res, next) => {
 
                       var critical_item = {};
                       //time_from_start = data[i].duration.split(":").slice(-2).join(":").split(".")[0];
-                      critical_item["id"] = participants["PTN"].length+1;
+                      if(dataActions[i].name == "B1P"){
+                        critical_item["id"] = participants["B1P"].length+1;
+                      }else{
+                        critical_item["id"] = participants["PTN"].length+1;
+                      }
                       critical_item["group"] = dataActions[i].id_object;
                       critical_item["action"] = dataActions[i].action_desc;
                       critical_item["start"] = dataActions[i].time_action;
@@ -137,7 +141,11 @@ router.post('/generateJson2', (req, res, next) => {
                       //else if(data[i].action_desc.split(" ")[0] == "Lose"){
                       //  critical_item["content"] = '<div class="special-time">'+time_from_start+'</div><img src="../../../img/lose.png" style="width: 136px; height: 112px;">';
                       //  }
-                      participants["PTN"].push(critical_item);
+                      if(dataActions[i].name == "B1P"){
+                        participants["B1P"].push(critical_item);
+                      }else{
+                        participants["PTN"].push(critical_item);
+                      }
                     }
 
                  else {
