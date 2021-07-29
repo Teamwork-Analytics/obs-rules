@@ -179,25 +179,31 @@ router.post('/addactionsectionobject', (req, res, next) => {
 //new table created to allow multiplicity
 //added 26-04-2019
 router.post('/addstartstopaction', (req, res, next) => {
-
   var results = [];
   var action_string = {id_session:req.body.id_session, id_action: req.body.id_action, action_desc: req.body.desc, time_action: new Date()};
-  console.log('Here it is??? ', action_string);
   con.query('INSERT INTO action_session_object SET ?', action_string, (err, result) => {
-  
-  if(err) throw err;
-    console.log(`inserted ${result.affectedRows} row(s)`);
-   
-    const query_string2 = 'SELECT actions.action_type, action_session_object.id, action_session_object.action_desc, action_session_object.notes, action_session_object.id_object, action_session_object.time_action, object_session.name FROM action_session_object LEFT JOIN object_session ON action_session_object.id_object=object_session.id AND action_session_object.id_session=object_session.id_session JOIN actions ON action_session_object.id_action = actions.id WHERE action_session_object.id_session = ? ORDER BY action_session_object.id DESC;';
-   
-    con.query(query_string2,[req.body.id_session], (err,rows) => {
-      if(err) throw err;
-      rows.forEach( (row) => {
-        results.push(row);
-            //console.log(`${row.name} started at ${row.time_start}`);
+
+    // INFO: safeguards against application crash
+    // Allows to click "start session" several times with no app crash
+    if(err) { // in case a session has already started
+      console.log("session has already started, cannot start twice")
+    } else {
+      console.log("starting the session")
+      console.log(`inserted ${result.affectedRows} row(s)`);
+
+      const query_string2 = 'SELECT actions.action_type, action_session_object.id, action_session_object.action_desc, action_session_object.notes, action_session_object.id_object, action_session_object.time_action, object_session.name FROM action_session_object LEFT JOIN object_session ON action_session_object.id_object=object_session.id AND action_session_object.id_session=object_session.id_session JOIN actions ON action_session_object.id_action = actions.id WHERE action_session_object.id_session = ? ORDER BY action_session_object.id DESC;';
+
+      con.query(query_string2,[req.body.id_session], (err,rows) => {
+        if(err) throw err;
+        rows.forEach( (row) => {
+          results.push(row);
+          //console.log(`${row.name} started at ${row.time_start}`);
+        });
+        return res.json(results);
       });
-      return res.json(results);
-    });
+    }
+
+    
   });
 });
 
