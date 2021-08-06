@@ -14,7 +14,7 @@ const path = require('path');
 const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
-
+//const database='testMonash';
 
 const con = mysql.createConnection({
   host: 'localhost',
@@ -40,10 +40,8 @@ router.get('/all', (req, res, next) => {
     results.push(row);
     //console.log(`${row.name} started at ${row.time_start}`);
     });
-
     return res.json(results);
   });
-
 });
 
 //insert source in session

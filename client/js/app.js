@@ -741,17 +741,23 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
     //GET GRAPH
     $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
     .success(function(data){
-      //$scope.sessionRules = data;
-      //$http.get('path/to/service', {timeout: 5000});
-      $scope.graph = $scope.graph = true;
-      $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
-      $scope.graphPath = data.path;
-      message = '<span>'+ data.message + '</span>';
-      //const parser = new DOMParser();
-      //message = parser.parseFromString(message, 'text/html');
-      console.log('This is parsed', message);
-      //console.log('Parser', parser)
-      $scope.myFeedback = message;
+
+      if(data.error!=0 || data.messageError!="none"){
+        window.alert('There was an error generating the graph, please try later: '+ data.messageError);
+      }else{
+        //$scope.sessionRules = data;
+        //$http.get('path/to/service', {timeout: 5000});
+        $scope.graph = $scope.graph = true;
+        $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
+        $scope.graphPath = data.path;
+        message = '<span>'+ data.message + '</span>';
+        //const parser = new DOMParser();
+        //message = parser.parseFromString(message, 'text/html');
+        console.log('This is parsed', message);
+        //console.log('Parser', parser)
+        $scope.myFeedback = message;
+      }
+
     })
     .error(function(error){
       console.log('Error: ' + error);
@@ -896,7 +902,7 @@ app.controller('actionsController', function($window, $scope, $location, $route,
           //window.alert("All works properly: " + data.error);
         })
         .error((error) => {
-          console.log('Error: ' + error);
+          console.log('Error: ' + data.error);
         });
 
   };//end log

@@ -342,7 +342,7 @@
           </div>
 
         <div class="p-2"> 
-        <select ng-if="!(item.id_object == 4)" ng-init="selectedTracker = item.serial"  
+        <select ng-if="!(item.id_object == 4 || item.id_object == 7)" ng-init="selectedTracker = item.serial"  
                 ng-model="selectedTracker"
                 ng-change="updateTagObjSession(item.id, selectedTracker)">
           <option value="">--Tag--</option>
@@ -358,11 +358,10 @@
           <option ng-repeat="x in trackers_empatica" value="{{x.id_empatica}}">{{x.name}}:{{x.id_empatica}}</option>
         </select>
         <p class="text-secondary" ng-if="!(item.id_object == 6 || item.id_object == 1 || item.id_object == 4 || item.id_object == 7)"> Not available </p>
-        <p class="text-secondary" ng-if="item.id_object == 4">
+        <p class="text-secondary" ng-if="item.id_object == 4 || item.id_object == 7">
               (x, y) <input type="text" ng-model='coordinates' ng-init="coordinates=item.coordinates">
                <span><a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="addFixedCoordinates(item.id, coordinates)"> Add </a>
         </p>
-
         </div>
          <div class="p-2">
             <a href="javascript:void(0)" class="btn btn-outline-danger btn-sm" ng-click="deleteObjectSession(item.id)"> Delete </a>

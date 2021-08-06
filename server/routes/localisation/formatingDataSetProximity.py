@@ -126,10 +126,12 @@ def asignPhases(df, phasesReference):
     return df
 
 def cleaning(df):
-    df = df[['session', 'timestamp','tracker', 'x', 'y', 'z','pitch','yaw','roll','accX','accY','accZ']]  # Re-order dataframe columns
+    #df = df[['session', 'timestamp','tracker', 'x', 'y', 'z','pitch','yaw','roll','accX','accY','accZ']]  # Re-order dataframe columns
+    df = df[['session', 'timestamp', 'tracker', 'x', 'y']]  # Re-order dataframe columns
     df = df.sort_values(['tracker', 'session', 'timestamp'])  # order session (1 - 12)
     # remove tracker = 1 - VALIDATE IF IT IS NECESSARY TO REMOVE THE PATIENT
     #df = df[df.tracker != 1]
+    #print(df.head(10))
     return df
 
 def normalization(df):
@@ -347,9 +349,9 @@ def fixedReference(df):
 
 
 def nameTrackers(df, listRoles):
-    value=listRoles.get(0)
+    #value=listRoles.get(0)
     #print('Roles: @@@@@@ ', value)
-    x = value.split(",")
+    #x = value.split(",")
     for x in range(0, len(listRoles)):
         serial=int(listRoles.get(x).split(',')[1])
         role=listRoles.get(x).split(',')[0]
@@ -359,13 +361,56 @@ def nameTrackers(df, listRoles):
     #If there is a tracker that was not capture in  the webtool, all registers for that trackers will desapear
     #df = df.query('Role.notna()')
     #print(df['tracker'].head(10), listRoles)
+    #delete all the trackers that were not named
     df.dropna(subset=["Role"], inplace=True)
     #df['Role'].replace('', np.nan, inplace=True)
+    #print(df.Role.unique())
     return df
 
-def roleNum (df, df_trackers, centeredRole):
+def roleNum(df, df_trackers, centeredRole):
     #print('TRACKERS ',df_trackers)
     for index, row_df in df_trackers.iterrows():
-        if (int(row_df['tracker'])==int(centeredRole)):
+        #print('Tracker: ', str(row_df['tracker']), ' Enumeration: ', row_df['enumeration'])
+        if (str(row_df['tracker']).split(".")[0]==str(centeredRole)):
             centeredRole=int(row_df['enumeration'])
     return centeredRole
+
+
+def creatingTimestampColumns(start, end, patientcoordinates, session):
+
+    x=patientcoordinates.split(",")[0]
+    y=patientcoordinates.split(",")[1]
+    #print('patient coordinates: ', x, y)
+
+    start =  pd.to_datetime(start.split(".")[0])
+    end = pd.to_datetime(end.split(".")[0])
+    #print('Dates in the formating.py: ', start, end)
+    difference = end - start
+    difference_seconds=difference.total_seconds()
+    #print('the number of seconds is', difference_seconds)
+    #print(data['timestamp'])
+    #data= pd.date_range(end=datetime.today(), periods=100).to_pydatetime().tolist()
+    #data1 = pd.date_range(start=start,end=end, periods=3).to_pydatetime().tolist()
+    #data1 = pd.date_range(start=start, end=end, periods=567).to_pydatetime().tolist()
+
+    data1 = pd.date_range(start=start, end=end, periods=difference_seconds).to_pydatetime().tolist()
+    #print(data1)
+    #create  the dataFrame
+
+    df = pd.DataFrame(data1, columns=["timestamp"])
+    #print(df.head(5))
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df['tracker']=int('11111')
+    df['session'] = int(session)
+    df['x']=int(x)
+    df['y'] = int(y)
+    #print(len(df))
+    df = normalization(df)
+    df = df[['session', 'timestamp', 'tracker', 'x', 'y']]  # Re-order dataframe columns
+    df = df.reset_index()
+
+
+    #print('here we go',df)
+    #print(type(data1))
+
+    return df

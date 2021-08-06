@@ -8,6 +8,7 @@ import distancesProximity as distances
 import visualisationProximity as vis
 from datetime import datetime
 from time import gmtime, strftime
+import pandas as pd
 
 def main():
 	# intimate, personal, social, public
@@ -34,7 +35,6 @@ def main():
 
 	if typeOfGraph == 'Priority':
 		spetialSim='barchar'
-
 	if typeOfGraph == 'All':
 		typeOfGraph='full'
 	else:
@@ -53,16 +53,28 @@ def main():
 	#print('dates in the python script AFTER : ', phase1, phase2)
 	#CENTERED ROLE
 	if typeOfGraph == 'role-centered':
-		centeredRole= A[0]['value_of_mag'];
+		#print('The value of the center role: ', A[0]['value_of_mag'])
+		if(A[0]['value_of_mag'] is None or A[0]['value_of_mag']== '' or A[0]['value_of_mag']== 'null'):
+			centeredRole='11111'
+		else:
+			centeredRole= A[0]['value_of_mag']
 	else:
-		centeredRole=0;
-	# ROLES
+		centeredRole=0
 
+	# ROLES
+	#print('centeredRole value: ', centeredRole)
+	#7 is the patient role according to the web tool
 	for x in range(len(C)):
-		roles[x] = C[x]['name']+','+ C[x]['serial']
 		if (C[x]['id_object']) == 7:
 			patientIDDevice = C[x]['serial']
-
+			patientcoordinates = C[x]['coordinates']
+			if(centeredRole=='11111'):
+				roles[x] = C[x]['name'] + ',' + '11111'
+			else:
+				roles[x] = C[x]['name'] + ',' + '11111'
+			#print('Here is the patient information: ',patientIDDevice, patientcoordinates, roles[x])
+		else:
+			roles[x] = C[x]['name'] + ',' + C[x]['serial']
 	#print('After the loop: ',patientIDDevice)
 	# WHICH SESSION
 	session = A[0]['id_session']
@@ -82,15 +94,35 @@ def main():
 
 		createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice)
 	else:
-		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice)
+		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice, patientcoordinates)
 
-def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice):
+def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice, patientcoordinates):
 	#READ DATA
 	df = formating.readingDataJson(file,session);
-	if (patientIDDevice != '') & (typeOfGraph=='full'):
+	#print('Alll the variables I want to know: ',centeredRole, patientcoordinates, patientIDDevice);
+	if ((not(patientIDDevice is None)) & (patientIDDevice != '')) & (typeOfGraph=='full'):
 		query = 'tracker !=' + patientIDDevice
 		df = df.query(query)
-	#print(df.head(5));
+
+	if (typeOfGraph=='role-centered'):
+		# Add the patient info into the dataFrame
+		if(not(patientcoordinates is None)) & (centeredRole=='11111'):
+			#create a small dataFrame with the patient info
+			#the tagId is 0000
+			#print('Good the patient coordinate and the centered role is patient', centeredRole, patientcoordinates)
+			dfPatient= formating.creatingTimestampColumns(phase1, phase2, patientcoordinates, session)
+
+			#Concat the new dataFrame with the one that was read in the first line
+
+			frames = [dfPatient, df]
+			df = pd.concat(frames, sort=True)
+			df = df.reset_index()
+			#print(df);
+		elif (patientcoordinates is None):
+			response = {"message": 'none', "path": 'none', "messageError": 'Please set the patient coordinate or the role serial tracker'}
+			json_RESPONSE = json.dumps(response)
+			print(json_RESPONSE)
+
 	#FORMATING
 	#session = session;
 
@@ -125,8 +157,9 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	#print ('AFTER FILTERING: ',len(df.index))
 
 	# WHICH  TRACKER IS THE SELECTED ROLE, returns the enum tracker
+	#print('Here is the center role value: ',centeredRole)
 	centeredRole = formating.roleNum(df, df_trackers, centeredRole)
-	#print('Selected role in the miedle: $$$$$', centeredRole)
+	#print('Enum for the selected role in the miedle: $$$$$', centeredRole)
 	## DISTANCES
 	# To run the calculation of distances it requires the number of trackers and the dataset
 	df_distancesBetTrackers = distances.distancesBetweenTrackers(df, n)
@@ -152,7 +185,7 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		#filterProxemic = vis.filterPL(df, proxemic,proxemic2, role=0)
 		graph, message = vis.generateFullGraph(filterProxemic, trackers_names)
 		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
-		response = {"message": message, "path": name}
+		response = {"message": message, "path": name, "messageError": "none"}
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
@@ -183,7 +216,7 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		graph, message = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
 		#print(graph)
 		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
-		response =  {"message":message, "path":name}
+		response =  {"message":message, "path":name, "messageError": "none"}
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
@@ -193,7 +226,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
 	#print(df.head(10))
-	if patientIDDevice!='':
+	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
 		df = df.query(query)
 	#FilterDataSet
@@ -216,7 +249,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	# bed 1: %, bed 2: %, bed  3: %
 	itemsPlot, message, indexMax=distances.aggregateProximity(df, proxemic, numberOfPatients)
 	name = vis.plotBarChart(itemsPlot, session, idRule, indexMax)
-	response = {"message": message, "path": name}
+	response = {"message": message, "path": name, "messageError": "none"}
 	json_RESPONSE = json.dumps(response)
 	print(json_RESPONSE)
 

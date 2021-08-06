@@ -13,6 +13,7 @@ const { spawn } = require('child_process');
 const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
+//const database='testMonash';
 
 
 //import{roles} from './rules';
@@ -379,8 +380,6 @@ router.get('/createBarChar/:idRule', (req, res, next) => {
   console.log('ID_SESSION: ########: ', req.query.id_session);
   const id_rule = req.params.idRule;
   console.log('Ready to create the bar char');
-
-  
 });
 
 
@@ -392,6 +391,7 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
   let exist=false;
   let fileName='';
   const timestamps= [];
+  var error=0;
 
   const id_rule = req.params.idRule;
   console.log('ID_SESSION: ########: ', req.query.id_session);
@@ -411,18 +411,24 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
 
   //console.log('TO VALIDATE IF THE FILE EXISTS',validate);
   const logOutput = (name) => (data) => {
-    console.log('TYPE OF DATA: ', (typeof data));
-    console.log('ANSWER FROM PYTHON: ',data.toString());
+    //console.log('TYPE OF DATA: ', (typeof data));
+      console.log('ANSWER FROM PYTHON: ',data.toString());
     //data = data.toString().replace(/[\n]/g,'<br>');
     jsonResponse = JSON.parse(data.toString());
-    console.log('JSON. RESPONSE : ',jsonResponse['message']);
+
+/*    if(jsonResponse['messageError'].toString()!=undefined){
+      error=1;
+      return res.json({'error': error, 'messageError': jsonResponse['messageError'].toString()});
+    }else{*/
+    //jsonResponse = JSON.parse(data.toString());
+    //console.log('JSON. RESPONSE : ',jsonResponse['message']);
     message = jsonResponse['message'].toString().replace(/[\n]/g,'<br>');
     //fromPython=data.toString().split(',');
 
     //console.log('ANSWER FROM PYTHON: ', data.toString()[0], data.toString()[0]);
     //returnJson = './data/graphs/'+fromPython[1].replace(/^'|'$/g, '');
     //fileName= req.query.id_session +'_'+ id_rule+'_'+'porcentages_personal.png';
-    console.log('HTML MESSAGE : ',message);
+    //console.log('HTML MESSAGE : ',message);
     var output = [];
 
     var query_string = 'UPDATE rules SET feedback_wrong = ? WHERE (id = ?);';
@@ -436,19 +442,20 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
         if(err) throw err;
 
         returnJson = './data/graphs/'+ jsonResponse['path'].toString();
-        return res.json({'path': returnJson, 'rule': results,  'message':message});
+        return res.json({'path': returnJson, 'rule': results,  'message':message, 'error': error, 'messageError': jsonResponse['messageError'].toString()});
       });
     });
-
-    //message = jsonResponse['message'].replace(/[\n]/g,'<br>');
-    //console.log(fileName);
-
-    //const parser = new window.DOMParser();
-    //var message = parser.parseFromString(message, 'text/html');
   };
 
-  const logOutputError = (name) => (data) => console.log(`[${name}] ${data.toString()}`);
+  const logOutputError =  (name) => debounce ((data) => {
+    //console.log(`[${name}] ${data.toString()}`);
+    //res.setHeader('Content-Type', 'text/plain');
 
+    console.log('Log output error: ', data.toString());
+    error=1;
+    return res.json({'error': error, 'message':data.toString()});
+    //res.json();
+  },5000);
 
   //console.log('ID_SESSION: ########: ', req.query);
   //const idsession=req.query.id_session;
@@ -475,11 +482,11 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
           rows.forEach( (row) => {
             result.push(row);
           });
-          return res.json({'path': './data/graphs/'+validate, 'rule': results, 'message': result[0].feedback_wrong});
+          return res.json({'path': './data/graphs/'+validate, 'rule': results, 'message': result[0].feedback_wrong, 'error': error, 'messageError': 'none'});
         });
       }
       else{
-        var query_string = 'select aobj.time_action from action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) OR (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action asc;';
+        var query_string = 'select distinct aobj.time_action from action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) OR (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action asc;';
         con.query(query_string, [results[0].id_first_act, req.query.id_session, results[0].id_second_act, req.query.id_session,], (err, rows) => {
         if(err) throw err;
         rows.forEach( (row) => {
@@ -511,29 +518,26 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
             console.log('COORDINATES BED 1!!!! ', resultCoordinates[0]);  
               //MOVE THE SCRIPT HERE
             const pythonProcess = spawn('python',[path, JSON.stringify(results), JSON.stringify(timestamps), JSON.stringify(resultsRoles), JSON.stringify(resultCoordinates)]);
-            // const pythonProcess = spawn('python',[path, results, timestamps, resultsRoles]);
-  /*          pythonProcess.stdout.on('data', (data) => {
-                // Do something with the data returned from python script
-                console.log('Are we receiving something? ',data.toString());
-                name =data.toString();
-                console.log('The path of the file in nodejs is: ', name);
-                //name=res.json(name);
-
-            });*/
 
             console.log('This is the python', pythonProcess);
+
             pythonProcess.stdout.on(
               'data',
               logOutput('stdout')
             );
-  /*          pythonProcess.stderr.on('data', (data) => {
+            pythonProcess.stderr.on('data', (data) => {
                 console.log('Error? ',data.toString());
-            });*/
+            });
 
-            pythonProcess.stderr.on(
+/*            pythonProcess.stderr.on(
               'data',
               logOutputError('stderr')
-            );
+            );*/
+
+/*            pythonProcess.stdin.on(
+              'data',
+              logOutputError('stdin')
+            );*/
             pythonProcess.on(
               'close', (code) => {
                 console.log('The ON message: ',code);
@@ -587,4 +591,16 @@ function diff_minutes(dt2, dt1)
   return minutes.toFixed(2);
   
  }
+
+
+function debounce(callback, wait) {
+  let timerId;
+  return (...args) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => {
+      callback(...args);
+    }, wait);
+  };
+}
+
 module.exports = router;

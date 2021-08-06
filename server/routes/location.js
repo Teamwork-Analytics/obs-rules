@@ -31,7 +31,7 @@ var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {
 const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
-
+//const database='testMonash';
 
 
 const con = mysql.createConnection({

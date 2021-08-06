@@ -15,7 +15,7 @@ const fs = require('fs');
 const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
-
+//const database='testMonash';
 
 const con = mysql.createConnection({
   host: 'localhost',
