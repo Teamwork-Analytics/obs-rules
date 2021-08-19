@@ -44,6 +44,7 @@ def main():
 	myFormat = '%Y-%m-%d %I:%M:%S'
 	phase1 = B[0]['time_action']
 	phase2 = B[1]['time_action']
+
 	#print('dates in the python script: ', phase1, phase2)
 	#phase1 = datetime.strptime(phase1.split('.')[0], myFormat)
 
@@ -75,6 +76,7 @@ def main():
 			#print('Here is the patient information: ',patientIDDevice, patientcoordinates, roles[x])
 		else:
 			roles[x] = C[x]['name'] + ',' + C[x]['serial']
+		#print(roles[x])
 	#print('After the loop: ',patientIDDevice)
 	# WHICH SESSION
 	session = A[0]['id_session']
@@ -98,8 +100,9 @@ def main():
 
 def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice, patientcoordinates):
 	#READ DATA
-	df = formating.readingDataJson(file,session);
+	df = formating.readingDataJson(file,session)
 	#print('Alll the variables I want to know: ',centeredRole, patientcoordinates, patientIDDevice);
+
 	if ((not(patientIDDevice is None)) & (patientIDDevice != '')) & (typeOfGraph=='full'):
 		query = 'tracker !=' + patientIDDevice
 		df = df.query(query)
@@ -110,7 +113,10 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 			#create a small dataFrame with the patient info
 			#the tagId is 0000
 			#print('Good the patient coordinate and the centered role is patient', centeredRole, patientcoordinates)
-			dfPatient= formating.creatingTimestampColumns(phase1, phase2, patientcoordinates, session)
+			start = df['timestamp'].iloc[0]
+			# last value
+			end = df['timestamp'].iloc[-1]
+			dfPatient= formating.creatingTimestampColumns(start, end, patientcoordinates, session)
 
 			#Concat the new dataFrame with the one that was read in the first line
 
@@ -129,9 +135,11 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	#FILTER DATA ACCORDING TO PHASES
 	df1= formating.nameTrackers(df, roles)
 	#print(df.loc[df['tracker'] == 26689])
+	#print(df1.Role.unique())
+	#print(df1)
 
 	#GET NUMBER OF TRACKERS
-	n = et.numberTrackers(df)
+	n = et.numberTrackers(df1)
 	#print ('number of trackers', n)
 	#print (roles)
 	#print ('BEFORE FILTERING: ',len(df.index))
@@ -140,13 +148,16 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	df, toSend = formating.filteringPhases(df1, phase1, phase2)
 	#Total of seconds
 
-	#print('This is the data filtered dataframe: ',df)
+	#print('This is the data filtered dataframe: ',df.Role.unique())
 	#print('This is the data number of rows: ',len(df.index))
 	totalSeconds = len(df.index)
 	if df.empty:
 		#print('No matching rows: ', toSend);
 		df, toSend= formating.filteringPhasesAdding(df1, phase1, phase2)
-		#print(df, toSend)
+		if df.empty:
+			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+	#print(toSend)
+	#print(df, toSend)
 	# Call the function that enumerates trackers
 	df_trackers = et.enumerate_trackers(df)
 	#print('df_trackers: $$$$$',df_trackers)
@@ -222,19 +233,22 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 
 def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice):
 	#Read the file
-	df = formating.readingDataJson(file, session)
+	df1 = formating.readingDataJson(file, session)
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
 	#print(df.head(10))
 	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
-		df = df.query(query)
+		df1 = df1.query(query)
 	#FilterDataSet
-	df, toSend = formating.filteringPhases(df, phase1, phase2)
+	df, toSend = formating.filteringPhases(df1, phase1, phase2)
 	if df.empty:
 		# print('No matching rows: ', toSend);
-		df, toSend = formating.filteringPhasesAdding(df, phase1, phase2)
-	#print(df.head(10), toSend)
+		df, toSend = formating.filteringPhasesAdding(df1, phase1, phase2)
+		if df.empty:
+			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+	#print(toSend)
+	#print(df.tracker.unique(), toSend)
 
 	#print('This is the data number of rows: ',len(df.index))
 

@@ -486,7 +486,7 @@ router.get('/bringGraph/:idRule', (req, res, next) => {
         });
       }
       else{
-        var query_string = 'select distinct aobj.time_action from action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) OR (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action asc;';
+        var query_string = '(select distinct (aobj.time_action) from MonashAugustDataCollection.action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) limit 1) UNION (select distinct (aobj.time_action)from MonashAugustDataCollection.action_session_object as aobj where (aobj.id_action=? and aobj.id_session=?) ORDER BY aobj.time_action limit 1);';
         con.query(query_string, [results[0].id_first_act, req.query.id_session, results[0].id_second_act, req.query.id_session,], (err, rows) => {
         if(err) throw err;
         rows.forEach( (row) => {

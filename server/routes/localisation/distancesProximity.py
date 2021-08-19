@@ -15,9 +15,10 @@ def pivot_table(df):
     return df_pivot
 
 def distancesBetweenTrackers(df, numberOfTrackers):
+    #print(df.enumeration.unique())
     df_pivoted = pivot_table(df)
     #print(df_pivoted.head(50))
-
+    #print(numberOfTrackers)
 
     # if patient is None:
     #     df.loc[df['tracker'] == 26689, 'tracker'] = 'PTN'
@@ -27,6 +28,7 @@ def distancesBetweenTrackers(df, numberOfTrackers):
     for x in range(1, numberOfTrackers):
         for i in range(x + 1, numberOfTrackers + 1):
             column_name = 'D_' + str(x) + '_' + str(i)
+            #print(column_name)
             df_pivoted[column_name] = np.sqrt((df_pivoted['x', i] - df_pivoted['x', x]) ** 2 + (df_pivoted['y', i] - df_pivoted['y', x]) ** 2)
     #print(df_pivoted.head())
     return df_pivoted
@@ -87,6 +89,8 @@ def asignProximityLabel(df, numberPatients):
 def aggregateProximity(df, proxemic, numberPatients):
     #print('From the begining',df.head(10))
     total = len(df.index)
+    if (total==0):
+        total==1
     countClose=0
     items = []
     values = []

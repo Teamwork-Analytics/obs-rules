@@ -27,6 +27,7 @@ def readingData(filename, path, phase, session):
     #print(df["x"].head(50), df["y"].head(50))
 
     # Delete trackers - I will delete the Patient from my list of trackers
+
     df = cleaning(df)
     df = deleteRole(df, file_extension)
     df = normalization(df)
@@ -53,15 +54,24 @@ def readingDataJson(file, session):
     #print('This is the file path: ',file)
     session_data= pd.read_json(file, lines=True, orient='records')
     #print(session_data.head(10));
+    #print('Number of columns: ', len(session_data.columns))
+    if(len(session_data.columns)<=1):
+        #session_data = pd.read_json(file, lines=True, orient='values')
+        session_data=pd.read_json(session_data[0].to_json(), orient='index')
+        session_data=session_data.reset_index()
+    #print('Number of columns After: ', len(session_data.columns))
+    #print(session_data.tagId.unique())
     df=formatJson(session_data, session)
     # Delete trackers - I will delete the Patient from my list of trackers
     df = normalization(df)
     df = cleaning(df)
+    #print (df["timestamp"].head(10))
 
     return df
 
 def formatExcel(df, session):
     print('Here I am')
+
     df.rename(columns={'TAG ID': 'tracker'}, inplace=True)
     df.rename(columns={'Timestamp': 'timestamp'}, inplace=True)
     df.rename(columns={'avg(x)': 'x'}, inplace=True)
@@ -75,12 +85,20 @@ def formatExcel(df, session):
     return df
 
 def formatJson(df, session):
+    #print(df.tagId.unique())
     #print ('### JSON')
     # 2. Add the session column
     ## TO DO - The session should be part of the file and can be added accordint to the file name
     df['session'] = int(session)
+
     # 3. Change the name of the column
     df.rename(columns={'tagId': 'tracker'}, inplace=True)
+
+    #for col in data.columns:
+    #    if (col == "TAG ID"):
+    #        df.rename(columns={'TAG ID': 'tracker'}, inplace=True)
+    #    elif(col == "tagId"):
+    #        df.rename(columns={'tagId': 'tracker'}, inplace=True)
 
     # 4. Change numeric value of timestamp to datatime
     #myFormat = '%Y-%m-%d %H:%M:%S'
@@ -103,17 +121,23 @@ def formatJson(df, session):
     # json_tree = objectpath.Tree(df_test['data'])
     x = []; y = []; z = []; aX = []; aY = []; aZ = []; pitch = []; yaw = [];
     roll = []
+    #print(df["data"].head(10))
     for item in df['data']:
+        #print(item)
         x.append(item.get("coordinates").get("x")); y.append(item.get("coordinates").get("y")); z.append(item.get("coordinates").get("z"))
-        aX.append(item.get("acceleration").get("x")); aY.append(item.get("acceleration").get("y")); aZ.append(item.get("acceleration").get("z"))
+        #aX.append(item.get("acceleration").get("x")); aY.append(item.get("acceleration").get("y")); aZ.append(item.get("acceleration").get("z"))
         pitch.append(item.get("orientation").get("pitch")); yaw.append(item.get("orientation").get("yaw")); roll.append(item.get("orientation").get("roll"))
 
     df.insert(0, "x", x, True); df.insert(1, "y", y, True); df.insert(2, "z", z, True)
-    df.insert(3, "accX", aX, True); df.insert(4, "accY", aY, True); df.insert(5, "accZ", aZ, True)
-    df.insert(6, "pitch", pitch, True); df.insert(7, "yaw", yaw, True); df.insert(8, "roll", roll, True)
+    #df.insert(3, "accX", aX, True); df.insert(4, "accY", aY, True); df.insert(5, "accZ", aZ, True)
+    df.insert(3, "pitch", pitch, True); df.insert(4, "yaw", yaw, True); df.insert(5, "roll", roll, True)
     # session_data.insert(3, "pitch", pitch, True); session_data.insert(4, "yaw", yaw, True); session_data.insert(5, "roll", roll, True)
     #df['phase'] = '2'
     #df['quartile'] = '2'
+    #print(df.tracker.unique())
+    df = df.sort_values('timestamp')
+    df = df.reset_index()
+    #print(df["timestamp"])
     return df
 
 #This function should be optimize to generate the phases automatically in the data set
@@ -137,16 +161,19 @@ def cleaning(df):
 def normalization(df):
     df2 = pd.DataFrame()
     trackers = df.tracker.unique()
+
     sessions = df.session.unique()
 
     list_tracker = trackers
     list_session = sessions
     session_tracker = df.groupby(['session', 'tracker']).size().reset_index().rename(columns={0: 'count'})
+    #print(session_tracker)
 
     for index, row_pair in session_tracker.iterrows():
         # GET sub dataframe for a particular tracker
+        #print(index, row_pair)
         session_df = df[(df['tracker'] == row_pair['tracker']) & (df['session'] == row_pair['session'])]
-        #print (session_df)
+
 
         ## Create new dataframe with 60 data points per second for each session using start and end time from classroom dataset
         # get first value in timestamp
@@ -155,14 +182,21 @@ def normalization(df):
         last = session_df['timestamp'].iloc[-1]
         # create time range for new dataframe
         df_time = pd.date_range(start=first, end=last, freq='S')
-
+        #if (row_pair['tracker'] == 27261):
+        #   print(df_time, first, last)
         #print(df_time.to_frame().head(5))
+
 
         ## MERGE classroom dataframe to new dataframe with 60 data points
         #session_df['timestamp']=session_df['timestamp'].astype('datetime64')
         session_df = session_df.set_index('timestamp')  # need to index timestamp
+        #print(session_df['tracker'].head(100))
+        #print((session_df.tracker.unique()))
         #merge = session_df.merge(df_time.to_frame(),left_on='timestamp', how='right')
         merge = pd.merge(df_time.to_frame(), session_df, left_index=True, right_on='timestamp', how='left')
+
+        #if(row_pair['tracker']==27152):
+        #    print (merge)
         #print(merge.head(5))
 
         ## FILL MISSING VALUES - interpolate values
@@ -174,9 +208,11 @@ def normalization(df):
 
         # SAVE
         df2 = df2.append(m)
+        #print((df2.tracker.unique()))
     df2 = df2.reset_index()  # remove index (duplicate timestamp values)
     #df2 = df2[['tracker', 'session', 'phase', 'quartile', 'timestamp', 'x', 'y']]  # select required columns
     #print('All good to this point')
+    #print(trackers, (df2.tracker.unique()))
     return df2
 
 def phaseI(initial, outtime, x, phase):
@@ -219,6 +255,27 @@ def filteringPhasesAdding(df, phase1, phase2):
     toSend=str(phase1)+str(phase2)
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
     #print('First timestamp: ', phase1, 'second timestamp: ', phase2, pd.to_datetime(phase1[0]).strftime(myFormatB))
+    #filtered = df[df['timestamp'] >= datetime.datetime.strptime(phase1[0], myFormatB) & df['timestamp'] <= datetime.datetime.strptime(phase2[0], myFormatB)]
+    #filtered = df[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB) + timedelta(hours=4)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB)+ timedelta(hours=4))]
+    filtered = df[(df['timestamp'] >= phase1.strftime(myFormatB)) & (df['timestamp'] <= phase2.strftime(myFormatB))]
+
+    #df.loc[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB))]
+
+    return filtered, toSend
+
+
+def filteringPhasesMinosTimeZone(df, phase1, phase2):
+    myFormatB = '%Y-%m-%d %I:%M:%S'
+    #myFormatB = '%Y-%m-%d %I:%M:%S.%f'
+    #myFormatB = '%Y-%m-%d %I:%M:%S'
+    phase1= pd.to_datetime(phase1.split(".")[0])
+    phase2 = pd.to_datetime(phase2.split(".")[0])
+    phase1=phase1 + pd.DateOffset(hours=-3)
+    phase2 = phase2 + pd.DateOffset(hours=-3)
+    toSend=str(phase1)+str(phase2)
+    #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
+    #print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
+
     #filtered = df[df['timestamp'] >= datetime.datetime.strptime(phase1[0], myFormatB) & df['timestamp'] <= datetime.datetime.strptime(phase2[0], myFormatB)]
     #filtered = df[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB) + timedelta(hours=4)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB)+ timedelta(hours=4))]
     filtered = df[(df['timestamp'] >= phase1.strftime(myFormatB)) & (df['timestamp'] <= phase2.strftime(myFormatB))]
@@ -382,9 +439,13 @@ def creatingTimestampColumns(start, end, patientcoordinates, session):
     y=patientcoordinates.split(",")[1]
     #print('patient coordinates: ', x, y)
 
-    start =  pd.to_datetime(start.split(".")[0])
-    end = pd.to_datetime(end.split(".")[0])
+    #start =  pd.to_datetime(start.split(".")[0])
+    #end = pd.to_datetime(end.split(".")[0])
     #print('Dates in the formating.py: ', start, end)
+    #THIS WAS ADDED SO THAT IT WORKS
+
+    #start=start + pd.DateOffset(hours=-3)
+    #end = end + pd.DateOffset(hours=-3)
     difference = end - start
     difference_seconds=difference.total_seconds()
     #print('the number of seconds is', difference_seconds)
