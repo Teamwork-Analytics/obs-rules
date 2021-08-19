@@ -69,7 +69,7 @@ def filterPL(df, proxemicLabel,proxemicLabel2, role):
 def orderTrackers(role, df_trackers):
     index = int(role)
     # Order the vertices... Role should be the first one.
-    print(role, df_trackers)
+    #print(role, df_trackers)
     df_shifted=pd.concat([df_trackers.iloc[[index-1], :], df_trackers.drop(index-1, axis=0)], axis=0)
     df_shifted.reset_index(level=0, inplace=True)
     return df_shifted
