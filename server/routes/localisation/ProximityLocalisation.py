@@ -237,7 +237,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	df1 = formating.readingDataJson(file, session)
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
-	print(df1.head(10), df1.tracker.unique())
+	#print(df1.head(10), df1.tracker.unique())
 	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
 		df1 = df1.query(query)
