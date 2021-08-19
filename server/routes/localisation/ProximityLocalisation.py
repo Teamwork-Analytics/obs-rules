@@ -237,7 +237,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	df1 = formating.readingDataJson(file, session)
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
-	#print(df.head(10))
+	print(df1.head(10), df.tracker.unique())
 	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
 		df1 = df1.query(query)
@@ -249,7 +249,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 		if df.empty:
 			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
 	#print(toSend)
-	print(df.tracker.unique(), toSend, df)
+	#print(df.tracker.unique(), toSend, df)
 
 	#print('This is the data number of rows: ',len(df.index))
 
