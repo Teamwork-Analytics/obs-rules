@@ -157,7 +157,7 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
 	#print(toSend)
 	#print(df, toSend)
-	print('This is the data filtered dataframe: ',df.Role.unique(), df)
+	#print('This is the data filtered dataframe: ',df.Role.unique(), df)
 
 	# Call the function that enumerates trackers
 	df_trackers = et.enumerate_trackers(df)
@@ -249,7 +249,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 		if df.empty:
 			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
 	#print(toSend)
-	#print(df.tracker.unique(), toSend)
+	print(df.tracker.unique(), toSend, df)
 
 	#print('This is the data number of rows: ',len(df.index))
 
