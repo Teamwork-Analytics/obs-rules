@@ -270,8 +270,8 @@ def filteringPhasesMinosTimeZone(df, phase1, phase2):
     #myFormatB = '%Y-%m-%d %I:%M:%S'
     phase1= pd.to_datetime(phase1.split(".")[0])
     phase2 = pd.to_datetime(phase2.split(".")[0])
-    phase1=phase1 + pd.DateOffset(hours=-2)
-    phase2 = phase2 + pd.DateOffset(hours=-2)
+    phase1=phase1 + pd.DateOffset(hours=2)
+    phase2 = phase2 + pd.DateOffset(hours=2)
     toSend=str(phase1)+str(phase2)
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
     #print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
