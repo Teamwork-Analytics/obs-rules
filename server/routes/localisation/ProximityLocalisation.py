@@ -155,6 +155,8 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		df, toSend= formating.filteringPhasesAdding(df1, phase1, phase2)
 		if df.empty:
 			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+			if df.empty:
+				df, toSend = formating.filteringPhasesMinosTimeZone1(df1, phase1, phase2)
 	#print(toSend)
 	#print(df, toSend)
 	#print('This is the data filtered dataframe: ',df.Role.unique(), df)
@@ -237,7 +239,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	df1 = formating.readingDataJson(file, session)
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
-	#print(df1.head(10), df1.tracker.unique())
+	#print(df1.head(10), df1.tracker.unique(), phase1, phase2)
 	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
 		df1 = df1.query(query)
@@ -248,6 +250,8 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 		df, toSend = formating.filteringPhasesAdding(df1, phase1, phase2)
 		if df.empty:
 			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+			if df.empty:
+				df, toSend = formating.filteringPhasesMinosTimeZone1(df1, phase1, phase2)
 	#print(toSend)
 	#print(df.tracker.unique(), toSend, df)
 
