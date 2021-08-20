@@ -281,7 +281,7 @@ def filteringPhasesMinosTimeZone(df, phase1, phase2):
 
     toSend=str(phase1)+str(phase2)
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
-    #print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
+    print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
 
     #filtered = df[df['timestamp'] >= datetime.datetime.strptime(phase1[0], myFormatB) & df['timestamp'] <= datetime.datetime.strptime(phase2[0], myFormatB)]
     #filtered = df[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB) + timedelta(hours=4)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB)+ timedelta(hours=4))]
@@ -308,7 +308,7 @@ def filteringPhasesMinosTimeZone1(df, phase1, phase2):
 
     toSend=str(phase1)+str(phase2)
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
-    #print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
+    print('First timestamp: ', phase1, 'second timestamp: ', phase2, ' With format: ', phase1.strftime(myFormatB), df.head(10))
 
     #filtered = df[df['timestamp'] >= datetime.datetime.strptime(phase1[0], myFormatB) & df['timestamp'] <= datetime.datetime.strptime(phase2[0], myFormatB)]
     #filtered = df[(df['timestamp'] >= pd.to_datetime(phase1[0]).strftime(myFormatB) + timedelta(hours=4)) & (df['timestamp'] <= pd.to_datetime(phase2[0]).strftime(myFormatB)+ timedelta(hours=4))]
