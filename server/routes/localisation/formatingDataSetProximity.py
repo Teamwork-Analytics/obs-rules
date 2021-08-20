@@ -299,12 +299,12 @@ def filteringPhasesMinosTimeZone1(df, phase1, phase2):
     phase2 = pd.to_datetime(phase2.split(".")[0])
 
     #ALWAYS VALIDATE THIS BIT - FOR THE SERVER
-    phase1=phase1 + pd.DateOffset(hours=2)
-    phase2 = phase2 + pd.DateOffset(hours=2)
+    #phase1=phase1 + pd.DateOffset(hours=2)
+    #phase2 = phase2 + pd.DateOffset(hours=2)
 
     #LOCAL
-    #phase1=phase1 + pd.DateOffset(hours=-15)
-    #phase2 = phase2 + pd.DateOffset(hours=-15)
+    phase1=phase1 + pd.DateOffset(hours=-10)
+    phase2 = phase2 + pd.DateOffset(hours=-10)
 
     toSend=str(phase1)+str(phase2)
     #df.loc[df['tracker'] == 'PTN', 'phase'] = phase
