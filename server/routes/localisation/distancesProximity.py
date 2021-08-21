@@ -48,12 +48,12 @@ def proxemicsLabels(df_distancesBetTrackers, numberOfTrackers):
                 'intimate',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
             df_distancesBetTrackers[column_nameresult] = np.where(
-                (((df_distancesBetTrackers[column_name] / 1000) >= 0.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 1)),
+                (((df_distancesBetTrackers[column_name] / 1000) >= 0.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 1.5)),
                 # Identifies the case to apply to
                 'intimate',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
             df_distancesBetTrackers[column_nameresult] = np.where(
-                (((df_distancesBetTrackers[column_name] / 1000) >= 1) & ((df_distancesBetTrackers[column_name]) / 1000 < 4)),
+                (((df_distancesBetTrackers[column_name] / 1000) >= 1.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 4)),
                 # Identifies the case to apply to
                 'social',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
@@ -79,7 +79,7 @@ def calculateDistancesRolesToBeds(df, coordinates):
 def asignProximityLabel(df, numberPatients):
     for x in range(1, numberPatients+1):
         df['PL_'+str(x)] = 'False'
-        df['PL_'+str(x)] = np.where((((df['Bed_'+str(x)] / 1000) >= 0) & ((df['Bed_'+str(x)]) / 1000 <= 1)), 'intimate',df['PL_'+str(x)])
+        df['PL_'+str(x)] = np.where((((df['Bed_'+str(x)] / 1000) >= 0) & ((df['Bed_'+str(x)]) / 1000 <= 1.5)), 'intimate',df['PL_'+str(x)])
     #print(df['PL_1'].head(5))
     #print(df['PL_2'].head(5))
     #print(df['PL_3'].head(5))
@@ -110,7 +110,7 @@ def aggregateProximity(df, proxemic, numberPatients):
     dfSummary = pd.DataFrame({'beds': items, 'values': values})
 
     #Define message to be  presented next to the bar chart
-    message = 'For the selected period, the team spent on average '+ '<span class="message-graph-possitive"> '+ str(maxTime) +' % </span> of their time on'+ '<span class="message-graph-possitive"> '+' Bed '+str(indexMax) +' </span>'
+    message = 'For the selected period, the team spent '+ '<span class="message-graph-possitive"> '+ str(maxTime) +' % </span> (percent) of their time on'+ '<span class="message-graph-possitive"> '+' Bed '+str(indexMax) +' </span>'
 
     #print('After filtering', dfSummary)
     return dfSummary, message, indexMax
