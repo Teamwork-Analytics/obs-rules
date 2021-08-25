@@ -268,11 +268,12 @@ def fullGraphDefinition(df, df_trackers):
     for j in range (0,len(roles)-1):
         for i in range (j+1, len(roles)-1):
             color = ''
+            valuePorcent = (float(values[k]) * 100)
             if float(values[k]) < 0.5:
                 color = '<span class="message-graph-negative"> '
             else:
                 color = '<span class="message-graph-possitive"> '
-            message += ' ' + roles[j] + ' spent ' + color + values[k] + '%' + ' </span>' + ' (percent) of her/his time with ' + roles[i] + ' \n'
+            message += ' ' + roles[j] + ' spent ' + color + str(valuePorcent)+ '%' + ' </span>' + ' (percent) of her/his time with ' + roles[i] + ' \n'
             k +=1
     return g, message
 
@@ -359,7 +360,7 @@ def graphDefinition(df, df_trackers, typ):
                 color='<span class="message-graph-negative"> '
             else:
                 color= '<span class="message-graph-possitive"> '
-            message += ' '+roles[i] + ' spent ' + color + valuePorcent + '% '+' </span>'+ '(percent) of her/his time with ' +roles[0] +' \n'
+            message += ' '+roles[i] + ' spent ' + color + str(valuePorcent) + '% '+' </span>'+ '(percent) of her/his time with ' +roles[0] +' \n'
     return g, message
 
 # The degree of a vertex equals the number of edges adjacent to it.
