@@ -291,7 +291,7 @@ function visVanillaTimeLine(){
 	    var groups = [];
 	    var value ={};
 	    for(var i=0;i<data.n;i++){
-	    	if(participants[i]=='PTN' || participants[i]=='B1P'){
+	    	if(participants[i]=='PTN' || participants[i]=='B1P' || participants[i]=='B4P'){
 	    		groups[i] = new vis.DataSet([
 	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i], style:"color: white; background-color: white;"}]);
 	    	}else{
