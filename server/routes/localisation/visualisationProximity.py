@@ -354,11 +354,12 @@ def graphDefinition(df, df_trackers, typ):
     for i in range(0, len(values)-1):
         color = ''
         if i>0:
+            valuePorcent = (float(values[i]) * 100)
             if float(values[i]) < 0.5:
                 color='<span class="message-graph-negative"> '
             else:
                 color= '<span class="message-graph-possitive"> '
-            message += ' '+roles[i] + ' spent ' + color + values[i] + '% '+' </span>'+ '(percent) of her/his time with ' +roles[0] +' \n'
+            message += ' '+roles[i] + ' spent ' + color + valuePorcent + '% '+' </span>'+ '(percent) of her/his time with ' +roles[0] +' \n'
     return g, message
 
 # The degree of a vertex equals the number of edges adjacent to it.
@@ -409,7 +410,7 @@ def plotBarChart(items, session, idRule, indexMax):
     #plt.xticks(4, items['beds'])
     actualDir = os.getcwd()
     #plt.savefig(actualDir+'/client/data/graphs/'+name)
-    out = items.plot.bar(x='beds', y='values', rot=0, title='Percentage of time nurses spent on beds (close proximity 0m-1m)')
+    out = items.plot.bar(x='beds', y='values', rot=0, title='Percentage of time nurses spent on beds (close proximity 0m-1.5m)')
     for p in out.patches:
         out.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
     out.figure.savefig(actualDir+'/client/data/graphs/'+name)
