@@ -10,9 +10,9 @@ const { spawn } = require('child_process');
 
 
 //const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
+//const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-//const database='MonashInterviews';
+const database='MonashInterviews';
 //const database='testMonash';
 
 
@@ -117,7 +117,7 @@ router.post('/generateJson2', (req, res, next) => {
 
             else {
                    //add critical items to R1 - they don't have student associated
-                    if(dataActions[i].action_type == "critical" && (dataActions[i].name == "PTN" || dataActions[i].name == "B1P")){
+                    if(dataActions[i].action_type == "critical" && (dataActions[i].name == "PTN" || dataActions[i].name == "B1P" || dataActions[i].name == "B4P")){
                       var ct = {};
                       ct["event"] = dataActions[i].action_desc;
                       ct["when"] = dataActions[i].time_action;
@@ -127,6 +127,9 @@ router.post('/generateJson2', (req, res, next) => {
                       //time_from_start = data[i].duration.split(":").slice(-2).join(":").split(".")[0];
                       if(dataActions[i].name == "B1P"){
                         critical_item["id"] = participants["B1P"].length+1;
+                      }
+                      if(dataActions[i].name == "B4P"){
+                        critical_item["id"] = participants["B4P"].length+1;
                       }else{
                         critical_item["id"] = participants["PTN"].length+1;
                       }
@@ -144,6 +147,9 @@ router.post('/generateJson2', (req, res, next) => {
                       //  }
                       if(dataActions[i].name == "B1P"){
                         participants["B1P"].push(critical_item);
+                      }
+                      if(dataActions[i].name == "B4P"){
+                        participants["B4P"].push(critical_item);
                       }else{
                         participants["PTN"].push(critical_item);
                       }
