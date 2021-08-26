@@ -127,9 +127,6 @@ router.post('/generateJson2', (req, res, next) => {
                       //time_from_start = data[i].duration.split(":").slice(-2).join(":").split(".")[0];
                       if(dataActions[i].name == "B1P"){
                         critical_item["id"] = participants["B1P"].length+1;
-                      }
-                      if(dataActions[i].name == "B4P"){
-                        critical_item["id"] = participants["B4P"].length+1;
                       }else{
                         critical_item["id"] = participants["PTN"].length+1;
                       }
@@ -147,9 +144,6 @@ router.post('/generateJson2', (req, res, next) => {
                       //  }
                       if(dataActions[i].name == "B1P"){
                         participants["B1P"].push(critical_item);
-                      }
-                      if(dataActions[i].name == "B4P"){
-                        participants["B4P"].push(critical_item);
                       }else{
                         participants["PTN"].push(critical_item);
                       }
