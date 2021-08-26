@@ -117,7 +117,7 @@ router.post('/generateJson2', (req, res, next) => {
 
             else {
                    //add critical items to R1 - they don't have student associated
-                    if(dataActions[i].action_type == "critical" && (dataActions[i].name == "PTN" || dataActions[i].name == "B1P" || dataActions[i].name == "B4P")){
+                    if(dataActions[i].action_type == "critical" && (dataActions[i].name == "PTN" || dataActions[i].name == "B1P")){
                       var ct = {};
                       ct["event"] = dataActions[i].action_desc;
                       ct["when"] = dataActions[i].time_action;
