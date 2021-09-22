@@ -9,8 +9,8 @@ const { getCoordinates } = require('./objects');
 const { spawn } = require('child_process');
 
 
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
 //const database='testMonash';

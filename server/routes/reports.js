@@ -22,8 +22,8 @@ var mqtt_client = [];
   database: 'group_analytics1'
 });*/
 
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
+const database='AllUTSsessions';
+//const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
 //const database='testMonash';
