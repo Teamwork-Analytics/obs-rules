@@ -14,9 +14,9 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:root
 });*/
 
 //const database='AllUTSsessions';
-//const database='MonashAugustDataCollection';
+const database='MonashAugustDataCollection';
 //const database='group_analytics1';
-const database='MonashInterviews';
+//const database='MonashInterviews';
 //const database='testMonash';
 
 const con = mysql.createConnection({
