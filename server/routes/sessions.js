@@ -6,24 +6,11 @@ const path = require('path');
 const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:root@138.25.199.243:5432/group-analytics';
 //var promise = require('bluebird');
 
-/*const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'group_analytics1'
-});*/
-
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
-//const database='group_analytics1';
-//const database='MonashInterviews';
-//const database='testMonash';
-
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'gloria',
-  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: database
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_password,
+  database: process.env.db_database
 });
 
 router.get('/', (req, res, next) => {

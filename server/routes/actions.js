@@ -7,25 +7,11 @@ const mqtt = require('mqtt');
 const url = require('url');
 var fs = require('fs');
 
-
-/*const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'group_analytics1'
-});*/
-
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
-//const database='group_analytics1';
-//const database='MonashInterviews';
-//const database='testMonash';
-
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'gloria',
-  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: database
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_password,
+  database: process.env.db_database
 });
 
 router.get('/', (req, res, next) => {
@@ -192,10 +178,10 @@ router.post('/addactionsectionobject', (req, res, next) => {
 //new table created to allow multiplicity
 //added 26-04-2019
 router.post('/addstartstopaction', (req, res, next) => {
-
   var results = [];
   var error='';
   var action_string = {id_session:req.body.id_session, id_action: req.body.id_action, action_desc: req.body.desc, time_action: new Date()};
+
   console.log('Here it is??? ', action_string);
   try{
     con.query('INSERT INTO action_session_object SET ?', action_string, (err, result) => {
@@ -223,7 +209,6 @@ router.post('/addstartstopaction', (req, res, next) => {
     var  error=1;
     return res.json(results);
   }
-
 });
 
 

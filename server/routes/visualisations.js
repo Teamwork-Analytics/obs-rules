@@ -8,27 +8,11 @@ const { getRoles } = require('./rules');
 const { getCoordinates } = require('./objects');
 const { spawn } = require('child_process');
 
-
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
-//const database='group_analytics1';
-//const database='MonashInterviews';
-//const database='testMonash';
-
-
-//import{roles} from './rules';
-/*const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'group_analytics1'
-});*/
-
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'gloria',
-  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: database
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_password,
+  database: process.env.db_database
 });
 
 
@@ -591,7 +575,6 @@ function diff_minutes(dt2, dt1)
   return minutes.toFixed(2);
   
  }
-
 
 function debounce(callback, wait) {
   let timerId;
