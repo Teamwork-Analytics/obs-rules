@@ -741,17 +741,23 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
     //GET GRAPH
     $http.get(`/api/v1/visualisations/bringGraph/${idRule}?id_session=${$scope.sessionid}`)
     .success(function(data){
-      //$scope.sessionRules = data;
-      //$http.get('path/to/service', {timeout: 5000});
-      $scope.graph = $scope.graph = true;
-      $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
-      $scope.graphPath = data.path;
-      message = '<span>'+ data.message + '</span>';
-      //const parser = new DOMParser();
-      //message = parser.parseFromString(message, 'text/html');
-      console.log('This is parsed', message);
-      //console.log('Parser', parser)
-      $scope.myFeedback = message;
+
+      if(data.error!=0 || data.messageError!="none"){
+        window.alert('There was an error generating the graph, please try later: '+ data.messageError);
+      }else{
+        //$scope.sessionRules = data;
+        //$http.get('path/to/service', {timeout: 5000});
+        $scope.graph = $scope.graph = true;
+        $scope.textgraph = data.rule[0].first_action + '  -  ' + data.rule[0].second_action;
+        $scope.graphPath = data.path;
+        message = '<span>'+ data.message + '</span>';
+        //const parser = new DOMParser();
+        //message = parser.parseFromString(message, 'text/html');
+        console.log('This is parsed', message);
+        //console.log('Parser', parser)
+        $scope.myFeedback = message;
+      }
+
     })
     .error(function(error){
       console.log('Error: ' + error);
@@ -887,13 +893,16 @@ app.controller('actionsController', function($window, $scope, $location, $route,
     };
     console.log('$$$$$$ ',dataObj);
     //add action-session-object
-    $http.post('/api/v1/actions/addstartstopaction', dataObj )
+    $http.post('/api/v1/actions/addstartstopaction', dataObj)
         .success(function(data){
-          $scope.selectedactions = data;
-          console.log(data);
+          if(data.error!=''){
+            window.alert("An error ocurred, please try later: " + data.error);
+          }
+          $scope.selectedactions = data.results;
+          //window.alert("All works properly: " + data.error);
         })
         .error((error) => {
-          console.log('Error: ' + error);
+          console.log('Error: ' + data.error);
         });
 
   };//end log
@@ -1646,7 +1655,10 @@ app.controller('actionsessionController', function($scope, $location, $routePara
     //console.log(dataObj);
     $http.post('/api/v1/actions/deleteaction', dataObj )
         .success(function(data){
-          $scope.actionData = data;
+          if(data.error!=''){
+            window.alert('An error ocurred: ' + data.error);
+          }
+          $scope.actionData = data.results;
         })
         .error((error) => {
           console.log('Error: ' + error);

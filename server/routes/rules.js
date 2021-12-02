@@ -23,6 +23,7 @@ var mqtt_client = [];
 const database='MonashAugustDataCollection';
 //const database='group_analytics1';
 //const database='MonashInterviews';
+//const database='testMonash';
 
 const con = mysql.createConnection({
   host: 'localhost',
@@ -128,7 +129,7 @@ router.get('/actions/:id_session', (req, res, next) => {
 const roles = (id_session, callback) => {
   const results = [];
 
-    con.query('SELECT * FROM object_session WHERE id_session = ? and id_object !=4 ORDER BY id ASC;', [id_session], (err,rows) => {
+    con.query('SELECT * FROM object_session WHERE id_session = ? and id_object !=4 and id_object!=5 ORDER BY id ASC;', [id_session], (err,rows) => {
     if(err) throw err;
     rows.forEach( (row) => {
       results.push(row);

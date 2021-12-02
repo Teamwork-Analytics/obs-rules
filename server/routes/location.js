@@ -19,7 +19,6 @@ var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {
     password: api_key
 });
 
-
 const con = mysql.createConnection({
   host: process.env.db_host,
   user: process.env.db_user,

@@ -27,10 +27,8 @@ router.get('/all', (req, res, next) => {
     results.push(row);
     //console.log(`${row.name} started at ${row.time_start}`);
     });
-
     return res.json(results);
   });
-
 });
 
 //insert source in session

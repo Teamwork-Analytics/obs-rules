@@ -8,6 +8,7 @@ import distancesProximity as distances
 import visualisationProximity as vis
 from datetime import datetime
 from time import gmtime, strftime
+import pandas as pd
 
 def main():
 	# intimate, personal, social, public
@@ -34,7 +35,6 @@ def main():
 
 	if typeOfGraph == 'Priority':
 		spetialSim='barchar'
-
 	if typeOfGraph == 'All':
 		typeOfGraph='full'
 	else:
@@ -44,6 +44,7 @@ def main():
 	myFormat = '%Y-%m-%d %I:%M:%S'
 	phase1 = B[0]['time_action']
 	phase2 = B[1]['time_action']
+
 	#print('dates in the python script: ', phase1, phase2)
 	#phase1 = datetime.strptime(phase1.split('.')[0], myFormat)
 
@@ -53,16 +54,29 @@ def main():
 	#print('dates in the python script AFTER : ', phase1, phase2)
 	#CENTERED ROLE
 	if typeOfGraph == 'role-centered':
-		centeredRole= A[0]['value_of_mag'];
+		#print('The value of the center role: ', A[0]['value_of_mag'])
+		if(A[0]['value_of_mag'] is None or A[0]['value_of_mag']== '' or A[0]['value_of_mag']== 'null'):
+			centeredRole='11111'
+		else:
+			centeredRole= A[0]['value_of_mag']
 	else:
-		centeredRole=0;
-	# ROLES
+		centeredRole=0
 
+	# ROLES
+	#print('centeredRole value: ', centeredRole)
+	#7 is the patient role according to the web tool
 	for x in range(len(C)):
-		roles[x] = C[x]['name']+','+ C[x]['serial']
 		if (C[x]['id_object']) == 7:
 			patientIDDevice = C[x]['serial']
-
+			patientcoordinates = C[x]['coordinates']
+			if(centeredRole=='11111'):
+				roles[x] = C[x]['name'] + ',' + '11111'
+			else:
+				roles[x] = C[x]['name'] + ',' + '11111'
+			#print('Here is the patient information: ',patientIDDevice, patientcoordinates, roles[x])
+		else:
+			roles[x] = C[x]['name'] + ',' + C[x]['serial']
+		#print(roles[x])
 	#print('After the loop: ',patientIDDevice)
 	# WHICH SESSION
 	session = A[0]['id_session']
@@ -82,24 +96,50 @@ def main():
 
 		createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice)
 	else:
-		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice)
+		initAnalisis(file, centeredRole, proxemic, proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice, patientcoordinates)
 
-def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice):
+def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, typeOfGraph, session, idRule, patientIDDevice, patientcoordinates):
 	#READ DATA
-	df = formating.readingDataJson(file,session);
-	if (patientIDDevice != '') & (typeOfGraph=='full'):
+	df = formating.readingDataJson(file,session)
+	#print('Alll the variables I want to know: ',centeredRole, patientcoordinates, patientIDDevice);
+
+	if ((not(patientIDDevice is None)) & (patientIDDevice != '')) & (typeOfGraph=='full'):
 		query = 'tracker !=' + patientIDDevice
 		df = df.query(query)
-	#print(df.head(5));
+
+	if (typeOfGraph=='role-centered'):
+		# Add the patient info into the dataFrame
+		if(not(patientcoordinates is None)) & (centeredRole=='11111'):
+			#create a small dataFrame with the patient info
+			#the tagId is 0000
+			#print('Good the patient coordinate and the centered role is patient', centeredRole, patientcoordinates)
+			start = df['timestamp'].iloc[0]
+			# last value
+			end = df['timestamp'].iloc[-1]
+			dfPatient= formating.creatingTimestampColumns(start, end, patientcoordinates, session)
+
+			#Concat the new dataFrame with the one that was read in the first line
+
+			frames = [dfPatient, df]
+			df = pd.concat(frames, sort=True)
+			df = df.reset_index()
+			#print(df);
+		elif (patientcoordinates is None):
+			response = {"message": 'none', "path": 'none', "messageError": 'Please set the patient coordinate or the role serial tracker'}
+			json_RESPONSE = json.dumps(response)
+			print(json_RESPONSE)
+
 	#FORMATING
 	#session = session;
 
 	#FILTER DATA ACCORDING TO PHASES
 	df1= formating.nameTrackers(df, roles)
 	#print(df.loc[df['tracker'] == 26689])
+	#print(df1.Role.unique())
+	#print(df1)
 
 	#GET NUMBER OF TRACKERS
-	n = et.numberTrackers(df)
+	n = et.numberTrackers(df1)
 	#print ('number of trackers', n)
 	#print (roles)
 	#print ('BEFORE FILTERING: ',len(df.index))
@@ -108,13 +148,19 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	df, toSend = formating.filteringPhases(df1, phase1, phase2)
 	#Total of seconds
 
-	#print('This is the data filtered dataframe: ',df)
 	#print('This is the data number of rows: ',len(df.index))
 	totalSeconds = len(df.index)
 	if df.empty:
 		#print('No matching rows: ', toSend);
 		df, toSend= formating.filteringPhasesAdding(df1, phase1, phase2)
-		#print(df, toSend)
+		if df.empty:
+			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+			if df.empty:
+				df, toSend = formating.filteringPhasesMinosTimeZone1(df1, phase1, phase2)
+	#print(toSend)
+	#print(df, toSend)
+	#print('This is the data filtered dataframe: ',df.Role.unique(), df)
+
 	# Call the function that enumerates trackers
 	df_trackers = et.enumerate_trackers(df)
 	#print('df_trackers: $$$$$',df_trackers)
@@ -125,8 +171,9 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 	#print ('AFTER FILTERING: ',len(df.index))
 
 	# WHICH  TRACKER IS THE SELECTED ROLE, returns the enum tracker
+	#print('Here is the center role value: ',centeredRole)
 	centeredRole = formating.roleNum(df, df_trackers, centeredRole)
-	#print('Selected role in the miedle: $$$$$', centeredRole)
+	#print('Enum for the selected role in the miedle: $$$$$', centeredRole)
 	## DISTANCES
 	# To run the calculation of distances it requires the number of trackers and the dataset
 	df_distancesBetTrackers = distances.distancesBetweenTrackers(df, n)
@@ -152,7 +199,7 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		#filterProxemic = vis.filterPL(df, proxemic,proxemic2, role=0)
 		graph, message = vis.generateFullGraph(filterProxemic, trackers_names)
 		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
-		response = {"message": message, "path": name}
+		response = {"message": message, "path": name, "messageError": "none"}
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
@@ -183,25 +230,30 @@ def initAnalisis(file, centeredRole, proxemic,proxemic2, phase1, phase2, roles, 
 		graph, message = vis.graphDefinition(dfnorm, trackers_names, 'porcentages')
 		#print(graph)
 		name = vis.visualiseGraph1(graph, session, 'porcentages', proxemic, idRule)
-		response =  {"message":message, "path":name}
+		response =  {"message":message, "path":name, "messageError": "none"}
 		json_RESPONSE = json.dumps(response)
 		print(json_RESPONSE)
 
 def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, patientIDDevice):
 	#Read the file
-	df = formating.readingDataJson(file, session)
+	df1 = formating.readingDataJson(file, session)
 	#Remove the patient' data from the dataFrame, if it was tracked
 	#print('Patient ID device', patientIDDevice)
-	#print(df.head(10))
-	if patientIDDevice!='':
+	#print(df1.head(10), df1.tracker.unique(), phase1, phase2)
+	if (patientIDDevice!='') & (not(patientIDDevice is None)):
 		query='tracker !=' + patientIDDevice
-		df = df.query(query)
+		df1 = df1.query(query)
 	#FilterDataSet
-	df, toSend = formating.filteringPhases(df, phase1, phase2)
+	df, toSend = formating.filteringPhases(df1, phase1, phase2)
 	if df.empty:
 		# print('No matching rows: ', toSend);
-		df, toSend = formating.filteringPhasesAdding(df, phase1, phase2)
-	#print(df.head(10), toSend)
+		df, toSend = formating.filteringPhasesAdding(df1, phase1, phase2)
+		if df.empty:
+			df, toSend = formating.filteringPhasesMinosTimeZone(df1, phase1, phase2)
+			if df.empty:
+				df, toSend = formating.filteringPhasesMinosTimeZone1(df1, phase1, phase2)
+	#print(toSend)
+	#print(df.tracker.unique(), toSend, df)
 
 	#print('This is the data number of rows: ',len(df.index))
 
@@ -216,7 +268,7 @@ def createBarChar(file, session, coordinates,proxemic, phase1, phase2, idRule, p
 	# bed 1: %, bed 2: %, bed  3: %
 	itemsPlot, message, indexMax=distances.aggregateProximity(df, proxemic, numberOfPatients)
 	name = vis.plotBarChart(itemsPlot, session, idRule, indexMax)
-	response = {"message": message, "path": name}
+	response = {"message": message, "path": name, "messageError": "none"}
 	json_RESPONSE = json.dumps(response)
 	print(json_RESPONSE)
 

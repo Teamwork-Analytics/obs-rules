@@ -15,9 +15,10 @@ def pivot_table(df):
     return df_pivot
 
 def distancesBetweenTrackers(df, numberOfTrackers):
+    #print(df.enumeration.unique())
     df_pivoted = pivot_table(df)
     #print(df_pivoted.head(50))
-
+    #print(numberOfTrackers)
 
     # if patient is None:
     #     df.loc[df['tracker'] == 26689, 'tracker'] = 'PTN'
@@ -27,6 +28,7 @@ def distancesBetweenTrackers(df, numberOfTrackers):
     for x in range(1, numberOfTrackers):
         for i in range(x + 1, numberOfTrackers + 1):
             column_name = 'D_' + str(x) + '_' + str(i)
+            #print(column_name)
             df_pivoted[column_name] = np.sqrt((df_pivoted['x', i] - df_pivoted['x', x]) ** 2 + (df_pivoted['y', i] - df_pivoted['y', x]) ** 2)
     #print(df_pivoted.head())
     return df_pivoted
@@ -46,12 +48,12 @@ def proxemicsLabels(df_distancesBetTrackers, numberOfTrackers):
                 'intimate',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
             df_distancesBetTrackers[column_nameresult] = np.where(
-                (((df_distancesBetTrackers[column_name] / 1000) >= 0.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 1)),
+                (((df_distancesBetTrackers[column_name] / 1000) >= 0.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 1.5)),
                 # Identifies the case to apply to
                 'intimate',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
             df_distancesBetTrackers[column_nameresult] = np.where(
-                (((df_distancesBetTrackers[column_name] / 1000) >= 1) & ((df_distancesBetTrackers[column_name]) / 1000 < 4)),
+                (((df_distancesBetTrackers[column_name] / 1000) >= 1.5) & ((df_distancesBetTrackers[column_name]) / 1000 < 4)),
                 # Identifies the case to apply to
                 'social',  # This is the value that is inserted
                 df_distancesBetTrackers[column_nameresult])
@@ -77,7 +79,7 @@ def calculateDistancesRolesToBeds(df, coordinates):
 def asignProximityLabel(df, numberPatients):
     for x in range(1, numberPatients+1):
         df['PL_'+str(x)] = 'False'
-        df['PL_'+str(x)] = np.where((((df['Bed_'+str(x)] / 1000) >= 0) & ((df['Bed_'+str(x)]) / 1000 <= 1)), 'intimate',df['PL_'+str(x)])
+        df['PL_'+str(x)] = np.where((((df['Bed_'+str(x)] / 1000) >= 0) & ((df['Bed_'+str(x)]) / 1000 <= 1.5)), 'intimate',df['PL_'+str(x)])
     #print(df['PL_1'].head(5))
     #print(df['PL_2'].head(5))
     #print(df['PL_3'].head(5))
@@ -87,6 +89,8 @@ def asignProximityLabel(df, numberPatients):
 def aggregateProximity(df, proxemic, numberPatients):
     #print('From the begining',df.head(10))
     total = len(df.index)
+    if (total==0):
+        total==1
     countClose=0
     items = []
     values = []
@@ -106,7 +110,7 @@ def aggregateProximity(df, proxemic, numberPatients):
     dfSummary = pd.DataFrame({'beds': items, 'values': values})
 
     #Define message to be  presented next to the bar chart
-    message = 'For the selected period, the team spent on average '+ '<span class="message-graph-possitive"> '+ str(maxTime) +' % </span> of their time on'+ '<span class="message-graph-possitive"> '+' Bed '+str(indexMax) +' </span>'
+    message = 'For the selected period, the team spent '+ '<span class="message-graph-possitive"> '+ str(maxTime) +' % </span> (percent) of their time on'+ '<span class="message-graph-possitive"> '+' Bed '+str(indexMax) +' </span>'
 
     #print('After filtering', dfSummary)
     return dfSummary, message, indexMax

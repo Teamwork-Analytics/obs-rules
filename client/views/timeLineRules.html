@@ -15,7 +15,7 @@ Please, click on any of the buttons below to validate group outcomes per assessm
 			</td>
 		</tr>
 	</table>
-	<!--Rules based on POSITIONING!-->
+	<!--Rules based on POSITIONING -->
 	<table class='styled-table'>
 		<tr>
 			<td ng-repeat="ruleP in positioningrules">
@@ -36,15 +36,20 @@ Please, click on any of the buttons below to validate group outcomes per assessm
 <div id="loading">loading...</div>
 <div id='graphs' ng-show='graph'>
 	<h2 id="textgraph" ><strong>{{textgraph}}</strong></h2>
-	<table cellspacing="0" cellpadding="0">
+	<table border="0" style="border: 0 !important;">
 		<tr>
-			<td>
+			<td style="border: 0;">
 				<img src={{graphPath}} alt="Graph" style="width:500px;height:500px;">			
 			</td>
-			<td>
-				<h2 id="feedback" >
+			<td style="border: 0;">
+				<h2 id="feedback">
 					<p ng-bind-html="myFeedback"></p>
 				</h2>			
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center" style="border: 0;">
+				<img src='./img/conventions.png' alt="conventions" style="width:1000px;height:150px;">				
 			</td>
 		</tr>
 	</table>
@@ -286,7 +291,7 @@ function visVanillaTimeLine(){
 	    var groups = [];
 	    var value ={};
 	    for(var i=0;i<data.n;i++){
-	    	if(participants[i]=='PTN' || participants[i]=='B1P'){
+	    	if(participants[i]=='PTN' || participants[i]=='B1P' || participants[i]=='B4P'){
 	    		groups[i] = new vis.DataSet([
 	        {id:data.participants[participants[i]][0].group, content:participants[i], classname:participants[i], style:"color: white; background-color: white;"}]);
 	    	}else{

@@ -99,25 +99,37 @@
         <h1>Log Actions</h1>
       </div>
       
-        <div class="d-flex align-items-between w-100">
+      <div class="d-flex align-items-between w-100">
         <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-success btn-sm" ng-click="logStartStopActionSession(8,'Session started')"> Start Session </a></span></div>
         <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-danger btn-sm" ng-click="logStartStopActionSession(9,'Session ended')"> Stop Session </a></span></div>
       </div>
 
       <div class="my-3 p-3 bg-white rounded box-shadow">
-            <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="actionsess in actionData">
-              <div class="d-flex justify-content-sm-between align-items-center w-100">
+          <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="actionsess in actionData">
+            <div class="d-flex justify-content-sm-between align-items-center w-100">
              <div>{{ actionsess.action_desc }} 
                    <div ng-show = "actionsess.action_type == 'critical'" ng-class="{'badge badge-warning': actionsess.action_type == 'critical'}">critical</div> 
              </div>
-              <div><button type="button" ng-repeat="object in objectData" class="btn btn-outline-primary btn-sm mx-1" 
-                    role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button> </div>
-              </div>
+             <div>
+              <span ng-repeat="object in objectData">
+                <button type="button" ng-if="object.name == 'GN1'" class="btn btn-outline-danger btn-sm mx-1" role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button> 
+                <button type="button" ng-if="object.name == 'GN2'" class="btn btn btn-outline-primary btn-sm mx-1" role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button> 
+                <button type="button" ng-if="object.name == 'WN1'" class="btn btn-outline-success btn-sm mx-1" role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button>
+                <button type="button" ng-if="object.name == 'WN2'" class="btn btn-outline-warning btn-sm mx-1"  role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button>
+                <button type="button" ng-if="object.name == 'B1P' || object.name == 'B4P'" class="btn btn-outline-secondary btn-sm mx-1" role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button>
+              </span>
             </div>
+
+            
+<!--             <button type="button" ng-repeat="object in objectData" class="btn btn-outline-primary btn-sm mx-1" 
+                    role="button" ng-click="logActionObject(object.id,actionsess.id,actionsess.id_action,actionsess.action_desc)"> {{ object.name }}</button>  -->
+            
+            </div>
+          </div>
       </div>
-       <div class="alert alert-warning" role="alert">
+      <div class="alert alert-warning" role="alert">
           You can add additional notes to each action. Click on "Save" to add your note.
-        </div>
+      </div>
       <div class="my-3 p-3 bg-white rounded box-shadow">
             <div class="pb-2 pt-2 mb-0 small lh-125 border-bottom border-gray" ng-repeat="sel in selectedactions track by sel.id">
               <div class="d-flex justify-content-between">
@@ -330,7 +342,7 @@
           </div>
 
         <div class="p-2"> 
-        <select ng-init="selectedTracker = item.serial"  
+        <select ng-if="!(item.id_object == 4 || item.id_object == 7)" ng-init="selectedTracker = item.serial"  
                 ng-model="selectedTracker"
                 ng-change="updateTagObjSession(item.id, selectedTracker)">
           <option value="">--Tag--</option>
@@ -346,11 +358,10 @@
           <option ng-repeat="x in trackers_empatica" value="{{x.id_empatica}}">{{x.name}}:{{x.id_empatica}}</option>
         </select>
         <p class="text-secondary" ng-if="!(item.id_object == 6 || item.id_object == 1 || item.id_object == 4 || item.id_object == 7)"> Not available </p>
-        <p class="text-secondary" ng-if="item.id_object == 4">
+        <p class="text-secondary" ng-if="item.id_object == 4 || item.id_object == 7">
               (x, y) <input type="text" ng-model='coordinates' ng-init="coordinates=item.coordinates">
                <span><a href="javascript:void(0)" class="btn btn-outline-warning btn-sm" ng-click="addFixedCoordinates(item.id, coordinates)"> Add </a>
         </p>
-
         </div>
          <div class="p-2">
             <a href="javascript:void(0)" class="btn btn-outline-danger btn-sm" ng-click="deleteObjectSession(item.id)"> Delete </a>

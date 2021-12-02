@@ -18,6 +18,7 @@ def enumerate_trackers(df):
         enumeration.append(cont)
         prev_index = index
     df_trackers['enumeration'] = enumeration
+
     df_trackers.reset_index(level=0, inplace=True)
     return df_trackers
 

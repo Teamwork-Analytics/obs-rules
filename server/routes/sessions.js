@@ -22,7 +22,7 @@ router.get('/', (req, res, next) => {
 router.get('/all', (req, res, next) => {
   const results = [];
 
-    con.query('SELECT * FROM session ORDER BY id DESC;', (err,rows) => {
+    con.query('SELECT * FROM session ORDER BY id ASC;', (err,rows) => {
     if(err) throw err;
 
     rows.forEach( (row) => {
