@@ -27,7 +27,7 @@ http://localhost:3000/
 
 1. So that the application works the data base needs to be working.
 
-Find the database schema in:
+Find the database schema in [this link](https://github.com/Teamwork-Analytics/obs-rules/blob/gloriaRules/SchemaOnly.sql)
 
 
 # Proxemics functionality
