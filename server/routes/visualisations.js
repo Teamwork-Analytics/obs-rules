@@ -121,7 +121,8 @@ router.post('/generateJson2', (req, res, next) => {
                       critical_item["className"] = "critical";
                      
                       //if(data[i].action_desc.split(" ")[0] == "Ask"){
-                      critical_item["content"] = '<img src="../../../img/warning.png" style="width: 40px; height: 40px;"><div class="special-time">'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'</div><div id="text">'+dataActions[i].action_desc+'</div>';
+                      //critical_item["content"] = '<img src="../../../img/warning.png" style="width: 40px; height: 40px;"><div class="special-time">'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'</div><div id="text">'+dataActions[i].action_desc+'</div>';
+                      critical_item["content"] = '<img src="../../../img/warning.png" style="width: 40px; height: 40px;"><div class="special-time"><strong>'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+ '</strong> '+dataActions[i].action_desc;
                       //  }
                       //else if(data[i].action_desc.split(" ")[0] == "Lose"){
                       //  critical_item["content"] = '<div class="special-time">'+time_from_start+'</div><img src="../../../img/lose.png" style="width: 136px; height: 112px;">';
@@ -151,7 +152,9 @@ router.post('/generateJson2', (req, res, next) => {
                         item["className"] = "action "+dataActions[i].object_type.toLowerCase();
                       }
                       
-                      item["content"] = moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'<div id="text">'+dataActions[i].action_desc+'</div>';
+                      //item["content"] = moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'<div id="text">'+dataActions[i].action_desc+'</div>';
+                      //for thwe new version of the timeline wich includes the video we combine the time and de action description
+                      item["content"] = '<strong>'+moment(dataActions[i].duration,"hh:mm:ss.SSS").format("mm:ss")+'</strong> '+dataActions[i].action_desc;
                       if (dataActions[i].name != null){
                         //console.log("aqui "+item)
                         participants[dataActions[i].name].push(item);
