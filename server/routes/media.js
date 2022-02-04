@@ -3,13 +3,7 @@ const router = express.Router();
 const mysql = require('mysql');
 const path = require('path');
 
-const con = mysql.createConnection({
-  host: process.env.db_host,
-  user: process.env.db_user,
-  password: process.env.db_password,
-  database: process.env.db_database
-});
-
+const con = require('../helpers/database');
 
 router.get('/', (req, res, next) => {
   res.sendFile(path.join(

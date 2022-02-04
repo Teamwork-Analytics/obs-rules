@@ -20,9 +20,20 @@ Front end: Angular
 
 # How to install this application
 
-cloned the branch named gloriaRules
+Clone the branch named gloriaRules
 
-in the folder obs-rules run: nodemon ./bin/www
+You will need the following libraries installed:
+1. node v10.15.3. We have initial tests on Node v16.6.2
+2. npm 7.11.0. We have initial tests on npm 7.20.3
+3. python 3.7
+
+To install node dependencies:
+1. `npm ci`
+
+To run the frontend and backend applications:
+
+1. set in a .env file the needed environment variables 
+2. `npm start start-nodemon`
 
 Once the application is running validate in your browser that everything is working:
 
@@ -40,8 +51,4 @@ Find the database schema in [this link](https://github.com/Teamwork-Analytics/ob
 The scripts used to plot positioning bar charts, ego-networks and full-graphs are located in: server/routes/localisation. All scripts were developed in python. 
 
 From the Nodejs application there is a called to the pythons scripts. See server/routes/visualisation.js function bringGraph. The script outcome is eather a bar graph or a graph with some narrative. The visual outcomes are plot in the front see client/views/timeLineRules.html, specifically in the div named graphs.
-
-
-
-
 

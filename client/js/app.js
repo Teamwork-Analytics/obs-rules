@@ -642,7 +642,7 @@ app.controller('manageVis', function($scope, $location, $routeParams, $http, soc
   var dataObj = {
     id_session : $scope.sessionid
   };
-  $http.post('/api/v1/visualisations/getDataforVis',dataObj)
+  $http.post('/api/v1/visualisations/getDataforVis', dataObj)
     .success(function(data){
       $http.post('/api/v1/visualisations/generateJson2', data)
       .success(function(objs){

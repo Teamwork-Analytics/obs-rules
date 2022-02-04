@@ -1,17 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pg = require('pg');
-const mysql = require('mysql');
 const path = require('path');
 const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:root@138.25.199.243:5432/group-analytics';
 //var promise = require('bluebird');
 
-const con = mysql.createConnection({
-  host: process.env.db_host,
-  user: process.env.db_user,
-  password: process.env.db_password,
-  database: process.env.db_database
-});
+const con = require('../helpers/database');
 
 router.get('/', (req, res, next) => {
   res.sendFile(path.join(

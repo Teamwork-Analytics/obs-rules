@@ -5,6 +5,7 @@ const path = require('path');
 //const moment = require('moment');
 //const {jsPDF} = require("jspdf"); // will automatically load the node version
 
+const con = require('../helpers/database');
 
 const mqtt = require('mqtt');
 const url = require('url');
@@ -14,27 +15,6 @@ const mqtt_url = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://wfejcfvu:t7Os7ER
 //const mqtt_url = url.parse(process.env.CLOUDMQTT_URL || 'mqtt://wpancwwq:JM7WMMC9MqzM@m14.cloudmqtt.com:11474');
 const auth = (mqtt_url.auth || ':').split(':');
 var mqtt_client = [];
-
-/*const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'group_analytics1'
-});*/
-
-//const database='AllUTSsessions';
-const database='MonashAugustDataCollection';
-//const database='group_analytics1';
-//const database='MonashInterviews';
-//const database='testMonash';
-
-const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'gloria',
-  password: 'Sj&7u#THDXWihfAy37KqyAu6hmGkLT',
-  database: database
-});
-
 
 function createHtml(obj){
 	console.log('Yes I am in the creationHtml function');

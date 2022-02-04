@@ -6,6 +6,8 @@ const mysql = require('mysql');
 const mqtt = require('mqtt');
 const url = require('url');
 
+const con = require('../helpers/database');
+
 const TOPIC = '5af38a1033e8270502daa9a6';
 const user = TOPIC;
 const api_key = '2c8e1209-e6a5-464a-bc36-8308ad353ac1';
@@ -17,13 +19,6 @@ const auth = (mqtt_url.auth || ':').split(':');
 var mqtt_client = mqtt.connect('wss://mqtt.cloud.pozyxlabs.com:443', {  
     username: user,
     password: api_key
-});
-
-const con = mysql.createConnection({
-  host: process.env.db_host,
-  user: process.env.db_user,
-  password: process.env.db_password,
-  database: process.env.db_database
 });
 
 router.get('/', (req, res, next) => {
