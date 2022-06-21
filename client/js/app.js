@@ -884,8 +884,153 @@ app.controller('actionsController', function($window, $scope, $location, $route,
 
   };//end log
 
+
+  var mainLaptopIpAddress = "localhost";//"49.127.32.101";
+  var sencondLaptopIpAddress = "";
+
+  $scope.startBaseline = function() {
+
+    console.log("start baseline");
+    var oReqBio = new XMLHttpRequest();
+    oReqBio.open('GET', 'http://' + mainLaptopIpAddress + ':7301/bio/start-baseline/' + $scope.sessionid, true);
+    oReqBio.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+    oReqBio.send();
+    oReqBio.onreadystatechange = function () {
+        if (oReqBio.readyState === 4 && oReqBio.status === 200) {
+            console.log(oReqBio.responseText);
+        }
+    };
+
+    var oReqAudio = new XMLHttpRequest();
+    oReqAudio.open('GET', 'http://' + mainLaptopIpAddress + ':7501/audio/start-baseline/' + $scope.sessionid, true);
+    oReqAudio.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+    oReqAudio.send();
+    oReqAudio.onreadystatechange = function () {
+        if (oReqAudio.readyState === 4 && oReqAudio.status === 200) {
+            console.log(oReqAudio.responseText);
+        }
+    };
+
+}
+
+$scope.stopBaseline = function() {
+    console.log("start baseline");
+    var oReqBioBaseline = new XMLHttpRequest();
+    oReqBioBaseline.open('GET', 'http://' + mainLaptopIpAddress + ':7301/bio/stop', true);
+    oReqBioBaseline.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+    oReqBioBaseline.send();
+    oReqBioBaseline.onreadystatechange = function () {
+        if (oReqBioBaseline.readyState === 4 && oReqBioBaseline.status === 200) {
+            console.log(oReqBioBaseline.responseText);
+            alert(oReqBioBaseline.responseText);
+        }
+    };
+
+    var oReqAudioBaseline = new XMLHttpRequest();
+    oReqAudioBaseline.open('GET', 'http://' + mainLaptopIpAddress + ':7501/audio/stop', true);
+    oReqAudioBaseline.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+    oReqAudioBaseline.send();
+    oReqAudioBaseline.onreadystatechange = function () {
+        if (oReqAudioBaseline.readyState === 4 && oReqAudioBaseline.status === 200) {
+            console.log(oReqAudioBaseline.responseText);
+            alert(oReqAudioBaseline.responseText);
+        }
+    };
+}
+
+
   $scope.logStartStopActionSession = function(actID,actDesc){
     
+    if (actID === 8) {
+      console.log("actID:" + actID);
+
+      console.log("start all recording------------------------");
+      var oReqBio = new XMLHttpRequest();
+      oReqBio.open('GET', 'http://' + mainLaptopIpAddress + ':7301/bio/start/' + $scope.sessionid, true);
+      oReqBio.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqBio.send();
+      oReqBio.onreadystatechange = function () {
+          if (oReqBio.readyState === 4 && oReqBio.status === 200) {
+              console.log(oReqBio.responseText);
+          }
+      };
+
+      var oReqPos = new XMLHttpRequest();
+      oReqPos.open('GET', 'http://' + mainLaptopIpAddress + ':7201/pos/start/' + $scope.sessionid, true);
+      oReqPos.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqPos.send();
+      oReqPos.onreadystatechange = function () {
+          if (oReqPos.readyState === 4 && oReqPos.status === 200) {
+              console.log(oReqPos.responseText);
+          }
+      };
+      var oReqAudio = new XMLHttpRequest();
+      oReqAudio.open('GET', 'http://' + sencondLaptopIpAddress + ':7501/audio/start/' + $scope.sessionid, true);
+      oReqAudio.setRequestHeader("Access-Control-Allow-Origin", "http://" + sencondLaptopIpAddress);
+      oReqAudio.send();
+      oReqAudio.onreadystatechange = function () {
+          if (oReqAudio.readyState === 4 && oReqAudio.status === 200) {
+              console.log(oReqAudio.responseText);
+          }
+      };
+
+      var oReqVideo = new XMLHttpRequest();
+      oReqVideo.open('GET', 'http://' + mainLaptopIpAddress + ':7101/video/start/' + $scope.sessionid, true);
+      oReqVideo.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqVideo.send();
+      oReqVideo.onreadystatechange = function () {
+          if (oReqVideo.readyState === 4 && oReqVideo.status === 200) {
+              console.log(oReqVideo.responseText);
+              if (oReqVideo.responseText === "please restart server") {
+                  alert("please restart video server");
+              }
+          }
+      };
+
+      console.log("recording started");
+  } else if (actID === 9) {
+      console.log("recording stop");
+
+      var oReqVideoStop = new XMLHttpRequest();
+      oReqVideoStop.open('GET', 'http://' + mainLaptopIpAddress + ':7101/video/stop', true);
+      oReqVideoStop.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqVideoStop.send();
+      oReqVideoStop.onreadystatechange = function () {
+          if (oReqVideoStop.readyState === 4 && oReqVideoStop.status === 200) {
+              console.log(oReqVideoStop.responseText);
+          }
+      };
+
+      var oReqPosStop = new XMLHttpRequest();
+      oReqPosStop.open('GET', 'http://' + mainLaptopIpAddress + ':7201/pos/stop', true);
+      oReqPosStop.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqPosStop.send();
+      oReqPosStop.onreadystatechange = function () {
+          if (oReqPosStop.readyState === 4 && oReqPosStop.status === 200) {
+              console.log(oReqPosStop.responseText);
+          }
+      };
+      var oReqBioStop = new XMLHttpRequest();
+      oReqBioStop.open('GET', 'http://' + mainLaptopIpAddress + ':7301/bio/stop', true);
+      oReqBioStop.setRequestHeader("Access-Control-Allow-Origin", "http://" + mainLaptopIpAddress);
+      oReqBioStop.send();
+      oReqBioStop.onreadystatechange = function () {
+          if (oReqBioStop.readyState === 4 && oReqBioStop.status === 200) {
+              console.log(oReqBioStop.responseText);
+          }
+      };
+
+      var oReqAudioStop = new XMLHttpRequest();
+      oReqAudioStop.open('GET', 'http://' + sencondLaptopIpAddress + ':7501/audio/stop', true);
+      oReqAudioStop.setRequestHeader("Access-Control-Allow-Origin", "http://" + sencondLaptopIpAddress);
+      oReqAudioStop.send();
+      oReqAudioStop.onreadystatechange = function () {
+          if (oReqAudioStop.readyState === 4 && oReqAudioStop.status === 200) {
+              console.log(oReqAudioStop.responseText);
+          }
+      };
+  }
+
     const dataObj = {
         id_session : $scope.sessionid,
         id_action: actID,

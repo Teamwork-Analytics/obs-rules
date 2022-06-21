@@ -100,8 +100,13 @@
       </div>
       
       <div class="d-flex align-items-between w-100">
-        <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-success btn-sm" ng-click="logStartStopActionSession(8,'Session started')"> Start Session </a></span></div>
-        <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-danger btn-sm" ng-click="logStartStopActionSession(9,'Session ended')"> Stop Session </a></span></div>
+
+        <div class="p-2">
+          <button class="btn btn-success" ng-click="startBaseline()">1. Start baseline</button>
+          <button class="btn btn-warning" ng-click="stopBaseline()">2. Stop baseline</button>
+      </div>
+        <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-success btn-sm" ng-click="logStartStopActionSession(8,'Session started')">3. Start Session </a></span></div>
+        <div class="p-2"><span><a href="javascript:void(0)" class="btn btn-danger btn-sm" ng-click="logStartStopActionSession(9,'Session ended')">4. Stop Session </a></span></div>
       </div>
 
       <div class="my-3 p-3 bg-white rounded box-shadow">
